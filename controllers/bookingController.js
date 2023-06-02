@@ -4,25 +4,28 @@ import Disponibilidad from "../models/AvailableModel.js";
 import Reserva from "../models/BookingModel.js";
 import obtenerDisponibilidad from "../helpers/obtenerDisponibilidad.js";
 
+//reservaRoutes.post("/", checkAuth, obtenerProEspecialidadFechaHora);
 const obtenerProEspecialidadFechaHora = async (req, res) => {
   const { fecha, citaHora, especialidad, localidad } = req.body;
   let profesionalesDisponibles = [];
 
   try {
     const profesionales = await Disponibilidad.find({ fecha })
-    .populate({
-      path: "creador",
-      match: {
-        especialidad: { $in: [especialidad] },
-        localidadesLaborales: { $in: [localidad] },
-      },
-      populate: { path: "disponibilidad", path: "creador" },
-    })
-    .lean();
+      .populate({
+        path: "creador",
+        match: {
+          especialidad: { $in: [especialidad] },
+          localidadesLaborales: { $in: [localidad] },
+        },
+        populate: { path: "disponibilidad", path: "creador" },
+      })
+      .lean();
 
     let buscarPorfesionales = profesionales.filter(
       (profesionalState) => profesionalState.creador !== null
     );
+
+      console.log("obtenerProEspecialidadFechaHora profesionalController",buscarPorfesionales)
 
     if (buscarPorfesionales.length > 0) {
       try {
@@ -30,6 +33,8 @@ const obtenerProEspecialidadFechaHora = async (req, res) => {
           buscarPorfesionales,
           citaHora
         );
+
+        //console.log(profesionalesDisponibles)
 
         if (profesionalesDisponibles.length <= 0) {
           return res.status(200).json({
@@ -53,26 +58,28 @@ const obtenerProEspecialidadFechaHora = async (req, res) => {
   }
 };
 
+//"/profesionales/fecha",
 const obtenerProfesionalesPorFecha = async (req, res) => {
   const { fecha, especialidad, localidad } = req.body;
 
   try {
     const profesionales = await Disponibilidad.find({ fecha })
-    .populate({
-      path: "creador",
-      match: {
-        especialidad: { $in: especialidad },
-        localidadesLaborales: { $in: [localidad] },
-        creador: { $exists: true }
-      },
-      populate: { path: "disponibilidad", path: "creador" },
-    })
-    .lean();
+      .populate({
+        path: "creador",
+        match: {
+          especialidad: { $in: especialidad },
+          localidadesLaborales: { $in: [localidad] },
+          creador: { $exists: true }
+        },
+        populate: { path: "disponibilidad", path: "creador" },
+      })
+      .lean();
 
 
     let buscarPorfesionales = profesionales.filter(
       (profesionalState) => profesionalState.creador !== null
     );
+    console.log(" ENTRE A obtenerProfesionalesPorFecha api/reservas/profesionales/fecha ",buscarPorfesionales)
 
     if (buscarPorfesionales.length <= 0) {
       return res.status(200).json({
@@ -89,6 +96,7 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
   }
 };
 
+//"/profesional/horario/:id",
 const obtenerHorariosProfesional = async (req, res) => {
   const { id } = req.params;
   const { fecha } = req.body;
@@ -119,6 +127,7 @@ const obtenerProfesional = async (req, res) => {
   res.json(profesional);
 };
 
+//"/crear/:id",
 const crearReserva = async (req, res) => {
   const { _id } = req.usuario;
   const { id } = req.params;
@@ -161,6 +170,7 @@ const crearReserva = async (req, res) => {
   }
 };
 
+//reservaRoutes.get("/", [checkAuth, isAdminRole], listarReservas);
 const listarReservas = async (req, res) => {
   const { limite = 10, pagina = 1 } = req.query;
   const query = {};
@@ -185,6 +195,7 @@ const listarReservas = async (req, res) => {
   }
 };
 
+//reservaRoutes.delete("/:id", checkAuth, eliminarReserva);
 const eliminarReserva = async (req, res) => {
   const { id } = req.params;
   try {

@@ -8,9 +8,17 @@ const numberTwilio = `${process.env.ACCESS_NUMBER_TWILIO}`;
 const client = twilio(accountSid, authToken);
 
 // controlador para whatsapp post venta
+
 const sendWhatsappfn = async (args) => {
     try {
-        const { number, message } = args;
+        let { number, message } = args;
+
+        // Verificar si el número ya tiene el código de país
+        if (!number.startsWith("+57") && !number.startsWith("57") && !number.startsWith("+")) {
+            // Agregar el código de país por defecto
+            number = "+57" + number;
+        }
+
         await client.messages.create({
             from: `whatsapp:${numberTwilio}`,
             to: `whatsapp:${number}`,
@@ -21,6 +29,22 @@ const sendWhatsappfn = async (args) => {
         console.error(`Error sending WhatsApp message: ${error}`);
     }
 };
+
+
+
+// const sendWhatsappfn = async (args) => {
+//     try {
+//         const { number, message } = args;
+//         await client.messages.create({
+//             from: `whatsapp:${numberTwilio}`,
+//             to: `whatsapp:${number}`,
+//             body: `${message}`
+//         });
+        
+//     } catch (error) {
+//         console.error(`Error sending WhatsApp message: ${error}`);
+//     }
+// };
 
 //controlador para ruta /whatsapp/send
 const sendWhatsapp = async (req, res) => {    

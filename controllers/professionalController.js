@@ -56,7 +56,7 @@ const perfilProfesional = async (req, res) => {
         select: "-creador -createdAt -updatedAt",
       }).populate("reservas");
 
-    console.log(profesional);
+//    console.log(profesional);
     if (!profesional) {
       const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
@@ -136,14 +136,15 @@ const perfilReferido = async (req, res) => {
 };
 
 const crearDisponibilidad = async (req, res) => {
-  const { fecha, hora } = req.body;
+  console.log("crear disponibilidad api/profesional", req.body)
+  const { fecha, horarios } = req.body;
 
   try {
     const profesional = await PerfilProfesional.findById(
       req.usuario.profesional
     );
 
-    console.log(fecha, hora, profesional._id);
+    //console.log(fecha, horarios, profesional._id);
 
     const actualizaDisponibilidad = await Disponibilidad.findOne(
       { fecha, creador: profesional._id },
@@ -153,7 +154,7 @@ const crearDisponibilidad = async (req, res) => {
     if (actualizaDisponibilidad) {
       const updateDisponibilidad = await Disponibilidad.updateOne(
         { fecha, creador: profesional._id },
-        { $set: { fecha, hora, creador: profesional._id } }
+        { $set: { fecha, horarios, creador: profesional._id } }
       );
 
       res.json({
@@ -165,7 +166,7 @@ const crearDisponibilidad = async (req, res) => {
 
     const nuevaDisponibilidad = new Disponibilidad({
       fecha,
-      hora,
+      horarios,
       creador: profesional._id,
     });
 
@@ -184,7 +185,7 @@ const crearDisponibilidad = async (req, res) => {
 const obtenerDisponibilidad = async (req, res) => {
   const { fecha } = req.params;
 
-  console.log(fecha);
+  //console.log(fecha);
 
   try {
     const disponibilidad = await Disponibilidad.findOne({ fecha,creador: req.usuario.profesional._id });

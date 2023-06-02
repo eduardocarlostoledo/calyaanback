@@ -10,7 +10,7 @@ const cargarImagen = async (req, res) => {
   const { _id } = req.usuario;
   const { file } = req;
 
-  console.log(file)
+  //console.log(file)
 
   const size = file.size / 1024 / 1024; // MB
 

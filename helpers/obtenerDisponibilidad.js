@@ -4,11 +4,17 @@ const obtenerDisponibilidad = async (profesionales, citaHora) => {
 
   profesionales.forEach((profesionalState) => {
     let opened = false;
-    profesionalState.hora.forEach((disponibilidadHoraState) => {
-      let open = new Date("1/1/1999 " + disponibilidadHoraState.split("-")[0]);
-      let close = new Date("1/1/1999 " + disponibilidadHoraState.split("-")[1]);
-      opened = opened || (hourDate >= open && close >= hourDate);
+    profesionalState.horarios.forEach((disponibilidadHoraState) => {
+
+      if (disponibilidadHoraState.stock) {
+        console.log("disponible",disponibilidadHoraState)
+        let open = new Date("1/1/1999 " + disponibilidadHoraState.hora.split("-")[0]);
+        let close = new Date("1/1/1999 " + disponibilidadHoraState.hora.split("-")[1]);
+        return opened = opened || (hourDate >= open && close >= hourDate);
+      }
     });
+
+    console.log(opened)
 
     if (opened) {
       profesional.push(profesionalState)

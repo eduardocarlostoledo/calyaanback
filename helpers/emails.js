@@ -18,7 +18,7 @@ const emailRegistro = async (data) => {
     },
   });
 
-  // infromacion para el email
+  // informacion para el email
 
   const info = await transport.sendMail({
     from: process.env.EMAIL_USER,
@@ -349,8 +349,11 @@ const emailRegistro = async (data) => {
     `,
   });
 };
-// ENIVAR UN EMAIL PARA HABILITAR LA CREACION DE UNA NUEVA CONTRASEÑA
+// ENVIAR UN EMAIL PARA HABILITAR LA CREACION DE UNA NUEVA CONTRASEÑA
 const emailOlvidePassword = async (data) => {
+
+  try {    
+
   const { nombre, email, token } = data;
 
   const transport = nodemailer.createTransport({
@@ -359,10 +362,10 @@ const emailOlvidePassword = async (data) => {
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
-    },
+    },    
   });
 
-  // infromacion para el email
+  // informacion para el email
 
   const info = await transport.sendMail({
     from: process.env.EMAIL_USER,
@@ -691,12 +694,18 @@ const emailOlvidePassword = async (data) => {
   </html>  
     `,
   });
+} catch (error) {
+  console.log(error);
+}
 };
 
 ///////////////////////////////////////////////NOTIFICACIONES DE COMPRAS Y ORDENES DE TRABAJO/////////////////////
 
 // email Compra
 const emailCompra = async (data) => {
+
+  try {    
+  
   const { cliente_id,    
         cliente_email,
         cliente_nombre,
@@ -800,8 +809,7 @@ const emailCompra = async (data) => {
     number: cliente_telefono,
     message: `Estimad@ ${cliente_nombre} ${cliente_apellido}. Nos complace informarle que su solicitud de servicio ha sido procesada con éxito. Usted ha contratado nuestro servicio de ${servicio} para su hogar en la dirección: ${direccion_Servicio}, cuyos datos adicionales: ${adicional_direccion_Servicio}, ubicada en la localidad de ${localidad_Servicio}, ciudad de ${ciudad_Servicio}. Su solicitud ha sido asignada a nuestr@ profesional: ${profesional_nombre}, quien estará disponible para brindarle el servicio el día: ${dia_servicio} a las: ${hora_servicio}. Le recordamos que el costo del servicio es de $${precio} y que el estado de su pago es: ${pagoServicio}. Si tiene alguna pregunta o inquietud, no dude en ponerse en contacto con nuestro equipo de soporte al cliente, siempre estamos dispuestos a ayudarle. Le agradecemos por confiar en nosotros y esperamos poder brindarle un excelente servicio. Cordialmente, El equipo de servicio al cliente de Calyann.`
   };
-  
-  await sendWhatsappfn(args);
+  if (cliente_telefono) await sendWhatsappfn(args);  
 
   const info = await transport.sendMail({
     from: process.env.EMAIL_USER,
@@ -810,10 +818,18 @@ const emailCompra = async (data) => {
     text: "calyaan",    
     html: emailHTML,
   });
+
+} catch (error) {
+  console.log(error);
+}
 };
 
 //notificacion a profesional
 const emailProfesional = async (data) => {
+
+  try {
+    
+  
   const {
     cliente_id,    
         cliente_email,
@@ -922,7 +938,7 @@ const args = {
   message: `Estimado/a ${profesional_nombre}. Le informamos que hemos procesado una solicitud de servicio de: ${servicio} para el cliente: ${cliente_nombre} ${cliente_apellido}, cédula: ${cliente_cedula}. La prestación se llevará a cabo el día: ${dia_servicio} a las: ${hora_servicio}, ubicado en: ${direccion_Servicio}, datos adicionales: ${adicional_direccion_Servicio}, en la localidad de ${localidad_Servicio}, ciudad de ${ciudad_Servicio}. Le recordamos que el estado del pago del servicio es: ${pagoServicio}. Si tiene alguna pregunta o inquietud, no dude en ponerse en contacto con el equipo de soporte. Cordialmente, El equipo de Calyann.`
 }
 
-await sendWhatsappfn (args);
+if (profesional_telefono) await sendWhatsappfn(args);
 
   const info = await transport.sendMail({
     from: process.env.EMAIL_USER,
@@ -931,7 +947,120 @@ await sendWhatsappfn (args);
     text: "Calyaan",    
     html: emailHTML,
   });
-  
+} catch (error) {
+  console.log(error);
+}
 };
 
-export { emailRegistro, emailOlvidePassword, emailCompra, emailProfesional };
+//notificacion de cancelacion de servicio a profesional emailCancelacionProfesional
+const emailCancelacionProfesional = async (data) => {
+
+  try {
+    
+  
+  const {
+    _id,
+    cliente_nombre,
+    cliente_apellido,
+    liberar_hora_servicio,
+    liberar_dia_servicio,
+    liberar_profesional_id,
+    liberar_profesional_email,
+    liberar_profesional_telefono
+  } = data
+  //Se modifica estado pago para el envio de notificacion al profesional
+  
+
+  const transport = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  //cuerpo email profesional
+  const emailHTML = `<!DOCTYPE html>
+  <html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <title>Orden de trabajo</title>
+    <style>
+      body {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #444444;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .logo {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .logo img {
+        max-width: 150px;
+      }
+      .message {
+        background-color: #f8f8f8;
+        border: 1px solid #dddddd;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .message p {
+        margin-bottom: 10px;
+      }
+      .signature {
+        text-align: right;
+      }
+      .signature p {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo">
+        <img src="https://calyaan.b-cdn.net/wp-content/uploads/2022/01/Logo-Calyaan2.png" alt="Logo de la empresa">
+      </div>
+      <div class="message">
+
+        <p>Estimado/a: </p>
+        <p>Le informamos que hemos procesado una solicitud de reprogramacion de servicio de la orden ${_id} del cliente ${cliente_nombre} ${cliente_apellido} que estaba agendada para el día: ${liberar_dia_servicio} a las: ${liberar_hora_servicio}. </p> 
+        <p>Si tiene alguna pregunta o inquietud, no dude en ponerse en contacto con el equipo de soporte facilitando el numero de orden. </p>
+        
+      </div>
+      <div class="signature">
+        <p>Cordialmente,</p>
+        <p>El equipo de Calyann</p>
+      </div>
+    </div>
+  </body>
+  </html>
+`
+
+const args = {
+  number: liberar_profesional_telefono,
+  message: `Le informamos que hemos procesado una solicitud de reprogramacion de servicio de la orden ${_id} del cliente ${cliente_nombre} ${cliente_apellido} que estaba agendada para el día: ${liberar_dia_servicio} a las: ${liberar_hora_servicio}. Si tiene alguna pregunta o inquietud, no dude en ponerse en contacto con el equipo de soporte facilitando el numero de orden.`
+}
+
+if (liberar_profesional_telefono) await sendWhatsappfn(args);
+
+  const info = await transport.sendMail({
+    from: process.env.EMAIL_USER,
+    to: liberar_profesional_email,
+    subject: "Orden de Servicio",
+    text: "Calyaan",    
+    html: emailHTML,
+  });
+} catch (error) {
+  console.log(error);
+}
+};
+
+export { emailRegistro, emailOlvidePassword, emailCompra, emailProfesional, emailCancelacionProfesional };

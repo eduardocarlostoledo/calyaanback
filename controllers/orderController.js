@@ -74,7 +74,7 @@ const saveOrder = async (arrayPreference
     telefono_Servicio
   });
   await newOrder.save();
-
+console.log("SE HA GUARDADO UNA NUEVA ORDEN newOrder", newOrder)
   return newOrder;
 };
 
@@ -117,9 +117,7 @@ const getOrdenesByStatus = async (req, res, next) => {
   }
 };
 
-
 const updateOrden = async (req, res, next) => {
-  
   const {
     _id,
     cliente_email,
@@ -127,14 +125,15 @@ const updateOrden = async (req, res, next) => {
     cliente_apellido,
     cliente_cedula,
     cliente_telefono,
-    profesional_email,
-    profesional_nombre,
-    profesional_apellido,
     direccion_Servicio,
     adicional_direccion_Servicio,
     localidad_Servicio,
     telefono_Servicio,
-    estadoServicio
+    estadoServicio,
+    estadoFacturacion,
+    numeroFacturacion,
+    estadoLiquidacion,
+    numeroLiquidacion,
   } = req.body;
 
   try {
@@ -149,26 +148,28 @@ const updateOrden = async (req, res, next) => {
     buscarorden.cliente_apellido = cliente_apellido;
     buscarorden.cliente_cedula = cliente_cedula;
     buscarorden.cliente_telefono = cliente_telefono;
-    buscarorden.profesional_email = profesional_email;
-    buscarorden.profesional_nombre = profesional_nombre;
-    buscarorden.profesional_apellido = profesional_apellido;
     buscarorden.direccion_Servicio = direccion_Servicio;
     buscarorden.adicional_direccion_Servicio = adicional_direccion_Servicio;
     buscarorden.localidad_Servicio = localidad_Servicio;
     buscarorden.telefono_Servicio = telefono_Servicio;
     buscarorden.estadoServicio = estadoServicio;
+    buscarorden.estadoFacturacion = estadoFacturacion;
+    buscarorden.numeroFacturacion = numeroFacturacion;
+    buscarorden.estadoLiquidacion = estadoLiquidacion;
+    buscarorden.numeroLiquidacion = numeroLiquidacion;
 
     const ordenActualizada = await buscarorden.save();
-
+console.log("ordenactualizada",ordenActualizada)
     res.json({
-      msg: "Actualizado correctamente", ordenActualizada
+      msg: 'Orden actualizada correctamente',
+      ordenActualizada,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ msg: "Error intentando acceder a la información" });
+    console.error('Error al actualizar la orden:', error);
+    return res.status(500).json({ msg: 'Error al actualizar la orden' });
   }
 };
+
 
 
 const deleteOrden = async (req, res, next) => {
