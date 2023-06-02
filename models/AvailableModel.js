@@ -6,8 +6,11 @@ const disponibilidadSchema = mongoose.Schema(
       type: String,
       requerido: true,
     },
-    hora: {
-      type: [],
+    horarios: {
+      type: [{
+        hora: { type: String },
+        stock: { type: Boolean, default: true }
+      }],
     },
     creador: {
       type: mongoose.Schema.Types.ObjectId,

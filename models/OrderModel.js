@@ -56,7 +56,6 @@ const ordenSchema = mongoose.Schema({
   },
   hora_servicio: {
     type: String,
-
   },
   servicio: {
     type: String,
@@ -102,6 +101,22 @@ const ordenSchema = mongoose.Schema({
     type: String,
     enum: ["Pendiente", "Completado", "Cancelado"],
     default: "Pendiente"
+  },
+  estadoFacturacion: {
+    type: String,
+    enum: ["Facturado", "NoFacturado", "Error"],
+    default: "NoFacturado"
+  },
+  numeroFacturacion: {
+    type: String,    
+  },
+  estadoLiquidacion: {
+    type: String,
+    enum: ["Liquidado", "NoLiquidado", "Error"],
+    default: "NoLiquidado"
+  },
+  numeroLiquidacion: {
+    type: String,    
   },
   payment_id: {
     type: String,
