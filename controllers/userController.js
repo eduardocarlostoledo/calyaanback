@@ -611,6 +611,7 @@ const obtenerDirecciones = async (req, res) => {
 };
 
 const crearDireccion = async (req, res) => {
+  console.log("REQ BODY CREAR DIRECCION", req.body);
   const { _id } = req.usuario;
 
   try {
