@@ -11,10 +11,12 @@ import {
 } from "../helpers/emails.js";
 import Disponibilidad from "../models/AvailableModel.js";
 import convertirFormatoHora from "../helpers/formatoFecha.js";
+import { obtenerIndicesCumplenCondicion } from "../helpers/comparaDisponibilidad.js";
 //import {reprogramarReserva} from "../helpers/reprogramacionReserva.js";
 
 // let arrayPreference = {};
 const payPreference = async (req, res) => {
+  
   try {
     const {
       DateService,
@@ -60,10 +62,11 @@ const payPreference = async (req, res) => {
       direccion_Servicio: parsedData_customer.address,
       adicional_direccion_Servicio: parsedData_customer.address2,
       ciudad_Servicio: parsedData_customer.ciudad,
-      localidad_Servicio: parsedData_customer.localidad,
+      localidad_Servicio: parsedDateService.localidadServicio,
+      //localidad_Servicio: parsedData_customer.localidad,
       telefono_Servicio: parsedData_customer.telefono,
     };
-    console.log("arrayPreference", arrayPreference);
+    
 
     const newOrder = await saveOrder(arrayPreference);
     const usuario = await Usuario.findOne({ _id: newOrder.cliente_id });
@@ -143,7 +146,7 @@ const feedbackSuccess = async (req, res) => {
       path: "profesional_id",
       populate: "disponibilidad",
     });
-    console.log("ORDEN SUCCES", order);
+    console.log("ORDEN SUCCES");
 
     order.payment_id = payment_id;
     order.estadoPago = status;
@@ -154,23 +157,21 @@ const feedbackSuccess = async (req, res) => {
       fecha: order.dia_servicio,
       creador: order.profesional_id._id,
     });
-    console.log(
-      "disponibilidadProfesional",
-      disponibilidadProfesional.horarios
-    );
-
-    // const index = disponibilidadProfesional.horarios.findIndex(item => item.hora === '07:00-07:59');
+    
     const index = disponibilidadProfesional.horarios.findIndex(
       (item) => item.hora === order.hora_servicio
     );
-    if (index !== -1) {
-      disponibilidadProfesional.horarios[index].stock = false;
+    if (index !== -1) {      
+    
+      disponibilidadProfesional.horarios[index].stock = false;  
 
-      const siguienteIndex =
-        (index + 1) % disponibilidadProfesional.horarios.length;
-      disponibilidadProfesional.horarios[siguienteIndex].stock = false;
+      const fechaHoraServicio = new Date(`${order.dia_servicio}T${order.hora_servicio.split('-')[0]}:00`);      
+      const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
+      indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });
+  
     }
-
+    
+    
     await disponibilidadProfesional.save();
     await order.save();
     await emailCompra(order);
@@ -397,7 +398,7 @@ const feedbackFailureManual = async (req, res) => {
 };
 
 const updatePayOrder = async (req, res) => {
-  console.log("REQ BODY UPDATEPAYORDER ", req.body);
+  
 
   try {
     const { _id } = req.body;
@@ -430,20 +431,20 @@ const updatePayOrder = async (req, res) => {
         .status(404)
         .json({ error: "No se encontró la disponibilidad del profesional" });
     }
-
     const index = disponibilidadProfesional.horarios.findIndex(
-      (item) => item.hora === order.hora_servicio
+      (item) => item.hora === order.hora_servicio      
     );
-
+    
     if (index !== -1) {
-      disponibilidadProfesional.horarios[index].stock = false;
+      disponibilidadProfesional.horarios[index].stock = false;  
 
-      const siguienteIndex =
-        (index + 1) % disponibilidadProfesional.horarios.length;
-      disponibilidadProfesional.horarios[siguienteIndex].stock = false;
+      const fechaHoraServicio = new Date(`${order.dia_servicio}T${order.hora_servicio.split('-')[0]}:00`);      
+      const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
+      indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });
+  
     }
     console.log("orden almacenada actualizada con nueva reservacion");
-    console.log("disponibilidad profesional actualizada con nueva reservacion");
+    
 
     await disponibilidadProfesional.save();
     await order.save();
@@ -459,7 +460,7 @@ const updatePayOrder = async (req, res) => {
 };
 
 const liberarReserva = async (req, res) => {
-  console.log("REQ BODY LIBERAR RESERVA ", req.body);
+  
   try {
     const {
       _id,
@@ -488,7 +489,7 @@ const liberarReserva = async (req, res) => {
         );
       }
 
-      console.log("Reprogramando reserva disponibilidad de profesional");
+      
 
       const index = disponibilidadProfesional.horarios.findIndex(
         (item) => item.hora === liberar_hora_servicio
@@ -497,13 +498,14 @@ const liberarReserva = async (req, res) => {
       if (index !== -1) {
         disponibilidadProfesional.horarios[index].stock = true;
 
-        const siguienteIndex =
-          (index + 1) % disponibilidadProfesional.horarios.length;
-        disponibilidadProfesional.horarios[siguienteIndex].stock = true;
-      }
+      const fechaHoraServicio = new Date(`${liberar_dia_servicio}T${liberar_hora_servicio.split('-')[0]}:00`);      
+      const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
+      indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = true;  });
+      }        
+        
       console.log(
-        "disponibilidad profesional restablecida",
-        disponibilidadProfesional
+        "disponibilidad profesional restablecida"
+        
       );
       await disponibilidadProfesional.save();
       // Comentado por ahora, implementar la notificación de reprogramación si es necesario
@@ -526,69 +528,6 @@ const liberarReserva = async (req, res) => {
   }
 };
 
-// const updatePayOrder = async (req, res) => {
-// console.log("REQ BODY UPDATEPAYORDER", req.body)
-
-//   try {
-//     // se guardan los datos y se envian en casi de que sea una reprogramacion. se necesita liberar el horario que se ha reprogramado
-//     if(req.body.hora_servicio) {
-//       let guardarDatosReprogramacion = req.body
-//       reprogramarReserva(guardarDatosReprogramacion)
-//       console.log("guardando datos de la reserva que ha sido reprogramada, se procede a liberar horario" )
-
-//     }
-
-//     const { _id } = req.body;
-
-//     const order = await Orden.findOneAndUpdate({ _id }, { ...req.body }, { new: true });
-
-//     // disponibilidad true a false
-//     let disponibilidadProfesional = await Disponibilidad.findOne({ fecha: order.dia_servicio, creador: order.profesional_id._id });
-//     console.log("disponibilidadProfesional", disponibilidadProfesional.horarios);
-
-//     // const index = disponibilidadProfesional.horarios.findIndex(item => item.hora === '07:00-07:59');
-//     const index = disponibilidadProfesional.horarios.findIndex(item => item.hora === order.hora_servicio);
-//     if (index !== -1) {
-//       disponibilidadProfesional.horarios[index].stock = false;
-
-//       const siguienteIndex = (index + 1) % disponibilidadProfesional.horarios.length;
-//       disponibilidadProfesional.horarios[siguienteIndex].stock = false;
-//     }
-
-//     await disponibilidadProfesional.save();
-//     await order.save();
-//     await emailCompra(order);
-//     await emailProfesional(order);
-
-//     res.status(200).json({ msg: "Orden agendada correctamente" });
-
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Server error in failure" });
-//   };
-// };
-
-// const reprogramarReserva = async (guardarDatosReprogramacion) => {
-
-//   // disponibilidad false a true
-// let disponibilidadProfesional = await Disponibilidad.findOne({ fecha: guardarDatosReprogramacion.dia_servicio, creador: guardarDatosReprogramacion.profesional_id });
-// console.log("reprogramar reserva disponibilidad de profesional", disponibilidadProfesional.horarios);
-
-// // const index = disponibilidadProfesional.horarios.findIndex(item => item.hora === '07:00-07:59');
-// const index = disponibilidadProfesional.horarios.findIndex(item => item.hora === guardarDatosReprogramacion.hora_servicio);
-// if (index !== -1) {
-// disponibilidadProfesional.horarios[index].stock = true;
-
-// const siguienteIndex = (index + 1) % disponibilidadProfesional.horarios.length;
-// disponibilidadProfesional.horarios[siguienteIndex].stock = true;
-// }
-
-// await disponibilidadProfesional.save();
-// // analizar como notificar la reprogramacion si hay cambio de profesional.
-// // await emailCompra(order);
-// // await emailProfesional(order);
-
-// }
 
 export {
   payPreference,

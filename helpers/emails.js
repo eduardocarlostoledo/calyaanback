@@ -1054,7 +1054,7 @@ if (liberar_profesional_telefono) await sendWhatsappfn(args);
   const info = await transport.sendMail({
     from: process.env.EMAIL_USER,
     to: liberar_profesional_email,
-    subject: "Orden de Servicio",
+    subject: "Reprogramacion de Servicio",
     text: "Calyaan",    
     html: emailHTML,
   });

@@ -137,13 +137,14 @@ const perfilReferido = async (req, res) => {
 
 const crearDisponibilidad = async (req, res) => {
   console.log("crear disponibilidad api/profesional", req.body)
+  console.log("req.usuario.profesional", req.usuario.profesional)
   const { fecha, horarios } = req.body;
 
   try {
     const profesional = await PerfilProfesional.findById(
       req.usuario.profesional
     );
-
+console.log("profesional", profesional)
     //console.log(fecha, horarios, profesional._id);
 
     const actualizaDisponibilidad = await Disponibilidad.findOne(

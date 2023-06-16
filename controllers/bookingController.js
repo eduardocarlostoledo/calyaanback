@@ -25,7 +25,7 @@ const obtenerProEspecialidadFechaHora = async (req, res) => {
       (profesionalState) => profesionalState.creador !== null
     );
 
-      console.log("obtenerProEspecialidadFechaHora profesionalController",buscarPorfesionales)
+      
 
     if (buscarPorfesionales.length > 0) {
       try {
@@ -79,11 +79,11 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
     let buscarPorfesionales = profesionales.filter(
       (profesionalState) => profesionalState.creador !== null
     );
-    console.log(" ENTRE A obtenerProfesionalesPorFecha api/reservas/profesionales/fecha ",buscarPorfesionales)
+    
 
     if (buscarPorfesionales.length <= 0) {
       return res.status(200).json({
-        msg: "No encontramos profesionales con disponibilidad para la fecha indica intenta nuevamente",
+        msg: "No encontramos profesionales con disponibilidad para la fecha indicada intenta nuevamente",
       });
     }
 
