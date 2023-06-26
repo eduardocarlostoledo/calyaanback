@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("JEISON",process.env.JWT_KEY)
 const checkAuth = async (req, res, next) => {
   const { authorization } = req.headers;
 

@@ -25,8 +25,6 @@ const obtenerProEspecialidadFechaHora = async (req, res) => {
       (profesionalState) => profesionalState.creador !== null
     );
 
-      
-
     if (buscarPorfesionales.length > 0) {
       try {
         profesionalesDisponibles = await obtenerDisponibilidad(
@@ -69,17 +67,15 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
         match: {
           especialidad: { $in: especialidad },
           localidadesLaborales: { $in: [localidad] },
-          creador: { $exists: true }
+          creador: { $exists: true },
         },
         populate: { path: "disponibilidad", path: "creador" },
       })
       .lean();
 
-
     let buscarPorfesionales = profesionales.filter(
       (profesionalState) => profesionalState.creador !== null
     );
-    
 
     if (buscarPorfesionales.length <= 0) {
       return res.status(200).json({
@@ -87,7 +83,7 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
       });
     }
 
-    return res.status(200).json(profesionales);
+    return res.status(200).json(buscarPorfesionales);
   } catch (error) {
     console.log(error);
     return res
@@ -140,7 +136,7 @@ const crearReserva = async (req, res) => {
 
     const profesionalID = await PerfilProfesional.findById(id);
     if (!usuario) {
-      const error = new Error("El usuario no esta registrado");
+      const error = new Error("El usuario no esta registrado booking");
       return res.status(404).json({ msg: error.message });
     }
 

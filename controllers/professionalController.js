@@ -3,16 +3,120 @@ import PerfilProfesional from "../models/ProfessionalModel.js";
 import Disponibilidad from "../models/AvailableModel.js";
 import Reserva from "../models/BookingModel.js";
 
+const buscarPerfil = async (id) => {
+  const profesional = await PerfilProfesional.findOne({
+    creador: id,
+  }).populate("reservas");
+  return profesional;
+};
+
 const actualizarProfesional = async (req, res) => {
   const { _id } = req.usuario;
-
+  console.log("usuario", req.usuario);
+  console.log("body", req.body);
   const { descripcion, especialidades, localidades } = req.body;
   try {
+    console.log("usuario", req.usuario);
+    console.log("body", req.body);
     // Comprobar si el usuario existe
-    const profesional = await PerfilProfesional.findOne({ creador: _id }).populate("reservas");
+    const profesional = buscarPerfil(_id);
 
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado");
+      const error = new Error("El usuario no esta registrado pro linea 20");
+      return res.status(404).json({ msg: error.message });
+    }
+
+    if (descripcion) {
+      profesional.descripcion = descripcion;
+    }
+
+    if (especialidades && especialidades.length > 0) {
+      profesional.especialidad =
+        especialidades.map((especialidad) => especialidad) ||
+        profesional.especialidad;
+    }
+
+    if (localidades && localidades.length > 0) {
+      profesional.localidadesLaborales =
+        localidades.map((localidad) => localidad) ||
+        profesional.localidadesLaborales;
+    }
+
+    await profesional.save();
+
+    res.json({
+      msg: "Perfil profesional actualizado correctamente",
+      profesional,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const obtenerDisponibilidadTotal = async (req, res) => {
+  try {
+    const profesionales = await Disponibilidad.find()
+      .populate({
+        path: "creador",
+        populate: { path: "creador" },
+      })
+      .sort({ fecha: 1 })
+      .lean();
+    console.log(profesionales, "disponibilidades");
+
+    const fechaActual = new Date();
+    const fechaLimite = new Date(fechaActual.getTime() + 5 * 60 * 60 * 1000);
+
+    const profesionalesFiltrados = profesionales.filter((profesional) => {
+      return (
+        profesional.creador !== null &&
+        profesional.creador.especialidad !== null &&
+        profesional.creador.localidadesLaborales !== null &&
+        profesional.horarios.length > 0 &&
+        new Date(profesional.fecha) > fechaLimite
+      );
+    });
+
+    if (profesionalesFiltrados.length === 0) {
+      return res.status(200).json({
+        msg: "No encontramos profesionales con disponibilidad para la fecha indicada. Por favor, intenta nuevamente.",
+      });
+    }
+    const disponibilidadTotal = profesionalesFiltrados.map((profesional) => {
+      const horariosDisponibles = profesional.horarios.filter((horario) => {
+        return horario.stock === true;
+      });
+
+      return {
+        ...profesional,
+        disponibilidad: horariosDisponibles,
+      };
+    });
+
+    return res.status(200).json(disponibilidadTotal);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      msg: "Hubo un problema intentando acceder a los profesionales.",
+    });
+  }
+};
+
+const actualizarProfesionalAdmin = async (req, res) => {
+  const { _id } = req.body;
+  // console.log("usuario", req.usuario);
+  // console.log("body", req.body);
+  const { descripcion, especialidades, localidades } = req.body;
+  try {
+    // console.log("usuario", req.usuario);
+    // console.log("body", req.body);
+    // Comprobar si el usuario existe
+    const profesional = await PerfilProfesional.findOne({
+      creador: _id,
+    }).populate("reservas");
+
+    if (!profesional) {
+      const error = new Error("El usuario no esta registrado pro linea 20");
       return res.status(404).json({ msg: error.message });
     }
 
@@ -54,11 +158,12 @@ const perfilProfesional = async (req, res) => {
       .populate({
         path: "disponibilidad",
         select: "-creador -createdAt -updatedAt",
-      }).populate("reservas");
+      })
+      .populate("reservas");
 
-//    console.log(profesional);
+    //    console.log(profesional);
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado");
+      const error = new Error("El usuario no esta registrado pro line 67");
       return res.status(404).json({ msg: error.message });
     }
 
@@ -77,12 +182,15 @@ const GetPerfilProfesional = async (req, res) => {
   try {
     const profesional = await Usuario.findOne({
       _id: id,
-    }).populate({path:"profesional",populate: {
-      path: 'reservas',
-    } });
+    }).populate({
+      path: "profesional",
+      populate: {
+        path: "reservas",
+      },
+    });
 
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado");
+      const error = new Error("El usuario no esta registrado pro linea 94");
       return res.status(404).json({ msg: error.message });
     }
 
@@ -94,14 +202,15 @@ const GetPerfilProfesional = async (req, res) => {
 
 const GetPerfilProfesionalID = async (req, res) => {
   const { id } = req.params;
-
   try {
     const profesional = await PerfilProfesional.findOne({
       _id: id,
-    }).populate("disponibilidad")
+    }).populate("disponibilidad");
 
     if (!profesional) {
-      const error = new Error("El profesional no esta registrado");
+      const error = new Error(
+        "El profesional no esta registrado profesional linea 112"
+      );
       return res.status(404).json({ msg: error.message });
     }
 
@@ -110,7 +219,6 @@ const GetPerfilProfesionalID = async (req, res) => {
     console.log(error);
   }
 };
-
 
 const perfilReferido = async (req, res) => {
   const { _id } = req.usuario;
@@ -125,7 +233,7 @@ const perfilReferido = async (req, res) => {
       .populate("referidos");
 
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado");
+      const error = new Error("El usuario no esta registrado pro linea 135");
       return res.status(404).json({ msg: error.message });
     }
 
@@ -136,15 +244,15 @@ const perfilReferido = async (req, res) => {
 };
 
 const crearDisponibilidad = async (req, res) => {
-  console.log("crear disponibilidad api/profesional", req.body)
-  console.log("req.usuario.profesional", req.usuario.profesional)
+  // console.log("crear disponibilidad api/profesional", req.body);
+  // console.log("req.usuario.profesional", req.usuario.profesional);
   const { fecha, horarios } = req.body;
 
   try {
     const profesional = await PerfilProfesional.findById(
       req.usuario.profesional
     );
-console.log("profesional", profesional)
+    // console.log("profesional", profesional);
     //console.log(fecha, horarios, profesional._id);
 
     const actualizaDisponibilidad = await Disponibilidad.findOne(
@@ -189,7 +297,10 @@ const obtenerDisponibilidad = async (req, res) => {
   //console.log(fecha);
 
   try {
-    const disponibilidad = await Disponibilidad.findOne({ fecha,creador: req.usuario.profesional._id });
+    const disponibilidad = await Disponibilidad.findOne({
+      fecha,
+      creador: req.usuario.profesional._id,
+    });
 
     res.json(disponibilidad);
   } catch (error) {
@@ -274,12 +385,9 @@ const obtenerHistorial = async (req, res) => {
   const { id } = req.params;
 
   try {
- 
-    
-
-    const profesional = await PerfilProfesional.findOne({ _id: id }).populate("reservas")
-
-    
+    const profesional = await PerfilProfesional.findOne({ _id: id }).populate(
+      "reservas"
+    );
 
     res.json(profesional.reservas);
   } catch (error) {
@@ -299,7 +407,9 @@ const obtenerIDSReferidos = async (req, res) => {
 
 export {
   perfilProfesional,
+  obtenerDisponibilidadTotal,
   actualizarProfesional,
+  actualizarProfesionalAdmin,
   crearDisponibilidad,
   editarDisponibilidad,
   eliminarDisponibilidad,
@@ -308,5 +418,5 @@ export {
   perfilReferido,
   obtenerIDSReferidos,
   GetPerfilProfesional,
-  GetPerfilProfesionalID
+  GetPerfilProfesionalID,
 };

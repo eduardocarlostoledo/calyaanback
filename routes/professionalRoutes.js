@@ -5,6 +5,7 @@ import checkAuth from "../middlewares/checkAuth.js";
 import isAdminRole from "../middlewares/isAdminRole.js";
 import {
   actualizarProfesional,
+  actualizarProfesionalAdmin,
   perfilProfesional,
   crearDisponibilidad,
   editarDisponibilidad,
@@ -14,16 +15,31 @@ import {
   perfilReferido,
   obtenerIDSReferidos,
   GetPerfilProfesional,
-  GetPerfilProfesionalID
+  obtenerDisponibilidadTotal,
+  GetPerfilProfesionalID,
 } from "../controllers/professionalController.js";
 
 const profesionalRoutes = express.Router();
 
 profesionalRoutes.get("/perfil", checkAuth, perfilProfesional);
 
-profesionalRoutes.get("/perfil-profesional/:id", checkAuth, GetPerfilProfesional);
+profesionalRoutes.get(
+  "/perfil-profesional/:id",
+  checkAuth,
+  GetPerfilProfesional
+);
 
-profesionalRoutes.get("/perfil-profesional-id/:id", checkAuth, GetPerfilProfesionalID);
+profesionalRoutes.get(
+  "/disponibilidades-totales",
+  // checkAuth,
+  obtenerDisponibilidadTotal
+);
+
+profesionalRoutes.get(
+  "/perfil-profesional-id/:id",
+  checkAuth,
+  GetPerfilProfesionalID
+);
 
 profesionalRoutes.get("/perfil-referido", checkAuth, perfilReferido);
 
@@ -31,6 +47,11 @@ profesionalRoutes.put(
   "/actualizar-profesional",
   checkAuth,
   actualizarProfesional
+);
+profesionalRoutes.put(
+  "/actualizar-profesional-AdminDash",
+  // checkAuth,
+  actualizarProfesionalAdmin
 );
 profesionalRoutes.post("/", checkAuth, crearDisponibilidad);
 profesionalRoutes.get("/:fecha", checkAuth, obtenerDisponibilidad);
@@ -42,8 +63,5 @@ profesionalRoutes.get("/historial/:id", checkAuth, obtenerHistorial);
 
 // Obtener IDs Referidos
 profesionalRoutes.get("/referidos", obtenerIDSReferidos);
-
-
-
 
 export default profesionalRoutes;
