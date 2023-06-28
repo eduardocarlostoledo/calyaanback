@@ -136,7 +136,7 @@ const crearReserva = async (req, res) => {
 
     const profesionalID = await PerfilProfesional.findById(id);
     if (!usuario) {
-      const error = new Error("El usuario no esta registrado booking");
+      const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
 

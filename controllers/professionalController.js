@@ -3,13 +3,6 @@ import PerfilProfesional from "../models/ProfessionalModel.js";
 import Disponibilidad from "../models/AvailableModel.js";
 import Reserva from "../models/BookingModel.js";
 
-const buscarPerfil = async (id) => {
-  const profesional = await PerfilProfesional.findOne({
-    creador: id,
-  }).populate("reservas");
-  return profesional;
-};
-
 const actualizarProfesional = async (req, res) => {
   const { _id } = req.usuario;
   console.log("usuario", req.usuario);
@@ -19,10 +12,12 @@ const actualizarProfesional = async (req, res) => {
     console.log("usuario", req.usuario);
     console.log("body", req.body);
     // Comprobar si el usuario existe
-    const profesional = buscarPerfil(_id);
+    const profesional = await PerfilProfesional.findOne({
+      creador: _id,
+    }).populate("reservas");
 
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado pro linea 20");
+      const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
 
@@ -104,19 +99,28 @@ const obtenerDisponibilidadTotal = async (req, res) => {
 
 const actualizarProfesionalAdmin = async (req, res) => {
   const { _id } = req.body;
-  // console.log("usuario", req.usuario);
-  // console.log("body", req.body);
-  const { descripcion, especialidades, localidades } = req.body;
+  const {
+    descripcion,
+    especialidades,
+    localidades,
+    ciudad,
+    nombre,
+    apellido,
+    email,
+    telefono,
+    cedula,
+    sexo,
+    // direccionDefault,
+  } = req.body;
+  console.log(req.body);
   try {
-    // console.log("usuario", req.usuario);
-    // console.log("body", req.body);
     // Comprobar si el usuario existe
-    const profesional = await PerfilProfesional.findOne({
-      creador: _id,
+    const profesional = await Usuario.findOne({
+      _id: _id,
     }).populate("reservas");
 
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado pro linea 20");
+      const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
 
@@ -136,6 +140,21 @@ const actualizarProfesionalAdmin = async (req, res) => {
         profesional.localidadesLaborales;
     }
 
+    // Actualizar los campos del perfil profesional si existen en la solicitud
+    profesional.localidades = localidades || profesional.localidades;
+    profesional.ciudad = ciudad || profesional.ciudad;
+    profesional.nombre = nombre || profesional.nombre;
+    profesional.apellido = apellido || profesional.apellido;
+    // profesional.email = email || profesional.email;
+    profesional.telefono = telefono || profesional.telefono;
+    profesional.cedula = cedula || profesional.cedula;
+    profesional.sexo = sexo || profesional.sexo;
+    // profesional.direccionDefault =
+    //   direccionDefault || profesional.direccionDefault;
+    console.log("nombre --->", profesional.nombre);
+    console.log("id pro --->", profesional._id);
+    console.log("id --->", _id);
+
     await profesional.save();
 
     res.json({
@@ -146,6 +165,34 @@ const actualizarProfesionalAdmin = async (req, res) => {
     console.log(error);
   }
 };
+
+// const actualizarProfesionalAdmin = async (req, res) => {
+//   try {
+//     const { _id, ...actualizaciones } = req.body;
+
+//     const profesional = await PerfilProfesional.findOneAndUpdate(
+//       { creador: _id },
+//       { $set: { ...actualizaciones } },
+//       { new: true, populate: "reservas" }
+//     );
+
+//     if (!profesional) {
+//       return res.status(404).json({ msg: "El usuario no está registrado." });
+//     }
+
+//     res.json({
+//       msg: "Perfil profesional actualizado correctamente",
+//       profesional,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res
+//       .status(500)
+//       .json({
+//         msg: "Ha ocurrido un error al actualizar el perfil profesional.",
+//       });
+//   }
+// };
 
 const perfilProfesional = async (req, res) => {
   const { _id } = req.usuario;
@@ -161,10 +208,8 @@ const perfilProfesional = async (req, res) => {
       })
       .populate("reservas");
 
-    //    console.log(profesional);
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado pro line 67");
-      return res.status(404).json({ msg: error.message });
+      return res.status(404).json({ msg: "El usuario no está registrado" });
     }
 
     res.json({
@@ -173,8 +218,38 @@ const perfilProfesional = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ msg: "Ocurrió un error en el servidor" });
   }
 };
+
+// const perfilProfesional = async (req, res) => {
+//   const { _id } = req.usuario;
+
+//   try {
+//     const profesional = await PerfilProfesional.findOne({
+//       creador: _id,
+//     })
+//       .populate("creador", "nombre")
+//       .populate({
+//         path: "disponibilidad",
+//         select: "-creador -createdAt -updatedAt",
+//       })
+//       .populate("reservas");
+
+//     //    console.log(profesional);
+//     if (!profesional) {
+//       const error = new Error("El usuario no esta registrado");
+//       return res.status(404).json({ msg: error.message });
+//     }
+
+//     res.json({
+//       profesional,
+//       img: req.usuario.img,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 const GetPerfilProfesional = async (req, res) => {
   const { id } = req.params;
@@ -190,7 +265,7 @@ const GetPerfilProfesional = async (req, res) => {
     });
 
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado pro linea 94");
+      const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
 
@@ -208,9 +283,7 @@ const GetPerfilProfesionalID = async (req, res) => {
     }).populate("disponibilidad");
 
     if (!profesional) {
-      const error = new Error(
-        "El profesional no esta registrado profesional linea 112"
-      );
+      const error = new Error("El profesional no esta registrado profesional");
       return res.status(404).json({ msg: error.message });
     }
 
@@ -233,7 +306,7 @@ const perfilReferido = async (req, res) => {
       .populate("referidos");
 
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado pro linea 135");
+      const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
 

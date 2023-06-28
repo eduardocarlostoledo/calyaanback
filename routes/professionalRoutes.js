@@ -37,7 +37,7 @@ profesionalRoutes.get(
 
 profesionalRoutes.get(
   "/perfil-profesional-id/:id",
-  checkAuth,
+  // checkAuth,
   GetPerfilProfesionalID
 );
 
