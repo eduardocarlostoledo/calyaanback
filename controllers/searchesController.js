@@ -169,4 +169,21 @@ const obtenerProfesionales = async (req, res) => {
   }
 };
 
-export { buscarUsuarios, obtenerUsuarios, obtenerProfesionales, obtenerAll, obtenerOrdenes };
+
+
+const obtenerTodosUsuarios = async (req, res) => {
+  console.log("info redux", req.body)
+
+  try {
+    const usuarios = await Usuario.find();
+
+    res.json(usuarios);
+  } catch (error) {
+    res.status(500).json({ msg: "Error al obtener los usuarios de la base de datos" });
+  }
+};
+
+
+
+
+export { buscarUsuarios, obtenerUsuarios, obtenerProfesionales, obtenerAll, obtenerOrdenes, obtenerTodosUsuarios };
