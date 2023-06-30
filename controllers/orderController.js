@@ -45,6 +45,7 @@ const saveOrder = async (arrayPreference) => {
     ciudad_Servicio,
     localidad_Servicio,
     telefono_Servicio,
+    coupon
   } = arrayPreference;
 
   const newOrder = await new Orden({
@@ -71,6 +72,7 @@ const saveOrder = async (arrayPreference) => {
     ciudad_Servicio,
     localidad_Servicio,
     telefono_Servicio,
+    coupon
   });
   await newOrder.save();
   console.log("SE HA GUARDADO UNA NUEVA ORDEN newOrder", newOrder);
@@ -78,7 +80,6 @@ const saveOrder = async (arrayPreference) => {
 };
 
 const getOrdenById = async (req, res, next) => {
-  console.log(req.params.id);
   try {
     const orden = await Orden.findById(req.params.id);
     if (!orden) {
@@ -137,6 +138,8 @@ const updateOrden = async (req, res, next) => {
     numeroFacturacion,
     estadoLiquidacion,
     numeroLiquidacion,
+    estadoPago,
+    payment_id
   } = req.body;
 
   try {
@@ -160,6 +163,8 @@ const updateOrden = async (req, res, next) => {
     buscarorden.numeroFacturacion = numeroFacturacion;
     buscarorden.estadoLiquidacion = estadoLiquidacion;
     buscarorden.numeroLiquidacion = numeroLiquidacion;
+    buscarorden.estadoPago = estadoPago;
+    buscarorden.payment_id = payment_id;
 
     const ordenActualizada = await buscarorden.save();
     console.log("ordenactualizada", ordenActualizada);

@@ -66,19 +66,22 @@ const ordenSchema = mongoose.Schema({
   },
   cantidad: {
     type: Number,
-
+  },
+  coupon: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Cupon",
+  },
+  precioTotal:{
+    type: Number,
   },
   precio: {
     type: Number,
-
   },
   direccion_Servicio: {
     type: String,
-
   },
   adicional_direccion_Servicio: {
     type: String,
-
   },
   ciudad_Servicio: {
     type: String,

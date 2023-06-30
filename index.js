@@ -19,6 +19,10 @@ import payRouter from "./routes/payRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import mercadopago from "mercadopago";
 import sendWhatsapp from "./routes/sendWhatsapp.js";
+import couponRoutes from "./routes/couponRoutes.js";
+
+
+
 
 dotenv.config();
 
@@ -77,6 +81,7 @@ app.use("/api/reservas", reservaRoutes);
 app.use("/api/uploads", uploadsRoutes);
 app.use("/api/loaddata", loadDataRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/coupon", couponRoutes);
 app.use("/pay", payRouter);
 app.use("/ordenes", orderRoutes);
 app.use('/whatsapp',sendWhatsapp);

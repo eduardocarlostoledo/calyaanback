@@ -56,7 +56,7 @@ const payPreference = async (req, res) => {
       servicio: servicios.nombre,
       servicio_img: servicios.img,
       cantidad: parseInt(serviciosIds.length, 10),
-      precio: parseInt(servicios.precio, 10),
+      precio: parsedServices[0].valorTotal ? parsedServices[0].valorTotal : parseInt(servicios.precio, 10),
       dia_servicio: parsedDateService.date,
       hora_servicio: parsedDateService.time,
       direccion_Servicio: parsedData_customer.address,
@@ -65,9 +65,9 @@ const payPreference = async (req, res) => {
       localidad_Servicio: parsedDateService.localidadServicio,
       //localidad_Servicio: parsedData_customer.localidad,
       telefono_Servicio: parsedData_customer.telefono,
+      coupon: parsedServices[0]._idCodigo
     };
     
-
     const newOrder = await saveOrder(arrayPreference);
     const usuario = await Usuario.findOne({ _id: newOrder.cliente_id });
     const profesionalService = await PerfilProfesional.findOne({
@@ -258,13 +258,11 @@ const payPreferenceManual = async (req, res) => {
       ciudad_Servicio,
       localidad_Servicio,
       telefono_Servicio,
+      valorTotal,
+      coupon
     } = req.body;
 
-    console.log(cliente_id);
-
     let usuarioNuevo = await Usuario.findOne({ _id: cliente_id });
-
-    console.log(usuarioNuevo);
 
     if (!usuarioNuevo) {
       const error = new Error("El usuario no esta registrado");
@@ -285,7 +283,6 @@ const payPreferenceManual = async (req, res) => {
     const serviciosSearch = await Producto.findOne({
       idWP: { $in: serviciosIds },
     });
-console.log("serviciosSearch", serviciosSearch)
 
     const arrayPreference = {
       cliente_id: updateUsuario._id,
@@ -297,15 +294,18 @@ console.log("serviciosSearch", serviciosSearch)
       servicio: serviciosSearch.nombre,
       servicio_img: serviciosSearch.img,
       cantidad: serviciosSearch.length,
-      precio: Number(serviciosSearch.precio),
+      precio: valorTotal ? valorTotal : Number(serviciosSearch.precio),
       direccion_Servicio,
       adicional_direccion_Servicio,
       ciudad_Servicio,
       localidad_Servicio,
       telefono_Servicio: updateUsuario.telefono,
+      coupon
     };
 
     const newOrder = await new Orden(arrayPreference);
+
+    console.log(newOrder)
 
     await newOrder.save();
 
