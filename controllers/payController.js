@@ -12,6 +12,7 @@ import {
 import Disponibilidad from "../models/AvailableModel.js";
 import convertirFormatoHora from "../helpers/formatoFecha.js";
 import { obtenerIndicesCumplenCondicion } from "../helpers/comparaDisponibilidad.js";
+import Coupon from "../models/CouponModel.js";
 //import {reprogramarReserva} from "../helpers/reprogramacionReserva.js";
 
 // let arrayPreference = {};
@@ -148,6 +149,7 @@ const feedbackSuccess = async (req, res) => {
     });
     console.log("ORDEN SUCCES");
 
+
     order.payment_id = payment_id;
     order.estadoPago = status;
     order.payment_type = payment_type;
@@ -170,7 +172,12 @@ const feedbackSuccess = async (req, res) => {
       indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });
   
     }
-    
+
+    const cuponRedimido = await Coupon.findOne({_id:order.coupon})
+
+   cuponRedimido.reclamados = [...cuponRedimido.reclamados, order.cliente_id];
+
+    await cuponRedimido.save()
     
     await disponibilidadProfesional.save();
     await order.save();
@@ -336,6 +343,12 @@ const feedbackSuccessManual = async (req, res) => {
     order.estadoPago = status;
     order.payment_type = payment_type;
     order.merchant_order_id = merchant_order_id;
+
+    const cuponRedimido = await Coupon.findOne({_id:order.coupon})
+
+    cuponRedimido.reclamados = [...cuponRedimido.reclamados, order.cliente_id];
+ 
+    await cuponRedimido.save()
 
     await order.save();
 

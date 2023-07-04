@@ -5,7 +5,7 @@ import checkAuth from "../middlewares/checkAuth.js";
 const couponRoutes = express.Router();
 
 // Nuevo Cupon
-couponRoutes.post('',checkAuth, async (req, res) => {
+couponRoutes.post('', checkAuth, async (req, res) => {
   try {
     const { codigo } = req.body;
 
@@ -24,7 +24,7 @@ couponRoutes.post('',checkAuth, async (req, res) => {
 });
 
 // Obtener Descuento
-couponRoutes.post('/discount',checkAuth, async (req, res) => {
+couponRoutes.post('/discount', checkAuth, async (req, res) => {
 
   const { valor, coupon } = req.body;
 
@@ -51,17 +51,21 @@ couponRoutes.post('/discount',checkAuth, async (req, res) => {
       valorTotal = valor - existeCupon.descuento;
     }
 
-    res.status(200).json({ _idCodigo:existeCupon._id, codigo:existeCupon.codigo, descuento:existeCupon.descuento, tipoDescuento:existeCupon.tipoDescuento,valor, valorTotal });
+    if (valorTotal < 0) {
+      return res.status(400).json({ msg: 'No es posible redimir el cupón dado que es mayor al costo del servicio' });
+    }
+
+    res.status(200).json({ _idCodigo: existeCupon._id, codigo: existeCupon.codigo, descuento: existeCupon.descuento, tipoDescuento: existeCupon.tipoDescuento, valor, valorTotal });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
 });
 
 // Listar cupones
-couponRoutes.get('/list-coupons',checkAuth, async (req, res) => {
+couponRoutes.get('/list-coupons', checkAuth, async (req, res) => {
   try {
-    const cuponesVigentes = await Coupon.find({ vencimiento: { $gte: new Date() }, eliminado: false });
-    const cuponesNoVigentes = await Coupon.find({ vencimiento: { $lt: new Date() }, eliminado: false });
+    const cuponesVigentes = await Coupon.find({ vencimiento: { $gte: new Date() }, eliminado: false }).populate({path: "reclamados", select: "nombre apellido _id telefono email" })
+    const cuponesNoVigentes = await Coupon.find({ vencimiento: { $lt: new Date() }, eliminado: false }).populate({path: "reclamados", select: "nombre apellido _id telefono email" })
 
     res.json({ cuponesVigentes, cuponesNoVigentes });
   } catch (error) {
@@ -70,11 +74,9 @@ couponRoutes.get('/list-coupons',checkAuth, async (req, res) => {
 });
 
 // Eliminar cupon
-couponRoutes.patch('/delete/:cuponId',checkAuth, async (req, res) => {
+couponRoutes.patch('/delete/:cuponId', checkAuth, async (req, res) => {
   try {
     const cuponId = req.params.cuponId;
-
-    console.log(req.params.cuponId)
 
     const cupon = await Coupon.findById(cuponId);
     if (!cupon) {
