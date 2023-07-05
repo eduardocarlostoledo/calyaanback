@@ -66,7 +66,7 @@ const payPreference = async (req, res) => {
       localidad_Servicio: parsedDateService.localidadServicio,
       //localidad_Servicio: parsedData_customer.localidad,
       telefono_Servicio: parsedData_customer.telefono,
-      coupon: parsedServices[0]._idCodigo
+      coupon: parsedServices[0]._idCodigo ? parsedServices[0]._idCodigo  : undefined
     };
     
     const newOrder = await saveOrder(arrayPreference);
@@ -147,8 +147,7 @@ const feedbackSuccess = async (req, res) => {
       path: "profesional_id",
       populate: "disponibilidad",
     });
-    console.log("ORDEN SUCCES");
-
+    console.log("ORDEN SUCCES",order);
 
     order.payment_id = payment_id;
     order.estadoPago = status;
@@ -173,12 +172,16 @@ const feedbackSuccess = async (req, res) => {
   
     }
 
-    const cuponRedimido = await Coupon.findOne({_id:order.coupon})
+    if(order.coupon){
 
-   cuponRedimido.reclamados = [...cuponRedimido.reclamados, order.cliente_id];
+      const cuponRedimido = await Coupon.findOne({_id:order.coupon})
 
-    await cuponRedimido.save()
-    
+      cuponRedimido.reclamados = [...cuponRedimido.reclamados, order.cliente_id];
+
+      await cuponRedimido.save()
+      
+    }
+
     await disponibilidadProfesional.save();
     await order.save();
     await emailCompra(order);
@@ -307,7 +310,7 @@ const payPreferenceManual = async (req, res) => {
       ciudad_Servicio,
       localidad_Servicio,
       telefono_Servicio: updateUsuario.telefono,
-      coupon
+      coupon: coupon ? coupon : undefined,
     };
 
     const newOrder = await new Orden(arrayPreference);
@@ -344,11 +347,14 @@ const feedbackSuccessManual = async (req, res) => {
     order.payment_type = payment_type;
     order.merchant_order_id = merchant_order_id;
 
-    const cuponRedimido = await Coupon.findOne({_id:order.coupon})
+    if(order.coupon){
 
-    cuponRedimido.reclamados = [...cuponRedimido.reclamados, order.cliente_id];
+      const cuponRedimido = await Coupon.findOne({_id:order.coupon})
+
+      cuponRedimido.reclamados = [...cuponRedimido.reclamados, order.cliente_id];
  
-    await cuponRedimido.save()
+      await cuponRedimido.save()
+    }
 
     await order.save();
 

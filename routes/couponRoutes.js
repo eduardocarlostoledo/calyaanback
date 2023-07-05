@@ -46,11 +46,11 @@ couponRoutes.post('/discount', checkAuth, async (req, res) => {
 
     let valorTotal;
     if (existeCupon.tipoDescuento === 'porcentaje') {
-      valorTotal = valor * (existeCupon.descuento / 100);
+      valorTotal = valor - (valor * (existeCupon.descuento / 100));
     } else {
       valorTotal = valor - existeCupon.descuento;
     }
-
+console.log(valorTotal)
     if (valorTotal < 0) {
       return res.status(400).json({ msg: 'No es posible redimir el cupón dado que es mayor al costo del servicio' });
     }

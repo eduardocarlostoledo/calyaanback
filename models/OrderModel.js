@@ -70,6 +70,7 @@ const ordenSchema = mongoose.Schema({
   coupon: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Cupon",
+    required:false
   },
   precioTotal:{
     type: Number,
