@@ -57,7 +57,6 @@ const obtenerDisponibilidadTotal = async (req, res) => {
       })
       .sort({ fecha: 1 })
       .lean();
-    console.log(profesionales, "disponibilidades");
 
     const fechaActual = new Date();
     const fechaLimite = new Date(fechaActual.getTime() + 5 * 60 * 60 * 1000);
@@ -112,7 +111,6 @@ const actualizarProfesionalAdmin = async (req, res) => {
     sexo,
     // direccionDefault,
   } = req.body;
-  console.log(req.body);
   try {
     // Comprobar si el usuario existe
     const profesional = await Usuario.findOne({
@@ -151,9 +149,7 @@ const actualizarProfesionalAdmin = async (req, res) => {
     profesional.sexo = sexo || profesional.sexo;
     // profesional.direccionDefault =
     //   direccionDefault || profesional.direccionDefault;
-    console.log("nombre --->", profesional.nombre);
-    console.log("id pro --->", profesional._id);
-    console.log("id --->", _id);
+    
 
     await profesional.save();
 
