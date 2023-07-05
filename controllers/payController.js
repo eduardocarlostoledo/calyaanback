@@ -279,16 +279,20 @@ const payPreferenceManual = async (req, res) => {
       return res.status(404).json({ msg: error.message });
     }
 
+    console.log(usuario)
+
     const updateUsuario = await Usuario.findOneAndUpdate(
       { _id: cliente_id },
       {
-        nombre: usuarioNuevo.nombre,
-        apellido: usuarioNuevo.apellido,
-        cedula: usuarioNuevo.cedula,
-        telefono: usuarioNuevo.telefono,
+        nombre: usuario?.cliente_nombre,
+        apellido: usuario?.cliente_apellido,
+        cedula: usuario?.cliente_cedula,
+        telefono: usuario?.cliente_telefono,
       },
       { new: true }
     );
+
+    console.log("updateUsuario",updateUsuario)
 
     const serviciosSearch = await Producto.findOne({
       idWP: { $in: serviciosIds },
