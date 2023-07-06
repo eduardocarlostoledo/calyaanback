@@ -284,10 +284,12 @@ const payPreferenceManual = async (req, res) => {
     const updateUsuario = await Usuario.findOneAndUpdate(
       { _id: cliente_id },
       {
-        nombre: usuario?.cliente_nombre,
-        apellido: usuario?.cliente_apellido,
-        cedula: usuario?.cliente_cedula,
-        telefono: usuario?.cliente_telefono,
+        $set: {
+          nombre: usuario?.cliente_nombre,
+          apellido: usuario?.cliente_apellido,
+          cedula: usuario?.cliente_cedula,
+          telefono: usuario?.cliente_telefono,
+        },
       },
       { new: true }
     );
