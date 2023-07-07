@@ -1,6 +1,7 @@
 import mercadopago from "mercadopago";
 import PerfilProfesional from "../models/ProfessionalModel.js";
 import Usuario from "../models/UserModel.js";
+import Factura from "../models/FacturaModel.js";
 import saveOrder from "./orderController.js";
 import Producto from "../models/ProductModel.js";
 import Orden from "../models/OrderModel.js";
@@ -13,100 +14,120 @@ import Disponibilidad from "../models/AvailableModel.js";
 import convertirFormatoHora from "../helpers/formatoFecha.js";
 import { obtenerIndicesCumplenCondicion } from "../helpers/comparaDisponibilidad.js";
 import Coupon from "../models/CouponModel.js";
+import couponRoutes from "../routes/couponRoutes.js";
+import product from "../routes/productsRoutes.js";
+
 //import {reprogramarReserva} from "../helpers/reprogramacionReserva.js";
 
 // let arrayPreference = {};
 const payPreference = async (req, res) => {
   
-  try {
-    const {
-      DateService,
-      ProfessionalService,
-      profile,
-      services,
-      dataCustomer,
-    } = req.body;
 
-    const parsedProfile = JSON.parse(profile);
-    const parsedServices = JSON.parse(services);
-    const parsedProfessionalService = JSON.parse(ProfessionalService);
-    const parsedDateService = JSON.parse(DateService);
-    const parsedData_customer = JSON.parse(dataCustomer);
+  try {
+
+    const { cliente_id, profesional_id, servicios,cupon } = req.body
+
+    const cliente = await Usuario.findOne({
+      _id: cliente_id,
+    });
 
     const profesional = await Usuario.findOne({
-      profesional: parsedProfessionalService.creador._id,
+      profesional: profesional_id,
     });
 
-    const serviciosIds = parsedServices.map((service) => service.idWP);
+    const productos = await Producto.find({ idWP: { $in: servicios }});
 
-    const servicios = await Producto.findOne({ idWP: { $in: serviciosIds } });
+    const serviciosGuardar = productos.map((product)=>product._id)
+    console.log(productos)
 
-    const arrayPreference = {
-      cliente_id: parsedProfile._id,
-      cliente_email: parsedProfile.email,
-      cliente_nombre: parsedData_customer.firstName,
-      cliente_apellido: parsedData_customer.lastName,
-      cliente_cedula: parsedData_customer.cedula,
-      cliente_telefono: parsedData_customer.telefono,
-      user_profesional_id: parsedProfessionalService.creador._id,
-      profesional_id: parsedProfessionalService.creador._id,
-      profesional_email: profesional.email,
-      profesional_nombre: profesional.nombre,
-      profesional_apellido: profesional.apellido,
-      profesional_telefono: profesional.telefono,
-      servicio: servicios.nombre,
-      servicio_img: servicios.img,
-      cantidad: parseInt(serviciosIds.length, 10),
-      precio: parsedServices[0].valorTotal ? parsedServices[0].valorTotal : parseInt(servicios.precio, 10),
-      dia_servicio: parsedDateService.date,
-      hora_servicio: parsedDateService.time,
-      direccion_Servicio: parsedData_customer.address,
-      adicional_direccion_Servicio: parsedData_customer.address2,
-      ciudad_Servicio: parsedData_customer.ciudad,
-      localidad_Servicio: parsedDateService.localidadServicio,
-      //localidad_Servicio: parsedData_customer.localidad,
-      telefono_Servicio: parsedData_customer.telefono,
-      coupon: parsedServices[0]._idCodigo ? parsedServices[0]._idCodigo  : undefined
-    };
+    let  precioNeto =  productos.reduce((accum, product) => accum + product.precio, 0);
+
+    let precioSubTotal = precioNeto;
+
+    if(cupon){
+      const existeCupon = await Coupon.findOne({ codigo: cupon });
+
+      if (!existeCupon) {
+        const error = new Error("Cupón no válido");
+        return res.status(404).json({ msg: error.message });
+      }
+  
+      if (existeCupon.vencimiento && existeCupon.vencimiento < new Date()) {
+        return res.status(400).json({ msg: 'El cupón ha vencido' });
+      }
+  
+      if (existeCupon.reclamados.includes(req.usuario._id)) {
+        return res.status(400).json({ msg: 'El cupón ya ha sido reclamado' });
+      }
+  
+      if (existeCupon.tipoDescuento === 'porcentaje') {
+        precioSubTotal = valor - (valor * (existeCupon.descuento / 100));
+      } else {
+        precioSubTotal = valor - existeCupon.descuento;
+      }
+
+      if (precioSubTotal < 0) {
+        return res.status(400).json({ msg: 'No es posible redimir el cupón dado que es mayor al costo del servicio' });
+      }
+    }
+
+    let precioTotal = precioSubTotal;
+
+    const FacturaOrden = new Factura( {
+      precioNeto,
+      precioSubTotal,
+      precioTotal,
+      cupon,
+      fechaVenta:new Date(),
+      origen:"Mercado Pago",
+      servicios:serviciosGuardar
+    })
+
+    const factura = await FacturaOrden.save()
+
+    const OrdenPendiente = new Orden({
+      ...req.body,
+      servicios:serviciosGuardar,
+      factura:factura._id
+    })
+
+    const orden = await OrdenPendiente.save()
+
+    factura.orden = orden._id;
     
-    const newOrder = await saveOrder(arrayPreference);
-    const usuario = await Usuario.findOne({ _id: newOrder.cliente_id });
-    const profesionalService = await PerfilProfesional.findOne({
-      _id: newOrder.profesional_id,
-    });
-    usuario.reservas = [...usuario.reservas, newOrder._id];
-    profesionalService.reservas = [
-      ...profesionalService.reservas,
-      newOrder._id,
-    ];
+    await factura.save()
 
-    await usuario.save();
-    await profesionalService.save();
+console.log(factura)
 
-    res.send({ newOrder: newOrder._id });
+    res.send({ orden,factura });
   } catch (error) {
     console.log(error);
     res.status(500).send("Internal Server Error");
   }
 };
 
-const create_Preference = (req, res) => {
-  const orderId = req.params.orderId;
+const create_Preference = async (req, res) => {
+
+  const factura = await Factura.findById(req.params.orderId).populate("servicios");
+
+  let items = factura.servicios.map((producto) => {
+    return {
+      title: producto.nombre,
+      unit_price: Number(producto.precio),
+      quantity: 1
+    };
+  });
+  
+  console.log(items)
+
   let preference = {
-    items: [
-      {
-        title: req.body.description,
-        unit_price: Number(req.body.price),
-        quantity: Number(req.body.quantity),
-      },
-    ],
+    items,
     back_urls: {
       success: `${process.env.BACK}/pay/feedback/success`,
       failure: `${process.env.BACK}/pay/feedback/failure`,
       pending: `${process.env.BACK}/pay/feedback/pending`,
     },
     auto_return: "approved",
-
     payment_methods: {
       excluded_payment_types: [
         {
@@ -118,12 +139,13 @@ const create_Preference = (req, res) => {
       ],
     },
     statement_descriptor: "CALYAAN COLOMBIA",
-    external_reference: `${orderId}`,
+    external_reference: `${factura._id}`,
   };
 
   mercadopago.preferences
     .create(preference)
     .then(function (response) {
+      console.log(response)
       res.send({
         id: response.body.id,
         data: response.body.items,
@@ -142,6 +164,8 @@ const feedbackSuccess = async (req, res) => {
       merchant_order_id,
       external_reference,
     } = req.query;
+
+    console.log(req.query)
 
     const order = await Orden.findById(external_reference).populate({
       path: "profesional_id",

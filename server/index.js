@@ -82,8 +82,8 @@ app.use("/api/uploads", uploadsRoutes);
 app.use("/api/loaddata", loadDataRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/coupon", couponRoutes);
-app.use("/pay", payRouter);
-app.use("/ordenes", orderRoutes);
+app.use("/api/pay", payRouter);
+app.use("/api/ordenes", orderRoutes);
 app.use('/whatsapp',sendWhatsapp);
 
 

@@ -24,6 +24,9 @@ const productoSchema = mongoose.Schema(
     link: {
       type: String,
     },
+    cantidad:{
+      type:Number
+    }
   },
   {
     timestamps: true,
