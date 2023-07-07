@@ -5,6 +5,7 @@ import checkAuth from "../middlewares/checkAuth.js";
 import isAdminRole from "../middlewares/isAdminRole.js";
 import {
   actualizarProfesional,
+  actualizarProfesionalAdminDash,
   actualizarProfesionalAdmin,
   perfilProfesional,
   crearDisponibilidad,
@@ -43,16 +44,27 @@ profesionalRoutes.get(
 
 profesionalRoutes.get("/perfil-referido", checkAuth, perfilReferido);
 
+//  actualizar el perfil profesional del usuario ( descripcion, localidades y especialidades)
+profesionalRoutes.put(
+  "/actualizar-profesional-admin",
+  // checkAuth,
+  actualizarProfesionalAdminDash
+);
+
+// Actualizar el perfil de usuaio del profesional
+profesionalRoutes.put(
+  "/actualizar-profesional-admin-dash",
+  // checkAuth,
+  actualizarProfesionalAdmin
+);
+
+//  este de aca es para actualizar el profesional desde su propio perfil
 profesionalRoutes.put(
   "/actualizar-profesional",
   checkAuth,
   actualizarProfesional
 );
-profesionalRoutes.put(
-  "/actualizar-profesional-AdminDash",
-  // checkAuth,
-  actualizarProfesionalAdmin
-);
+
 profesionalRoutes.post("/", checkAuth, crearDisponibilidad);
 profesionalRoutes.get("/:fecha", checkAuth, obtenerDisponibilidad);
 profesionalRoutes.put("/:id", checkAuth, editarDisponibilidad);

@@ -48,6 +48,48 @@ const actualizarProfesional = async (req, res) => {
   }
 };
 
+const actualizarProfesionalAdminDash = async (req, res) => {
+  const { descripcion, especialidades, localidades, _id } = req.body;
+  console.log(_id, "el id");
+  console.log(req.body, "el body");
+  try {
+    // Comprobar si el usuario existe
+    const profesional = await PerfilProfesional.findById({
+      _id: _id,
+    });
+    console.log(profesional, "profeso");
+    if (!profesional) {
+      const error = new Error("El usuario no esta registrado");
+      return res.status(404).json({ msg: error.message });
+    }
+
+    if (descripcion) {
+      profesional.descripcion = descripcion;
+    }
+
+    if (especialidades && especialidades.length > 0) {
+      profesional.especialidad =
+        especialidades.map((especialidad) => especialidad) ||
+        profesional.especialidad;
+    }
+
+    if (localidades && localidades.length > 0) {
+      profesional.localidadesLaborales =
+        localidades.map((localidad) => localidad) ||
+        profesional.localidadesLaborales;
+    }
+
+    await profesional.save();
+
+    res.json({
+      msg: "Perfil profesional actualizado correctamente",
+      profesional,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const obtenerDisponibilidadTotal = async (req, res) => {
   try {
     const profesionales = await Disponibilidad.find()
@@ -97,15 +139,15 @@ const obtenerDisponibilidadTotal = async (req, res) => {
 };
 
 const actualizarProfesionalAdmin = async (req, res) => {
-  const { _id } = req.body;
   const {
-    descripcion,
-    especialidades,
-    localidades,
+    _id,
+    // descripcion,
+    // especialidades,
+    // localidades,
     ciudad,
     nombre,
     apellido,
-    email,
+    // email,
     telefono,
     cedula,
     sexo,
@@ -115,31 +157,32 @@ const actualizarProfesionalAdmin = async (req, res) => {
     // Comprobar si el usuario existe
     const profesional = await Usuario.findOne({
       _id: _id,
-    }).populate("reservas");
+    });
+    // .populate("reservas");
 
     if (!profesional) {
       const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
 
-    if (descripcion) {
-      profesional.descripcion = descripcion;
-    }
+    // if (descripcion) {
+    //   profesional.descripcion = descripcion;
+    // }
 
-    if (especialidades && especialidades.length > 0) {
-      profesional.especialidad =
-        especialidades.map((especialidad) => especialidad) ||
-        profesional.especialidad;
-    }
+    // if (especialidades && especialidades.length > 0) {
+    //   profesional.especialidad =
+    //     especialidades.map((especialidad) => especialidad) ||
+    //     profesional.especialidad;
+    // }
 
-    if (localidades && localidades.length > 0) {
-      profesional.localidadesLaborales =
-        localidades.map((localidad) => localidad) ||
-        profesional.localidadesLaborales;
-    }
+    // if (localidades && localidades.length > 0) {
+    //   profesional.localidadesLaborales =
+    //     localidades.map((localidad) => localidad) ||
+    //     profesional.localidadesLaborales;
+    // }
 
     // Actualizar los campos del perfil profesional si existen en la solicitud
-    profesional.localidades = localidades || profesional.localidades;
+    // profesional.localidades = localidades || profesional.localidades;
     profesional.ciudad = ciudad || profesional.ciudad;
     profesional.nombre = nombre || profesional.nombre;
     profesional.apellido = apellido || profesional.apellido;
@@ -149,7 +192,6 @@ const actualizarProfesionalAdmin = async (req, res) => {
     profesional.sexo = sexo || profesional.sexo;
     // profesional.direccionDefault =
     //   direccionDefault || profesional.direccionDefault;
-    
 
     await profesional.save();
 
@@ -478,6 +520,7 @@ export {
   perfilProfesional,
   obtenerDisponibilidadTotal,
   actualizarProfesional,
+  actualizarProfesionalAdminDash,
   actualizarProfesionalAdmin,
   crearDisponibilidad,
   editarDisponibilidad,
