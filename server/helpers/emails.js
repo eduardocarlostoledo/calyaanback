@@ -28,7 +28,7 @@ const emailRegistro = async (data) => {
     attachments: [
       {
         filename: "Logo-Calyaan.webp",
-        path: __dirname + "/public/images/Logo-Calyaan.webp",
+        path: __dirname + "/server/public/images/Logo-Calyaan.webp",
         cid: "logo",
       },
     ],
@@ -375,7 +375,7 @@ const emailOlvidePassword = async (data) => {
     attachments: [
       {
         filename: "Logo-Calyaan.webp",
-        path: __dirname + "/public/images/Logo-Calyaan.webp",
+        path: __dirname + "/server/public/images/Logo-Calyaan.webp",
         cid: "logo",
       },
     ],

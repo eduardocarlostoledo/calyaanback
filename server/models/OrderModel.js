@@ -14,10 +14,10 @@ const ordenSchema = mongoose.Schema({
     ref: "Producto",
   },
   factura: {
-    type: [mongoose.Schema.Types.ObjectId],
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Factura",
   },
-  dia_servicio: {
+  cita_servicio: {
     type: String,
   },
   hora_servicio: {

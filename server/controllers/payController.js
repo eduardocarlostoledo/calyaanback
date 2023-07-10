@@ -123,9 +123,9 @@ const create_Preference = async (req, res) => {
   let preference = {
     items,
     back_urls: {
-      success: `${process.env.BACK}/pay/feedback/success`,
-      failure: `${process.env.BACK}/pay/feedback/failure`,
-      pending: `${process.env.BACK}/pay/feedback/pending`,
+      success: `${process.env.BACK}/api/pay/feedback/success`,
+      failure: `${process.env.BACK}/api/pay/feedback/failure`,
+      pending: `${process.env.BACK}/api/pay/feedback/pending`,
     },
     auto_return: "approved",
     payment_methods: {
@@ -139,7 +139,7 @@ const create_Preference = async (req, res) => {
       ],
     },
     statement_descriptor: "CALYAAN COLOMBIA",
-    external_reference: `${factura._id}`,
+    external_reference: `${factura.orden}`,
   };
 
   mercadopago.preferences
@@ -167,30 +167,34 @@ const feedbackSuccess = async (req, res) => {
 
     console.log(req.query)
 
-    const order = await Orden.findById(external_reference).populate({
-      path: "profesional_id",
-      populate: "disponibilidad",
-    });
+    const order = await Orden.findById(external_reference).populate({path:"profesional_id", populate:"disponibilidad"});
     console.log("ORDEN SUCCES",order);
+   
+    const factura = await Factura.findById(order.factura);
 
-    order.payment_id = payment_id;
-    order.estadoPago = status;
-    order.payment_type = payment_type;
-    order.merchant_order_id = merchant_order_id;
+console.log(factura)
+
+    factura.payment_id = payment_id;
+    factura.estadoPago = status;
+    factura.payment_type = payment_type;
+    factura.merchant_order_id = merchant_order_id;
 
     let disponibilidadProfesional = await Disponibilidad.findOne({
-      fecha: order.dia_servicio,
+      fecha: order.cita_servicio,
       creador: order.profesional_id._id,
     });
     
+
+    console.log(disponibilidadProfesional)
+
     const index = disponibilidadProfesional.horarios.findIndex(
-      (item) => item.hora === order.hora_servicio
+      (item) => item.hora === order.cita_servicio
     );
     if (index !== -1) {      
     
       disponibilidadProfesional.horarios[index].stock = false;  
 
-      const fechaHoraServicio = new Date(`${order.dia_servicio}T${order.hora_servicio.split('-')[0]}:00`);      
+      const fechaHoraServicio = new Date(`${order.cita_servicio}T${order.cita_servicio.split('-')[0]}:00`);      
       const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
       indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });
   
@@ -208,10 +212,11 @@ const feedbackSuccess = async (req, res) => {
 
     await disponibilidadProfesional.save();
     await order.save();
+    await factura.save()
     await emailCompra(order);
     await emailProfesional(order);
 
-    res.redirect(`${process.env.FRONT}/resumen/${external_reference}`);
+    res.redirect(`${process.env.FRONT}/wordpress`);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error in success route" });
