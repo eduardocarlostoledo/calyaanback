@@ -2,23 +2,38 @@ import Orden from "../models/OrderModel.js";
 
 const getAllOrden = async (req, res, next) => {
   try {
-    const orden = await Orden.find().sort({ createdAt: -1 })
-    .populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } })
-    .populate({ path: "factura", select: "-__v -orden -servicios" })
-    .populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales", populate: { path: "creador", select: "_id nombre apellido email cedula telefono direccionDefault" } })
-    .populate({ path: "servicios", select: "_id nombre precio link" })
-    .lean()
+    const orden = await Orden.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "cliente_id",
+        select: "_id nombre apellido email cedula telefono direccionDefault",
+        populate: {
+          path: "direccionDefault",
+          select: "-createdAt -updateAt -cliente",
+        },
+      })
+      .populate({ path: "factura", select: "-__v -orden -servicios" })
+      .populate({
+        path: "profesional_id",
+        select:
+          "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
+        populate: {
+          path: "creador",
+          select: "_id nombre apellido email cedula telefono direccionDefault",
+        },
+      })
+      .populate({ path: "servicios", select: "_id nombre precio link" })
+      .lean();
 
-
-const ordenes = orden.map((orden) => {
-    const { creador, ...restoOrden } = orden.profesional_id;
-    return {
+    const ordenes = orden.map((orden) => {
+      const { creador, ...restoOrden } = orden.profesional_id;
+      return {
         ...orden,
-        profesional_id: {...creador,...restoOrden}
-    };
-});
+        profesional_id: { ...creador, ...restoOrden },
+      };
+    });
 
-res.status(200).json(ordenes);
+    res.status(200).json(ordenes);
   } catch (err) {
     next(err);
   }
@@ -62,7 +77,7 @@ const saveOrder = async (arrayPreference) => {
     ciudad_Servicio,
     localidad_Servicio,
     telefono_Servicio,
-    coupon
+    coupon,
   } = arrayPreference;
 
   const newOrder = await new Orden({
@@ -89,36 +104,51 @@ const saveOrder = async (arrayPreference) => {
     ciudad_Servicio,
     localidad_Servicio,
     telefono_Servicio,
-    coupon
+    coupon,
   });
   await newOrder.save();
   console.log("SE HA GUARDADO UNA NUEVA ORDEN newOrder", newOrder);
   return newOrder;
 };
 
-
 const getOrdenById = async (req, res, next) => {
   try {
-    const orden = await Orden.find().sort({ createdAt: -1 })
-    .populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } })
-    .populate({ path: "factura", select: "-__v -orden -servicios" })
-    .populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales", populate: { path: "creador", select: "_id nombre apellido email cedula telefono direccionDefault" } })
-    .populate({ path: "servicios", select: "_id nombre precio link" })
-    .lean()
+    const orden = await Orden.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "cliente_id",
+        select: "_id nombre apellido email cedula telefono direccionDefault",
+        populate: {
+          path: "direccionDefault",
+          select: "-createdAt -updateAt -cliente",
+        },
+      })
+      .populate({ path: "factura", select: "-__v -orden -servicios" })
+      .populate({
+        path: "profesional_id",
+        select:
+          "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
+        populate: {
+          path: "creador",
+          select: "_id nombre apellido email cedula telefono direccionDefault",
+        },
+      })
+      .populate({ path: "servicios", select: "_id nombre precio link" })
+      .lean();
 
-if (!orden) {
-    return res.status(404).json({ message: "Factura no encontrada" });
-}
+    if (!orden) {
+      return res.status(404).json({ message: "Factura no encontrada" });
+    }
 
-const ordenRequest = [...orden].map((factura) => {
-    const { creador, ...restoOrden } = factura.profesional_id;
-    return {
+    const ordenRequest = [...orden].map((factura) => {
+      const { creador, ...restoOrden } = factura.profesional_id;
+      return {
         ...factura,
-        profesional_id: {...creador,...restoOrden}
-    };
-});
+        profesional_id: { ...creador, ...restoOrden },
+      };
+    });
 
-res.status(200).json(ordenRequest[0]);
+    res.status(200).json(ordenRequest[0]);
   } catch (err) {
     console.log(err);
     next(err);
@@ -127,7 +157,22 @@ res.status(200).json(ordenRequest[0]);
 
 const getOrdenesByUserId = async (req, res, next) => {
   try {
-    const ordenes = await Orden.find({ cliente_id: req.params.id }).populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } }).populate({ path: "factura", select: "-__v -orden -servicios" }).populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt" }).populate({ path: "servicios", select: "_id nombre precio link" });
+    const ordenes = await Orden.find({ cliente_id: req.params.id })
+      .populate({
+        path: "cliente_id",
+        select: "_id nombre apellido email cedula telefono direccionDefault",
+        populate: {
+          path: "direccionDefault",
+          select: "-createdAt -updateAt -cliente",
+        },
+      })
+      .populate({ path: "factura", select: "-__v -orden -servicios" })
+      .populate({
+        path: "profesional_id",
+        select:
+          "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt",
+      })
+      .populate({ path: "servicios", select: "_id nombre precio link" });
 
     if (ordenes.length === 0) {
       return res
@@ -156,7 +201,7 @@ const getOrdenesByStatus = async (req, res, next) => {
 };
 
 const updateOrden = async (req, res, next) => {
- /*  const {
+  /*  const {
     _id,
     cliente_email,
     cliente_nombre,
@@ -175,18 +220,32 @@ const updateOrden = async (req, res, next) => {
     estadoPago,
     payment_id
   } = req.body; */
-  
-  const {_id,estado_servicio} = req.body
+
+  const { _id, estado_servicio } = req.body;
 
   try {
-
-    const buscarorden = await Orden.findById(_id).populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } }).populate({ path: "factura", select: "-__v -orden -servicios" }).populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt" }).populate({ path: "servicios", select: "_id nombre precio link" });
+    const buscarorden = await Orden.findById(_id)
+      .populate({
+        path: "cliente_id",
+        select: "_id nombre apellido email cedula telefono direccionDefault",
+        populate: {
+          path: "direccionDefault",
+          select: "-createdAt -updateAt -cliente",
+        },
+      })
+      .populate({ path: "factura", select: "-__v -orden -servicios" })
+      .populate({
+        path: "profesional_id",
+        select:
+          "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt",
+      })
+      .populate({ path: "servicios", select: "_id nombre precio link" });
 
     if (!buscarorden) {
       return res.status(404).json({ message: "Orden not found" });
     }
 
-   /*  buscarorden.cliente_email = cliente_email;
+    /*  buscarorden.cliente_email = cliente_email;
     buscarorden.cliente_nombre = cliente_nombre;
     buscarorden.cliente_apellido = cliente_apellido;
     buscarorden.cliente_cedula = cliente_cedula;
