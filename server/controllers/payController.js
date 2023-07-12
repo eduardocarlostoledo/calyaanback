@@ -78,7 +78,7 @@ const payPreference = async (req, res) => {
       precioSubTotal,
       precioTotal,
       cupon,
-      fechaVenta:new Date(),
+      fecha_venta:new Date(),
       origen:"Mercado Pago",
       servicios:serviciosGuardar
     })
@@ -172,12 +172,14 @@ const feedbackSuccess = async (req, res) => {
    
     const factura = await Factura.findById(order.factura);
 
-console.log(factura)
 
     factura.payment_id = payment_id;
     factura.estadoPago = status;
     factura.payment_type = payment_type;
     factura.merchant_order_id = merchant_order_id;
+
+    console.log(factura)
+
 
     let disponibilidadProfesional = await Disponibilidad.findOne({
       fecha: order.cita_servicio,
@@ -188,7 +190,7 @@ console.log(factura)
     console.log(disponibilidadProfesional)
 
     const index = disponibilidadProfesional.horarios.findIndex(
-      (item) => item.hora === order.cita_servicio
+      (item) => item.hora === order.cita_servicioAja
     );
     if (index !== -1) {      
     
@@ -213,8 +215,8 @@ console.log(factura)
     await disponibilidadProfesional.save();
     await order.save();
     await factura.save()
-    await emailCompra(order);
-    await emailProfesional(order);
+    //await emailCompra(order);
+    //await emailProfesional(order);
 
     res.redirect(`${process.env.FRONT}/wordpress`);
   } catch (error) {
@@ -287,76 +289,95 @@ const payPreferenceManual = async (req, res) => {
     console.log("paypreferencemanual req body", req.body)
     
     const {
-      usuario,
-      serviciosIds,
       cliente_id,
-      cantidad,
-      precio,
-      direccion_Servicio,
-      adicional_direccion_Servicio,
-      ciudad_Servicio,
-      localidad_Servicio,
-      telefono_Servicio,
-      valorTotal,
+      direccion_servicio,
+      info_direccion_servicio,
+      localidad_serivicio,
+      telefono_servicio,
+      servicios,
       coupon
     } = req.body;
 
-    let usuarioNuevo = await Usuario.findOne({ _id: cliente_id });
+    let usuario = await Usuario.findOne({ _id: cliente_id });
 
-    if (!usuarioNuevo) {
+    if (!usuario) {
       const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
 
-    console.log(usuario)
+    const serviciosSearch = await Producto.find({ idWP: { $in: servicios }});
+    const serviciosGuardar = serviciosSearch.map((product)=>product._id)
 
-    const updateUsuario = await Usuario.findOneAndUpdate(
-      { _id: cliente_id },
-      {
-        $set: {
-          nombre: usuario?.cliente_nombre,
-          apellido: usuario?.cliente_apellido,
-          cedula: usuario?.cliente_cedula,
-          telefono: usuario?.cliente_telefono,
-        },
-      },
-      { new: true }
-    );
-
-    console.log("updateUsuario",updateUsuario)
-
-    const serviciosSearch = await Producto.findOne({
-      idWP: { $in: serviciosIds },
-    });
 
     const arrayPreference = {
-      cliente_id: updateUsuario._id,
-      cliente_email: updateUsuario.email,
-      cliente_nombre: updateUsuario.nombre,
-      cliente_apellido: updateUsuario.apellido,
-      cliente_cedula: updateUsuario.cedula,
-      cliente_telefono: updateUsuario.telefono,
-      servicio: serviciosSearch.nombre,
-      servicio_img: serviciosSearch.img,
-      cantidad: serviciosSearch.length,
-      precio: valorTotal ? valorTotal : Number(serviciosSearch.precio),
-      direccion_Servicio,
-      adicional_direccion_Servicio,
-      ciudad_Servicio,
-      localidad_Servicio,
-      telefono_Servicio: updateUsuario.telefono,
+      cliente_id: usuario._id,
+      servicios: serviciosGuardar,
+      direccion_servicio,
+      info_direccion_servicio,
+      localidad_serivicio,
+      telefono_servicio,
+      estado_servicio:"Agendar",
       coupon: coupon ? coupon : undefined,
     };
 
-    const newOrder = await new Orden(arrayPreference);
 
-    console.log(newOrder)
+    let precioNeto =  serviciosSearch.reduce((accum, product) => accum + product.precio, 0);
+
+    let precioSubTotal = precioNeto;
+
+    if(coupon){
+      const existeCupon = await Coupon.findOne({ codigo: coupon });
+
+      if (!existeCupon) {
+        const error = new Error("Cupón no válido");
+        return res.status(404).json({ msg: error.message });
+      }
+  
+      if (existeCupon.vencimiento && existeCupon.vencimiento < new Date()) {
+        return res.status(400).json({ msg: 'El cupón ha vencido' });
+      }
+  
+      if (existeCupon.reclamados.includes(req.usuario._id)) {
+        return res.status(400).json({ msg: 'El cupón ya ha sido reclamado' });
+      }
+  
+      if (existeCupon.tipoDescuento === 'porcentaje') {
+        precioSubTotal = valor - (valor * (existeCupon.descuento / 100));
+      } else {
+        precioSubTotal = valor - existeCupon.descuento;
+      }
+
+      if (precioSubTotal < 0) {
+        return res.status(400).json({ msg: 'No es posible redimir el cupón dado que es mayor al costo del servicio' });
+      }
+    }
+
+    let precioTotal = precioSubTotal;
+
+    const FacturaOrden = new Factura( {
+      precioNeto,
+      precioSubTotal,
+      precioTotal,
+      coupon: coupon ? coupon : undefined,
+      fechaVenta:new Date(),
+      origen:"Mercado Pago",
+      servicios:serviciosGuardar,
+    })
+
+    const factura = await FacturaOrden.save()
+
+    const newOrder = await new Orden({...arrayPreference,factura:factura._id});
+
+    const orden = await newOrder.save()
+
+    factura.orden = orden._id;
 
     await newOrder.save();
+    await factura.save();
 
-    usuarioNuevo.reservas = [...usuarioNuevo.reservas, newOrder._id];
+    usuario.reservas = [...usuario.reservas, newOrder._id];
 
-    await usuarioNuevo.save();
+    await usuario.save();
 
     res.send({ newOrder: newOrder._id });
   } catch (error) {

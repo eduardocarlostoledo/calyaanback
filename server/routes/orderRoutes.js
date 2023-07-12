@@ -4,10 +4,11 @@ import { createOrden, updateOrden, getAllOrden, getOrdenById, deleteOrden, getOr
 const orderRouter = express.Router();
 
 orderRouter.post("/orden", createOrden);
+orderRouter.delete("/orden/:id", deleteOrden);
+
 orderRouter.put("/updateorden", updateOrden);
 orderRouter.get("/orden", getAllOrden);
 orderRouter.get("/getordenbyid/:id", getOrdenById);
-orderRouter.delete("/orden/:id", deleteOrden);
 orderRouter.get("/ordenbyuserid/:id", getOrdenesByUserId); 
 
 export default orderRouter;

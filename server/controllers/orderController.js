@@ -2,13 +2,18 @@ import Orden from "../models/OrderModel.js";
 
 const getAllOrden = async (req, res, next) => {
   try {
-    const orden = await Orden.find().sort({ createdAt: -1 });
+    const orden = await Orden.find().sort({ createdAt: -1 })
+    .populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } })
+    .populate({ path: "factura", select: "-__v -orden -servicios" })
+    .populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt" })
+    .populate({ path: "servicios", select: "_id nombre precio link" });
     res.status(200).json(orden);
   } catch (err) {
     next(err);
   }
 };
 
+//No valido
 const createOrden = async (req, res, next) => {
   console.log("ENTRE A CREATEORDER CONTROLLER", req.body); //FLAG
   try {
@@ -20,6 +25,7 @@ const createOrden = async (req, res, next) => {
   }
 };
 
+//No valido
 const saveOrder = async (arrayPreference) => {
   const {
     cliente_id,
@@ -79,9 +85,10 @@ const saveOrder = async (arrayPreference) => {
   return newOrder;
 };
 
+
 const getOrdenById = async (req, res, next) => {
   try {
-    const orden = await Orden.findById(req.params.id);
+    const orden = await Orden.findById(req.params.id).populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } }).populate({ path: "factura", select: "-__v -orden -servicios" }).populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt" }).populate({ path: "servicios", select: "_id nombre precio link" });
     if (!orden) {
       return res.status(404).json({ message: "Orden no encontrada" });
     }
@@ -94,7 +101,8 @@ const getOrdenById = async (req, res, next) => {
 
 const getOrdenesByUserId = async (req, res, next) => {
   try {
-    const ordenes = await Orden.find({ cliente_id: req.params.id });
+    const ordenes = await Orden.find({ cliente_id: req.params.id }).populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } }).populate({ path: "factura", select: "-__v -orden -servicios" }).populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt" }).populate({ path: "servicios", select: "_id nombre precio link" });
+
     if (ordenes.length === 0) {
       return res
         .status(404)
@@ -122,7 +130,7 @@ const getOrdenesByStatus = async (req, res, next) => {
 };
 
 const updateOrden = async (req, res, next) => {
-  const {
+ /*  const {
     _id,
     cliente_email,
     cliente_nombre,
@@ -140,16 +148,19 @@ const updateOrden = async (req, res, next) => {
     numeroLiquidacion,
     estadoPago,
     payment_id
-  } = req.body;
+  } = req.body; */
+  
+  const {_id,estado_servicio} = req.body
 
   try {
-    const buscarorden = await Orden.findById(_id);
+
+    const buscarorden = await Orden.findById(_id).populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } }).populate({ path: "factura", select: "-__v -orden -servicios" }).populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt" }).populate({ path: "servicios", select: "_id nombre precio link" });
 
     if (!buscarorden) {
       return res.status(404).json({ message: "Orden not found" });
     }
 
-    buscarorden.cliente_email = cliente_email;
+   /*  buscarorden.cliente_email = cliente_email;
     buscarorden.cliente_nombre = cliente_nombre;
     buscarorden.cliente_apellido = cliente_apellido;
     buscarorden.cliente_cedula = cliente_cedula;
@@ -164,7 +175,9 @@ const updateOrden = async (req, res, next) => {
     buscarorden.estadoLiquidacion = estadoLiquidacion;
     buscarorden.numeroLiquidacion = numeroLiquidacion;
     buscarorden.estadoPago = estadoPago;
-    buscarorden.payment_id = payment_id;
+    buscarorden.payment_id = payment_id; */
+
+    buscarorden.estado_servicio = estado_servicio;
 
     const ordenActualizada = await buscarorden.save();
     console.log("ordenactualizada", ordenActualizada);

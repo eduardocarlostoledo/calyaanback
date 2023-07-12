@@ -40,7 +40,7 @@ const ordenSchema = mongoose.Schema({
   },
   estado_servicio: {
     type: String,
-    enum: ["Pendiente", "Completado", "Cancelado"],
+    enum: ["Pendiente", "Completado", "Cancelado", "Agendar"],
     default: "Pendiente"
   },
 },

@@ -8,9 +8,11 @@ const FacturaSchema = new mongoose.Schema({
     },
     payment_id: {
         type: String,
+        default: ""
     },
     payment_type: {
         type: String,
+        default: ""
     },
     merchant_order_id: {
         type: String,
@@ -43,6 +45,18 @@ const FacturaSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Orden",
     },
+    nro_factura:{
+        type:String,
+        default: ""
+    },
+    estado_facturacion:{
+        type: String,
+        enum: ["pendiente", "facturado"],
+        default: "pendiente"
+    },
+    fecha_venta:{
+        type:String
+    }
 });
 
 const Factura = mongoose.model('Factura', FacturaSchema);

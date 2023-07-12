@@ -18,7 +18,7 @@ const obtenerProducto = async (req, res) => {
 //solo para testing
 const getProducts = async (req, res, next) => {
   try {
-    const products = await Producto.find();
+    const products = await Producto.find().select("-createdAt -updatedAt");
     res.status(200).json(products);
   } catch (err) {
     next(err);

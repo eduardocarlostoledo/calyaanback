@@ -642,7 +642,7 @@ const crearDireccion = async (req, res) => {
 
 const editarDireccion = async (req, res) => {
   const { id } = req.params;
-console.log("REQ BODY EDITAR DIRECCION", req.body);
+  console.log("REQ BODY EDITAR DIRECCION", req.body);
   try {
     const nuevaDireccion = await Direccion.findByIdAndUpdate(
       id,
@@ -696,14 +696,14 @@ const obtenerHistorial = async (req, res) => {
   }
 };
 
-const obtenerUsuarioEmail= async (req, res) => {
+const obtenerUsuarioEmail = async (req, res) => {
   const { email } = req.body;
 
   try {
 
-    const usuario = await Usuario.findOne({ email: email }).populate("direccionDefault")
+    const usuario = await Usuario.findOne({ email: email }).select("_id email nombre apellido cedula telefono direccionDefault").populate("direccionDefault")
 
-    if(!usuario){
+    if (!usuario) {
       const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
@@ -786,17 +786,17 @@ const registrarUsuarioReserva = async (req, res) => {
 //         //     cliente: usuario._id,
 //         //     ...req.body,
 //         //   });
-      
+
 //         //   if (usuario.direcciones.length <= 0) {
 //         //     usuario.direccionDefault = nuevaDireccion._id;
 //         //   }
-      
+
 //         //   usuario.direcciones = [...usuario.direcciones, nuevaDireccion._id];
-      
+
 //         //   await nuevaDireccion.save();
 //         //   await usuario.save();
-          
-      
+
+
 //         //   res.json({
 //         //     msg: "Dirección creada correctamente",
 //         //     direccion: nuevaDireccion,
@@ -804,7 +804,7 @@ const registrarUsuarioReserva = async (req, res) => {
 //         // } catch (error) {
 //         //   console.log(error);
 //         // }
-        
+
 //     await usuario.save();
 
 //     res.json(usuario);

@@ -20,6 +20,8 @@ import orderRoutes from "./routes/orderRoutes.js";
 import mercadopago from "mercadopago";
 import sendWhatsapp from "./routes/sendWhatsapp.js";
 import couponRoutes from "./routes/couponRoutes.js";
+import invoiceRoutes from "./routes/invoiceRoutes.js";
+import settlementRoutes from "./routes/settlementRoutes.js";
 
 
 
@@ -84,6 +86,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/pay", payRouter);
 app.use("/api/ordenes", orderRoutes);
+app.use("/api/facturas", invoiceRoutes);
+app.use("/api/liquidaciones", settlementRoutes);
 app.use('/whatsapp',sendWhatsapp);
 
 
