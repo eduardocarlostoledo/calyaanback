@@ -5,9 +5,20 @@ const getAllOrden = async (req, res, next) => {
     const orden = await Orden.find().sort({ createdAt: -1 })
     .populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } })
     .populate({ path: "factura", select: "-__v -orden -servicios" })
-    .populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt" })
-    .populate({ path: "servicios", select: "_id nombre precio link" });
-    res.status(200).json(orden);
+    .populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales", populate: { path: "creador", select: "_id nombre apellido email cedula telefono direccionDefault" } })
+    .populate({ path: "servicios", select: "_id nombre precio link" })
+    .lean()
+
+
+const ordenes = orden.map((orden) => {
+    const { creador, ...restoOrden } = orden.profesional_id;
+    return {
+        ...orden,
+        profesional_id: {...creador,...restoOrden}
+    };
+});
+
+res.status(200).json(ordenes);
   } catch (err) {
     next(err);
   }
@@ -88,11 +99,26 @@ const saveOrder = async (arrayPreference) => {
 
 const getOrdenById = async (req, res, next) => {
   try {
-    const orden = await Orden.findById(req.params.id).populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } }).populate({ path: "factura", select: "-__v -orden -servicios" }).populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt" }).populate({ path: "servicios", select: "_id nombre precio link" });
-    if (!orden) {
-      return res.status(404).json({ message: "Orden no encontrada" });
-    }
-    res.status(200).json(orden);
+    const orden = await Orden.find().sort({ createdAt: -1 })
+    .populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } })
+    .populate({ path: "factura", select: "-__v -orden -servicios" })
+    .populate({ path: "profesional_id", select: "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales", populate: { path: "creador", select: "_id nombre apellido email cedula telefono direccionDefault" } })
+    .populate({ path: "servicios", select: "_id nombre precio link" })
+    .lean()
+
+if (!orden) {
+    return res.status(404).json({ message: "Factura no encontrada" });
+}
+
+const ordenRequest = [...orden].map((factura) => {
+    const { creador, ...restoOrden } = factura.profesional_id;
+    return {
+        ...factura,
+        profesional_id: {...creador,...restoOrden}
+    };
+});
+
+res.status(200).json(ordenRequest[0]);
   } catch (err) {
     console.log(err);
     next(err);
