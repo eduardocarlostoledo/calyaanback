@@ -189,8 +189,10 @@ const feedbackSuccess = async (req, res) => {
 
     console.log(disponibilidadProfesional)
 
+    //2 horas para atras
+    
     const index = disponibilidadProfesional.horarios.findIndex(
-      (item) => item.hora === order.cita_servicioAja
+      (item) => item.hora === order.cita_servicio
     );
     if (index !== -1) {      
     
@@ -308,7 +310,6 @@ const payPreferenceManual = async (req, res) => {
     const serviciosSearch = await Producto.find({ idWP: { $in: servicios }});
     const serviciosGuardar = serviciosSearch.map((product)=>product._id)
 
-
     const arrayPreference = {
       cliente_id: usuario._id,
       servicios: serviciosGuardar,
@@ -319,7 +320,6 @@ const payPreferenceManual = async (req, res) => {
       estado_servicio:"Agendar",
       coupon: coupon ? coupon : undefined,
     };
-
 
     let precioNeto =  serviciosSearch.reduce((accum, product) => accum + product.precio, 0);
 
@@ -395,6 +395,8 @@ const feedbackSuccessManual = async (req, res) => {
       merchant_order_id,
       external_reference,
     } = req.query;
+
+    console.log(req.query)
 
     const order = await Orden.findById(external_reference);
 

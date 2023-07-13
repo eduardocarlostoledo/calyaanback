@@ -22,15 +22,25 @@ const getAllOrden = async (req, res, next) => {
           select: "_id nombre apellido email cedula telefono direccionDefault",
         },
       })
-      .populate({ path: "servicios", select: "_id nombre precio link" })
+      .populate({ path: "servicios", select: "_id nombre precio link img" })
       .lean();
 
+
     const ordenes = orden.map((orden) => {
-      const { creador, ...restoOrden } = orden.profesional_id;
-      return {
-        ...orden,
-        profesional_id: { ...creador, ...restoOrden },
-      };
+
+      if (orden?.profesional_id) {
+        const { creador, ...restoOrden } = orden.profesional_id;
+        return {
+          ...orden,
+          profesional_id: { ...creador, ...restoOrden },
+        };
+      } else {
+        return {
+          ...orden,
+          profesional_id: null
+        }
+      }
+
     });
 
     res.status(200).json(ordenes);
@@ -113,7 +123,8 @@ const saveOrder = async (arrayPreference) => {
 
 const getOrdenById = async (req, res, next) => {
   try {
-    const orden = await Orden.find()
+    console.log(req.params.id)
+    const orden = await Orden.find({_id:req.params.id})
       .sort({ createdAt: -1 })
       .populate({
         path: "cliente_id",
@@ -133,20 +144,30 @@ const getOrdenById = async (req, res, next) => {
           select: "_id nombre apellido email cedula telefono direccionDefault",
         },
       })
-      .populate({ path: "servicios", select: "_id nombre precio link" })
+      .populate({ path: "servicios", select: "_id nombre precio link img" })
       .lean();
 
-    if (!orden) {
-      return res.status(404).json({ message: "Factura no encontrada" });
+    if (!orden || orden.length < 1) {
+      return res.status(404).json({ message: "Orden no encontrada" });
     }
 
     const ordenRequest = [...orden].map((factura) => {
-      const { creador, ...restoOrden } = factura.profesional_id;
-      return {
-        ...factura,
-        profesional_id: { ...creador, ...restoOrden },
-      };
+      if (orden.profesional_id) {
+        const { creador, ...restoOrden } = orden.profesional_id;
+        return {
+          ...orden,
+          profesional_id: { ...creador, ...restoOrden },
+        };
+      } else {
+        return {
+          ...factura,
+          profesional_id: null
+        }
+
+      }
+
     });
+
 
     res.status(200).json(ordenRequest[0]);
   } catch (err) {

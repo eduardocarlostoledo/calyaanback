@@ -31,11 +31,18 @@ invoiceRoutes.get("/invoice", async (req, res, next) => {
       .lean();
 
     const facturasConCliente = facturas.map((factura) => {
-      const { creador, ...restoOrden } = factura.profesional_id;
-      return {
-        ...factura,
-        profesional_id: { ...creador, ...restoOrden },
-      };
+      if (factura.profesional_id) {
+        const { creador, ...restoOrden } = factura.profesional_id;
+        return {
+          ...factura,
+          profesional_id: { ...creador, ...restoOrden },
+        };
+      }else {
+        return {
+          ...factura,
+          profesional_id: null
+        }
+      }
     });
 
     res.status(200).json(facturasConCliente);
@@ -74,11 +81,19 @@ invoiceRoutes.get("/getinvoicebyid/:id", async (req, res, next) => {
     }
 
     const facturasConCliente = [...facturas].map((factura) => {
-      const { creador, ...restoOrden } = factura.profesional_id;
-      return {
-        ...factura,
-        profesional_id: { ...creador, ...restoOrden },
-      };
+  
+      if (factura.profesional_id) {
+        const { creador, ...restoOrden } = factura.profesional_id;
+        return {
+          ...factura,
+          profesional_id: { ...creador, ...restoOrden },
+        };
+      }else {
+        return {
+          ...factura,
+          profesional_id: null
+        }
+      }
     });
 
     res.status(200).json(facturasConCliente[0]);
