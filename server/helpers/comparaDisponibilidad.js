@@ -1,23 +1,47 @@
+//nueva funcion para obtener el index de la disponibilidad de las horas anteriores y posteriores a la fecha y hora del servicio
+
 export const obtenerIndicesCumplenCondicion = (disponibilidadProfesional, fechaHoraServicio) => {
-    const { fecha, horarios } = disponibilidadProfesional;
-    const resultados = [];
-  
-    for (let i = 0; i < horarios.length; i++) {
-      const horario = horarios[i];
-      const fechaHora = new Date(`${fecha}T${horario.hora.split('-')[0]}:00`);
-  
-      if (fechaHora > fechaHoraServicio) {
-        const diferenciaMs = Math.abs(fechaHora - fechaHoraServicio);
-        const diferenciaHoras = Math.floor(diferenciaMs / (1000 * 60 * 60));
-  
-        if (diferenciaHoras < 3) {
-          resultados.push(i);
-        }
+  const { fecha, horarios } = disponibilidadProfesional;
+  const resultados = [];
+
+  for (let i = 0; i < horarios.length; i++) {
+    const horario = horarios[i];
+    const fechaHora = new Date(`${fecha}T${horario.hora.split('-')[0]}:00`);
+
+    if (fechaHora >= fechaHoraServicio) {
+      const diferenciaMs = Math.abs(fechaHora - fechaHoraServicio);
+      const diferenciaHoras = Math.floor(diferenciaMs / (1000 * 60 * 60));
+
+      if (diferenciaHoras <= 2) {
+        resultados.push(i);
       }
     }
+  }
+
+  return resultados;
+};
+
+//esta funcion calcula 2 horas posteriores a la fechaHoraServicio pero no dos horas antes.
+// export const obtenerIndicesCumplenCondicion = (disponibilidadProfesional, fechaHoraServicio) => {
+//     const { fecha, horarios } = disponibilidadProfesional;
+//     const resultados = [];
   
-    return resultados;
-  };
+//     for (let i = 0; i < horarios.length; i++) {
+//       const horario = horarios[i];
+//       const fechaHora = new Date(`${fecha}T${horario.hora.split('-')[0]}:00`);
+  
+//       if (fechaHora > fechaHoraServicio) {
+//         const diferenciaMs = Math.abs(fechaHora - fechaHoraServicio);
+//         const diferenciaHoras = Math.floor(diferenciaMs / (1000 * 60 * 60));
+  
+//         if (diferenciaHoras < 3) {
+//           resultados.push(i);
+//         }
+//       }
+//     }
+  
+//     return resultados;
+//   };
   
 // export const compararDiferenciaHoras = (indicesYFechas, fechaHoraServicio) => {
 //     const resultados = [];

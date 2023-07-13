@@ -1,15 +1,26 @@
 import mongoose from "mongoose";
 
-const settlementSchema = new mongoose.Schema({
-    profesional: {
+const LiquidacionSchema = new mongoose.Schema({
+  numeroLiquidacion: {
+    type: String,
+    required: true,    
+  },
+  estadoLiquidacion: {
+    type: String,
+    required: true,
+    enum: ["NoLiquidado", "Liquidado", "Error"],
+    default: "NoLiquidado",
+  },
+  profesional: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "PerfilProfesional",
     },
+
     ordenes: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Orden",
     }],
-    rangodefechas: [{
+    rangodefechasLiquidadas: [{
       fechaInicio: {
         type: Date,
         required: true
@@ -26,6 +37,6 @@ const settlementSchema = new mongoose.Schema({
   });
   
 
-const Settlement = mongoose.model('Settlement', settlementSchema);
+const Liquidacion = mongoose.model('Liquidacion', LiquidacionSchema);
 
-export default Settlement;
+export default Liquidacion;

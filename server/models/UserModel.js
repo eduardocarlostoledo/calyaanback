@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 
 const usuarioSchema = mongoose.Schema(
   {
@@ -117,12 +117,12 @@ usuarioSchema.pre("save", async function (next) {
   // si esta modificado el password que pase al siguiente Middleware
   if (!this.isModified("password")) next();
 
-  const sal = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, sal);
+  const sal = await bcryptjs.genSalt(10);
+  this.password = await bcryptjs.hash(this.password, sal);
 });
 
 usuarioSchema.methods.comprobarPassword = async function (passwordForm) {
-  return await bcrypt.compare(passwordForm, this.password);
+  return await bcryptjs.compare(passwordForm, this.password);
 };
 
 const Usuario = mongoose.model("Usuario", usuarioSchema);
