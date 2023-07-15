@@ -20,7 +20,7 @@ const LiquidacionSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Orden",
     }],
-    rangodefechasLiquidadas: [{
+    
       fechaInicio: {
         type: Date,
         required: true
@@ -28,11 +28,15 @@ const LiquidacionSchema = new mongoose.Schema({
       fechaFin: {
         type: Date,
         required: true
-      }
-    }],
+      },
+    
     totalLiquidacion: {
       type: Number,
       required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
     },
   });
   
