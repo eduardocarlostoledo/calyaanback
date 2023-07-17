@@ -2,6 +2,7 @@ import Usuario from "../models/UserModel.js";
 import PerfilProfesional from "../models/ProfessionalModel.js";
 import Disponibilidad from "../models/AvailableModel.js";
 import Reserva from "../models/BookingModel.js";
+import Orden from "../models/OrderModel.js";
 
 const actualizarProfesional = async (req, res) => {
   const { _id } = req.usuario;
@@ -496,11 +497,18 @@ const obtenerHistorial = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const profesional = await PerfilProfesional.findOne({ _id: id }).populate(
-      "reservas"
-    );
-
-    res.json(profesional.reservas);
+    const ordenes = await Orden.find({ profesional_id: id })
+    .populate({
+      path: "servicios",
+      select: "idWP nombre"
+    })
+    .populate({
+      path: "cliente_id",
+      select:"nombre"
+    })
+    .select("cliente_id cita_servicio hora_servicio servicios estado_servicio");
+    console.log(ordenes)
+    res.json(ordenes);
   } catch (error) {
     console.log(error);
   }

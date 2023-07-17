@@ -144,7 +144,7 @@ const getOrdenById = async (req, res, next) => {
           select: "_id nombre apellido email cedula telefono direccionDefault",
         },
       })
-      .populate({ path: "servicios", select: "_id nombre precio link img" })
+      .populate({ path: "servicios", select: "_id nombre precio link img cantidad" })
       .lean();
 
     if (!orden || orden.length < 1) {

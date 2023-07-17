@@ -16,6 +16,7 @@ const FacturaSchema = new mongoose.Schema({
   },
   merchant_order_id: {
     type: String,
+    default: "",
   },
   precioTotal: {
     type: Number,
@@ -33,6 +34,7 @@ const FacturaSchema = new mongoose.Schema({
   },
   descuentoFidelidad: {
     type: Number,
+    default: "0",
   },
   origen: {
     type: String,
@@ -56,7 +58,16 @@ const FacturaSchema = new mongoose.Schema({
   },
   fecha_venta: {
     type: String,
+    default: new Date()
   },
+  metodo_pago:{
+    type:String,
+    default:""
+  },
+  link_pago:{
+    type:String,
+    default:""
+  }
 });
 
 const Factura = mongoose.model("Factura", FacturaSchema);

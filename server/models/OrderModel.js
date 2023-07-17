@@ -31,6 +31,7 @@ const ordenSchema = mongoose.Schema({
   },
   ciudad_servicio: {
     type: String,
+    default: "Bogotá"
   },
   localidad_servicio: {
     type: String,

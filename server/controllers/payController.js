@@ -194,8 +194,13 @@ const feedbackSuccess = async (req, res) => {
     const index = disponibilidadProfesional.horarios.findIndex(
       (item) => item.hora === order.cita_servicio
     );
+
+      console.log(index)
+
     if (index !== -1) {      
     
+      console.log(index)
+
       disponibilidadProfesional.horarios[index].stock = false;  
 
       const fechaHoraServicio = new Date(`${order.cita_servicio}T${order.cita_servicio.split('-')[0]}:00`);      
@@ -293,11 +298,13 @@ const payPreferenceManual = async (req, res) => {
     const {
       cliente_id,
       direccion_servicio,
-      info_direccion_servicio,
-      localidad_serivicio,
+      adicional_direccion_servicio,
+      localidad_servicio,
       telefono_servicio,
       servicios,
-      coupon
+      coupon,
+      metodo_pago,
+      link_pago
     } = req.body;
 
     let usuario = await Usuario.findOne({ _id: cliente_id });
@@ -314,8 +321,10 @@ const payPreferenceManual = async (req, res) => {
       cliente_id: usuario._id,
       servicios: serviciosGuardar,
       direccion_servicio,
-      info_direccion_servicio,
-      localidad_serivicio,
+      adicional_direccion_servicio,
+      localidad_servicio,
+      cita_servicio:"",
+      hora_servicio:"",
       telefono_servicio,
       estado_servicio:"Agendar",
       coupon: coupon ? coupon : undefined,
@@ -362,6 +371,8 @@ const payPreferenceManual = async (req, res) => {
       fechaVenta:new Date(),
       origen:"Mercado Pago",
       servicios:serviciosGuardar,
+      link_pago,
+      metodo_pago
     })
 
     const factura = await FacturaOrden.save()
@@ -379,7 +390,7 @@ const payPreferenceManual = async (req, res) => {
 
     await usuario.save();
 
-    res.send({ newOrder: newOrder._id });
+    res.send({ factura: factura._id });
   } catch (error) {
     console.log(error);
     res.status(500).send("Internal Server Error");
@@ -398,25 +409,28 @@ const feedbackSuccessManual = async (req, res) => {
 
     console.log(req.query)
 
-    const order = await Orden.findById(external_reference);
+    const factura = await Factura.findById(external_reference);
+    const orden = await Orden.findById(factura.orden);
 
-    order.payment_id = payment_id;
-    order.estadoPago = status;
-    order.payment_type = payment_type;
-    order.merchant_order_id = merchant_order_id;
+    factura.payment_id = payment_id;
+    factura.estadoPago = status;
+    factura.payment_type = payment_type;
+    factura.merchant_order_id = merchant_order_id;
 
-    if(order.coupon){
+    if(factura.coupon){
 
-      const cuponRedimido = await Coupon.findOne({_id:order.coupon})
+      const cuponRedimido = await Coupon.findOne({_id:factura.coupon})
 
-      cuponRedimido.reclamados = [...cuponRedimido.reclamados, order.cliente_id];
+      cuponRedimido.reclamados = [...cuponRedimido.reclamados, orden.cliente_id];
  
       await cuponRedimido.save()
     }
 
-    await order.save();
+  
+    await orden.save();
+    await factura.save();
 
-    res.redirect(`${process.env.FRONT}/resumen/${external_reference}`);
+    res.redirect(`${process.env.FRONT}/resumen/${orden._id}`);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error in success route" });
@@ -511,10 +525,12 @@ console.log("updatePayOrder req body", req.body)
         .status(404)
         .json({ error: "No se encontró la disponibilidad del profesional" });
     }
+
     const index = disponibilidadProfesional.horarios.findIndex(
       (item) => item.hora === order.hora_servicio      
     );
     
+
     if (index !== -1) {
       disponibilidadProfesional.horarios[index].stock = false;  
 
@@ -608,6 +624,48 @@ const liberarReserva = async (req, res) => {
   }
 };
 
+const agendarOrden = async (req, res) => {
+  try {
+ 
+    const order = await Orden.findById(req.body.id)
+    
+    order.cita_servicio = req.body.cita_servicio
+    order.hora_servicio = req.body.hora_servicio
+
+    console.log(order.cita_servicio)
+
+    let disponibilidadProfesional = await Disponibilidad.findOne({
+      fecha: order.cita_servicio,
+      creador: req.body.profesional_id,
+    });
+    
+    //2 horas para atras
+    
+    const index = disponibilidadProfesional.horarios.findIndex(
+      (item) => item.hora === order.hora_servicio
+    );
+
+    if (index !== -1) {      
+    
+      disponibilidadProfesional.horarios[index].stock = false;  
+
+      const fechaHoraServicio = new Date(`${order.cita_servicio}T${order.cita_servicio.split('-')[0]}:00`);      
+      const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
+      indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });
+  
+    }
+
+
+    await disponibilidadProfesional.save();
+    await order.save()
+
+
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error al reprogramar la reserva");
+  }
+};
+
 
 export {
   payPreference,
@@ -621,6 +679,7 @@ export {
   feedbackFailureManual,
   updatePayOrder,
   liberarReserva,
+  agendarOrden
 };
 
 // import mercadopago from "mercadopago";

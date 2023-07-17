@@ -4,7 +4,7 @@ const obtenerProducto = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const producto = await Producto.findOne({ idWP: id });
+    const producto = await Producto.findOne({ idWP: id }).select("-createdAt -updatedAt");
 
     if (!producto) {
       return res.json("El producto no existe");
@@ -30,7 +30,7 @@ const getProductName = async (req, res, next) => {
   const {nombre} = req.params;
 
   try {
-    const product = await Producto.findOne({nombre});
+    const product = await Producto.findOne({nombre}).select("-createdAt -updatedAt");
     res.status(200).json(product);
   } catch (err) {
     next(err);

@@ -7,6 +7,7 @@ import Direccion from "../models/AddressModel.js";
 import Disponibilidad from "../models/AvailableModel.js";
 import Reserva from "../models/BookingModel.js";
 import generarIdReferido from "../helpers/generarIdReferido.js";
+import Orden from "../models/OrderModel.js";
 
 // REGISTRAR A LOS USUARIOS
 const registrar = async (req, res) => {
@@ -689,8 +690,22 @@ const eliminarDireccion = async (req, res) => {
 const obtenerHistorial = async (req, res) => {
   const { id } = req.params;
   try {
-    const usuario = await Usuario.findOne({ _id: id }).populate("reservas");
-    res.json(usuario.reservas);
+    const ordenes = await Orden.find({ cliente_id: id })
+    .populate({
+      path: "servicios",
+      select: "idWP nombre"
+    })
+    .populate({
+      path: "profesional_id",
+      populate: {
+        path: "creador",
+        select: "nombre"
+      },
+      select:"creador"
+    })
+    .select("profesional_id cita_servicio hora_servicio servicios estado_servicio");
+
+    res.json(ordenes);
   } catch (error) {
     console.log(error);
   }
