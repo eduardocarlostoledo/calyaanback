@@ -151,11 +151,14 @@ const getOrdenById = async (req, res, next) => {
       return res.status(404).json({ message: "Orden no encontrada" });
     }
 
+    console.log(orden)
+
     const ordenRequest = [...orden].map((factura) => {
-      if (orden.profesional_id) {
-        const { creador, ...restoOrden } = orden.profesional_id;
+
+      if (factura.profesional_id) {
+        const { creador, ...restoOrden } = factura.profesional_id;
         return {
-          ...orden,
+          ...factura,
           profesional_id: { ...creador, ...restoOrden },
         };
       } else {

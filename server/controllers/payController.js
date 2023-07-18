@@ -369,7 +369,7 @@ const payPreferenceManual = async (req, res) => {
       precioTotal,
       coupon: coupon ? coupon : undefined,
       fechaVenta:new Date(),
-      origen:"Mercado Pago",
+      origen:"",
       servicios:serviciosGuardar,
       link_pago,
       metodo_pago
@@ -390,7 +390,7 @@ const payPreferenceManual = async (req, res) => {
 
     await usuario.save();
 
-    res.send({ factura: factura._id });
+    res.send({ factura: factura._id,order:newOrder._id });
   } catch (error) {
     console.log(error);
     res.status(500).send("Internal Server Error");
@@ -410,12 +410,14 @@ const feedbackSuccessManual = async (req, res) => {
     console.log(req.query)
 
     const factura = await Factura.findById(external_reference);
+
     const orden = await Orden.findById(factura.orden);
 
     factura.payment_id = payment_id;
     factura.estadoPago = status;
     factura.payment_type = payment_type;
     factura.merchant_order_id = merchant_order_id;
+    factura.origen = "Mercado Pago";
 
     if(factura.coupon){
 
@@ -631,9 +633,7 @@ const agendarOrden = async (req, res) => {
     
     order.cita_servicio = req.body.cita_servicio
     order.hora_servicio = req.body.hora_servicio
-
-    console.log(order.cita_servicio)
-
+    
     let disponibilidadProfesional = await Disponibilidad.findOne({
       fecha: order.cita_servicio,
       creador: req.body.profesional_id,
@@ -655,17 +655,43 @@ const agendarOrden = async (req, res) => {
   
     }
 
+    console.log(req.body.profesional_id)
 
-    await disponibilidadProfesional.save();
+    order.profesional_id = req.body.profesional_id;
+    order.estado_servicio = "Pendiente";
+
     await order.save()
 
+    console.log(order)
+    await disponibilidadProfesional.save();
 
+    res.status(200).json({ msg: "Profesional agendada correctamente" });
   } catch (error) {
     console.error(error);
-    throw new Error("Error al reprogramar la reserva");
+    throw new Error("Error al porgramar");
   }
 };
 
+const actualizarPago = async (req, res) => {
+  try {
+ 
+    const order = await Orden.findById(req.body.id)
+
+
+
+    const factura = await Factura.findById(order.factura)
+
+    factura.payment_id = req.body.payment_id
+    factura.origen = req.body.origen
+
+    await factura.save()
+
+    res.status(200).json({ msg: "Factura actualizada correctamente" });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error al porgramar");
+  }
+};
 
 export {
   payPreference,
@@ -679,7 +705,8 @@ export {
   feedbackFailureManual,
   updatePayOrder,
   liberarReserva,
-  agendarOrden
+  agendarOrden,
+  actualizarPago
 };
 
 // import mercadopago from "mercadopago";
