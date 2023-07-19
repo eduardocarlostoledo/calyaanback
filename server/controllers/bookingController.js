@@ -72,7 +72,7 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
       select: "descripcion creador img",
       populate: {
         path: "creador",
-        select: "nombre apellido telefono",
+        select: "nombre apellido telefono img",
       },
     })
     .lean();
