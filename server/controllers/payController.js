@@ -194,19 +194,14 @@ const feedbackSuccess = async (req, res) => {
     const index = disponibilidadProfesional.horarios.findIndex(
       (item) => item.hora === order.cita_servicio
     );
-
-      console.log(index)
-
-    if (index !== -1) {      
     
       console.log(index)
 
-      disponibilidadProfesional.horarios[index].stock = false;  
-
+    if (index !== -1) {          
+      console.log(index)
       const fechaHoraServicio = new Date(`${order.cita_servicio}T${order.cita_servicio.split('-')[0]}:00`);      
       const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
-      indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });
-  
+      indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });  
     }
 
     if(order.coupon){
@@ -530,16 +525,12 @@ console.log("updatePayOrder req body", req.body)
 
     const index = disponibilidadProfesional.horarios.findIndex(
       (item) => item.hora === order.hora_servicio      
-    );
-    
+    );    
 
     if (index !== -1) {
-      disponibilidadProfesional.horarios[index].stock = false;  
-
       const fechaHoraServicio = new Date(`${order.dia_servicio}T${order.hora_servicio.split('-')[0]}:00`);      
       const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
-      indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });
-  
+      indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });  
     }
     console.log("orden almacenada actualizada con nueva reservacion");
     
@@ -585,17 +576,12 @@ const liberarReserva = async (req, res) => {
         throw new Error(
           "No se encontró la disponibilidad del profesional para la reprogramación"
         );
-      }
-
-      
+      }    
 
       const index = disponibilidadProfesional.horarios.findIndex(
-        (item) => item.hora === liberar_hora_servicio
-      );
+        (item) => item.hora === liberar_hora_servicio      );
 
       if (index !== -1) {
-        disponibilidadProfesional.horarios[index].stock = true;
-
       const fechaHoraServicio = new Date(`${liberar_dia_servicio}T${liberar_hora_servicio.split('-')[0]}:00`);      
       const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
       indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = true;  });
@@ -628,35 +614,38 @@ const liberarReserva = async (req, res) => {
 
 const agendarOrden = async (req, res) => {
   try {
+    console.log("agendarOrden req body", req.body)
+
+    const { cita_servicio, hora_servicio, profesional_id } = req.body;
  
-    const order = await Orden.findById(req.body.id)
-    
-    order.cita_servicio = req.body.cita_servicio
-    order.hora_servicio = req.body.hora_servicio
-    
+    const order = await Orden.findById(req.body.id)     
+
+    order.cita_servicio = cita_servicio
+    order.hora_servicio = hora_servicio       
+
     let disponibilidadProfesional = await Disponibilidad.findOne({
-      fecha: order.cita_servicio,
-      creador: req.body.profesional_id,
-    });
-    
+      fecha: cita_servicio,
+      creador: profesional_id,
+    });    
     //2 horas para atras
     
     const index = disponibilidadProfesional.horarios.findIndex(
-      (item) => item.hora === order.hora_servicio
+      (item) => item.hora === hora_servicio
     );
 
     if (index !== -1) {      
     
-      disponibilidadProfesional.horarios[index].stock = false;  
-
-      const fechaHoraServicio = new Date(`${order.cita_servicio}T${order.cita_servicio.split('-')[0]}:00`);      
+      const fechaHoraServicio = new Date(`${cita_servicio}T${hora_servicio.split('-')[0]}:00`);      
       const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
+      console.log("indicesCumplenCondicion Agendar Orden",indicesCumplenCondicion)
       indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false;  });
   
     }
 
     console.log(req.body.profesional_id)
 
+    order.cita_servicio = cita_servicio
+    order.hora_servicio = hora_servicio
     order.profesional_id = req.body.profesional_id;
     order.estado_servicio = "Pendiente";
 
@@ -668,7 +657,7 @@ const agendarOrden = async (req, res) => {
     res.status(200).json({ msg: "Profesional agendada correctamente" });
   } catch (error) {
     console.error(error);
-    throw new Error("Error al porgramar");
+    throw new Error("Error al programar");
   }
 };
 
