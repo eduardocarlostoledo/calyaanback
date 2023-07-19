@@ -29,7 +29,8 @@ import {
   editarDireccion,
   GetPerfil,
   obtenerUsuarioEmail,
-  registrarUsuarioReserva
+  registrarUsuarioReserva,
+  getUser
 } from "../controllers/userController.js";
 
 // Instanciando el router de express
@@ -87,6 +88,9 @@ usuarioRoutes.delete("/direccion/:id", checkAuth, eliminarDireccion);
 
 //acceder al perfil
 usuarioRoutes.get("/perfil", checkAuth, perfil);
+
+// Obtener Usuario
+usuarioRoutes.get("/obtener-usuario", checkAuth, getUser);
 
 //acceder al perfil
 usuarioRoutes.get("/perfil/:id", checkAuth, GetPerfil);
