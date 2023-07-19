@@ -2,7 +2,6 @@ import Liquidacion from "../models/LiquidacionModel.js";
 import Orden from "../models/OrderModel.js";
 import PerfilProfesional from "../models/ProfessionalModel.js";
 
-
 const createSettlement = async (req, res, next) => {
   try {
     const {
@@ -12,39 +11,60 @@ const createSettlement = async (req, res, next) => {
       ordenes,
       fechaInicio,
       fechaFin,
-      totalLiquidacion
+      totalLiquidacion,
+      porcentajeProfesional,
+      porcentajeCaalyan,
     } = req.body;
-
-    if (!numeroLiquidacion || !estadoLiquidacion || !profesional || !ordenes || !fechaInicio || !fechaFin || !totalLiquidacion) {
+    console.log(req.body);
+    if (
+      !numeroLiquidacion ||
+      !estadoLiquidacion ||
+      !profesional ||
+      !ordenes ||
+      !fechaInicio ||
+      !fechaFin ||
+      !totalLiquidacion ||
+      !porcentajeProfesional ||
+      !porcentajeCaalyan
+    ) {
       res.status(400);
-      throw new Error("Faltan datos para almacenar la liquidacion o existen datos no validos");
+      throw new Error(
+        "Faltan datos para almacenar la liquidacion o existen datos no validos"
+      );
     }
- // Buscar documentos correspondientes a los _id de ordenes en el modelo Ordenes
- const ordenesIds = await Promise.all(ordenes.map(async (ordenId) => {
-    const orden = await Orden.findById(ordenId);
-    if (!orden) {
+    // Buscar documentos correspondientes a los _id de ordenes en el modelo Ordenes
+    const ordenesIds = await Promise.all(
+      ordenes.map(async (ordenId) => {
+        const orden = await Orden.findById(ordenId);
+        if (!orden) {
+          res.status(400);
+          throw new Error(`No se encontró la orden con el ID: ${ordenId}`);
+        }
+        await orden.save({ ...orden, liquidado: true });
+        return orden._id;
+      })
+    );
+
+    // Buscar el documento correspondiente al ID almacenado en la propiedad profesional
+    const perfilProfesional = await PerfilProfesional.findById(profesional._id);
+    if (!perfilProfesional) {
       res.status(400);
-      throw new Error(`No se encontró la orden con el ID: ${ordenId}`);
+      throw new Error(
+        `No se encontró el perfil profesional con el ID: ${profesional._id}`
+      );
     }
-    return orden._id;
-  }));
 
-  // Buscar el documento correspondiente al ID almacenado en la propiedad profesional
-  const perfilProfesional = await PerfilProfesional.findById(profesional);
-  if (!perfilProfesional) {
-    res.status(400);
-    throw new Error(`No se encontró el perfil profesional con el ID: ${profesional}`);
-  }
-
-  const liquidacion = new Liquidacion({
-    numeroLiquidacion,
-    estadoLiquidacion,
-    profesional: perfilProfesional._id, // Almacenar el ObjectId del profesional en lugar del _id
-    ordenes: ordenesIds, // Almacenar los ObjectId de las ordenes
-    fechaInicio,
-    fechaFin,
-    totalLiquidacion
-  });
+    const liquidacion = new Liquidacion({
+      numeroLiquidacion,
+      estadoLiquidacion,
+      profesional: perfilProfesional._id, // Almacenar el ObjectId del profesional en lugar del _id
+      ordenes: ordenesIds, // Almacenar los ObjectId de las ordenes
+      fechaInicio,
+      fechaFin,
+      totalLiquidacion,
+      porcentajeProfesional,
+      porcentajeCaalyan,
+    });
 
     const createdLiquidacion = await liquidacion.save();
     res.status(201).json(createdLiquidacion);
@@ -65,40 +85,59 @@ const updateSettlement = async (req, res, next) => {
       ordenes,
       fechaInicio,
       fechaFin,
-      totalLiquidacion
+      totalLiquidacion,
+      porcentajeProfesional,
+      porcentajeCaalyan,
     } = req.body;
 
-    if (!_id || !numeroLiquidacion || !estadoLiquidacion || !profesional || !ordenes || !fechaInicio ||
-        !fechaFin || !totalLiquidacion) {
+    if (
+      !_id ||
+      !numeroLiquidacion ||
+      !estadoLiquidacion ||
+      !profesional ||
+      !ordenes ||
+      !fechaInicio ||
+      !fechaFin ||
+      !totalLiquidacion ||
+      !porcentajeProfesional ||
+      !porcentajeCaalyan
+    ) {
       res.status(400);
-      throw new Error("Faltan datos para modificar la liquidacion o existen datos no validos");
+      throw new Error(
+        "Faltan datos para modificar la liquidacion o existen datos no validos"
+      );
     }
 
     // Buscar coincidencias dentro del modelo Ordenes y almacenar sus ObjectId
-    const ordenesIds = await Promise.all(ordenes.map(async (ordenId) => {
-      const orden = await Orden.findById(ordenId);
-      if (!orden) {
-        res.status(400);
-        throw new Error(`No se encontró la orden con el ID: ${ordenId}`);
-      }
-      return orden._id;
-    }));
+    const ordenesIds = await Promise.all(
+      ordenes.map(async (ordenId) => {
+        const orden = await Orden.findById(ordenId);
+        if (!orden) {
+          res.status(400);
+          throw new Error(`No se encontró la orden con el ID: ${ordenId}`);
+        }
+        return orden._id;
+      })
+    );
 
     // Buscar coincidencias dentro del modelo PerfilProfesional y almacenar su ObjectId
     const perfilProfesional = await PerfilProfesional.findById(profesional);
     if (!perfilProfesional) {
       res.status(400);
-      throw new Error(`No se encontró el perfil profesional con el ID: ${profesional}`);
+      throw new Error(
+        `No se encontró el perfil profesional con el ID: ${profesional}`
+      );
     }
 
     const liquidacion = await Liquidacion.findById(_id)
       .populate({
         path: "profesional",
-        select: "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
+        select:
+          "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
         populate: {
           path: "creador",
-          select: "_id nombre apellido email cedula telefono direccionDefault"
-        }
+          select: "_id nombre apellido email cedula telefono direccionDefault",
+        },
       })
       .populate({ path: "ordenes", select: "-__v -orden -servicios" });
 
@@ -114,6 +153,8 @@ const updateSettlement = async (req, res, next) => {
     liquidacion.fechaInicio = fechaInicio;
     liquidacion.fechaFin = fechaFin;
     liquidacion.totalLiquidacion = totalLiquidacion;
+    liquidacion.porcentajeProfesional = porcentajeProfesional;
+    liquidacion.porcentajeCaalyan = porcentajeCaalyan;
 
     const updatedLiquidacion = await liquidacion.save();
     res.status(200).json(updatedLiquidacion);
@@ -122,18 +163,18 @@ const updateSettlement = async (req, res, next) => {
   }
 };
 
-
 const getAllSettlement = async (req, res, next) => {
   try {
     const liquidaciones = await Liquidacion.find()
       .sort({ createdAt: -1 })
       .populate({
         path: "profesional",
-        select: "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
+        select:
+          "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
         populate: {
           path: "creador",
-          select: "_id nombre apellido email cedula telefono direccionDefault"
-        }
+          select: "_id nombre apellido email cedula telefono direccionDefault",
+        },
       })
       .populate({ path: "ordenes", select: "-__v -orden -servicios" })
       .lean();
@@ -145,31 +186,31 @@ const getAllSettlement = async (req, res, next) => {
 };
 
 const getSettlementById = async (req, res, next) => {
-    try {
-      const liquidacion = await Liquidacion.findById(req.params.id)
+  try {
+    const liquidacion = await Liquidacion.findById(req.params.id)
       .sort({ createdAt: -1 })
-        .populate({
-          path: "profesional",
-          select: "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
-          populate: {
-            path: "creador",
-            select: "_id nombre apellido email cedula telefono direccionDefault"
-          }
-        })
-        .populate({ path: "ordenes", select: "-__v -orden -servicios" })
-        .lean();
-  
-      if (!liquidacion) {
-        res.status(404).json({ message: "No se encontró la liquidación" });
-        return;
-      }
-  
-      res.status(200).json(liquidacion);
-    } catch (err) {
-      next(err);
+      .populate({
+        path: "profesional",
+        select:
+          "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
+        populate: {
+          path: "creador",
+          select: "_id nombre apellido email cedula telefono direccionDefault",
+        },
+      })
+      .populate({ path: "ordenes", select: "-__v -orden -servicios" })
+      .lean();
+
+    if (!liquidacion) {
+      res.status(404).json({ message: "No se encontró la liquidación" });
+      return;
     }
-  };
-  
+
+    res.status(200).json(liquidacion);
+  } catch (err) {
+    next(err);
+  }
+};
 
 const deleteSettlement = async (req, res, next) => {
   try {
@@ -188,39 +229,42 @@ const deleteSettlement = async (req, res, next) => {
 };
 
 const getSettlementesByUserId = async (req, res, next) => {
-    
-    try {
-        console.log("getSettlementesByUserId", req.params.id)
-      const liquidaciones = await Liquidacion.find({ profesional: req.params.id })
+  try {
+    console.log("getSettlementesByUserId", req.params.id);
+    const liquidaciones = await Liquidacion.find({ profesional: req.params.id })
       .sort({ createdAt: -1 })
-        .populate({
-          path: "profesional",
-          select: "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
-          populate: {
-            path: "creador",
-            select: "_id nombre apellido email cedula telefono direccionDefault"
-          }
-        })
-        .populate({ path: "ordenes", select: "-__v -orden -servicios" })
-        .lean();
-  
-      if (!liquidaciones) {
-        res.status(404);
-        throw new Error("No se encontraron liquidaciones para el usuario");
-      }
-  
-      res.status(200).json(liquidaciones);
-    } catch (err) {
-      if (err.kind === "ObjectId") {
-        res.status(404);
-        throw new Error("Usuario no encontrado");
-      }
-      next(err);
-    }
-  };
-  
+      .populate({
+        path: "profesional",
+        select:
+          "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
+        populate: {
+          path: "creador",
+          select: "_id nombre apellido email cedula telefono direccionDefault",
+        },
+      })
+      .populate({ path: "ordenes", select: "-__v -orden -servicios" })
+      .lean();
 
-export {
-    createSettlement, updateSettlement, getAllSettlement, getSettlementById, deleteSettlement, getSettlementesByUserId
+    if (!liquidaciones) {
+      res.status(404);
+      throw new Error("No se encontraron liquidaciones para el usuario");
+    }
+
+    res.status(200).json(liquidaciones);
+  } catch (err) {
+    if (err.kind === "ObjectId") {
+      res.status(404);
+      throw new Error("Usuario no encontrado");
+    }
+    next(err);
+  }
 };
 
+export {
+  createSettlement,
+  updateSettlement,
+  getAllSettlement,
+  getSettlementById,
+  deleteSettlement,
+  getSettlementesByUserId,
+};

@@ -37,11 +37,11 @@ invoiceRoutes.get("/invoice", async (req, res, next) => {
           ...factura,
           profesional_id: { ...creador, ...restoOrden },
         };
-      }else {
+      } else {
         return {
           ...factura,
-          profesional_id: null
-        }
+          profesional_id: null,
+        };
       }
     });
 
@@ -81,18 +81,17 @@ invoiceRoutes.get("/getinvoicebyid/:id", async (req, res, next) => {
     }
 
     const facturasConCliente = [...facturas].map((factura) => {
-  
       if (factura.profesional_id) {
         const { creador, ...restoOrden } = factura.profesional_id;
         return {
           ...factura,
           profesional_id: { ...creador, ...restoOrden },
         };
-      }else {
+      } else {
         return {
           ...factura,
-          profesional_id: null
-        }
+          profesional_id: null,
+        };
       }
     });
 
@@ -111,6 +110,7 @@ invoiceRoutes.put("/updateinvoice", async (req, res, next) => {
     estado_facturacion,
     origen,
   } = req.body;
+  console.log(req.body, "body factura");
 
   try {
     const facturas = await Factura.findById(_id);
