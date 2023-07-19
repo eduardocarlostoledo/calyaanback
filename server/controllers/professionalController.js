@@ -96,9 +96,11 @@ const obtenerDisponibilidadTotal = async (req, res) => {
     const profesionales = await Disponibilidad.find()
       .populate({
         path: "creador",
-        populate: { path: "creador" },
+        select:"descripcion _id especialidad localidadesLaborales creador",
+        populate: { path: "creador",select:"_id nombre apellido telefono"},
       })
       .sort({ fecha: 1 })
+      .select("-id -createdAt -updatedAt")
       .lean();
 
     const fechaActual = new Date();
@@ -129,6 +131,8 @@ const obtenerDisponibilidadTotal = async (req, res) => {
         disponibilidad: horariosDisponibles,
       };
     });
+
+    console.log(disponibilidadTotal)
 
     return res.status(200).json(disponibilidadTotal);
   } catch (error) {

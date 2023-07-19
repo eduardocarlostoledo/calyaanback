@@ -22,10 +22,11 @@ import product from "../routes/productsRoutes.js";
 // let arrayPreference = {};
 const payPreference = async (req, res) => {
   
-
   try {
 
     const { cliente_id, profesional_id, servicios,cupon } = req.body
+
+    console.log(servicios)
 
     const cliente = await Usuario.findOne({
       _id: cliente_id,
@@ -97,8 +98,6 @@ const payPreference = async (req, res) => {
     
     await factura.save()
 
-console.log(factura)
-
     res.send({ orden,factura });
   } catch (error) {
     console.log(error);
@@ -108,53 +107,58 @@ console.log(factura)
 
 const create_Preference = async (req, res) => {
 
-  const factura = await Factura.findById(req.params.orderId).populate("servicios");
+  try {
+    const factura = await Factura.findById(req.params.orderId).populate("servicios");
 
-  let items = factura.servicios.map((producto) => {
-    return {
-      title: producto.nombre,
-      unit_price: Number(producto.precio),
-      quantity: 1
-    };
-  });
-  
-  console.log(items)
-
-  let preference = {
-    items,
-    back_urls: {
-      success: `${process.env.BACK}/api/pay/feedback/success`,
-      failure: `${process.env.BACK}/api/pay/feedback/failure`,
-      pending: `${process.env.BACK}/api/pay/feedback/pending`,
-    },
-    auto_return: "approved",
-    payment_methods: {
-      excluded_payment_types: [
-        {
-          id: "ticket",
-        },
-        {
-          id: "bank_transfer",
-        },
-      ],
-    },
-    statement_descriptor: "CALYAAN COLOMBIA",
-    external_reference: `${factura.orden}`,
-  };
-
-  mercadopago.preferences
-    .create(preference)
-    .then(function (response) {
-      console.log(response)
-      res.send({
-        id: response.body.id,
-        data: response.body.items,
-      });
-    })
-    .catch(function (error) {
-      console.log(error);
+    let items = factura.servicios.map((producto) => {
+      return {
+        title: producto.nombre,
+        unit_price: Number(producto.precio),
+        quantity: 1
+      };
     });
+    
+    console.log(items)
+
+    let preference = {
+      items: items,
+      back_urls: {
+        success: `${process.env.BACK}/api/pay/feedback/success`,
+        failure: `${process.env.BACK}/api/pay/feedback/failure`,
+        pending: `${process.env.BACK}/api/pay/feedback/pending`,
+      },
+      auto_return: "approved",
+      payment_methods: {
+        excluded_payment_types: [
+          {
+            id: "ticket",
+          },
+          {
+            id: "bank_transfer",
+          },
+        ],
+      },
+      statement_descriptor: "CALYAAN COLOMBIA",
+      external_reference: `${factura.orden}`,
+    };
+  
+    mercadopago.preferences
+      .create(preference)
+      .then(function (response) {
+        console.log(response);
+        res.send({
+          id: response.body.id,
+          data: response.body.items,
+        });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  } catch (err) {
+    console.log(err);
+  }
 };
+
 const feedbackSuccess = async (req, res) => {
   try {
     const {

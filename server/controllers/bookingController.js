@@ -62,16 +62,22 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
 
   try {
     const profesionales = await Disponibilidad.find({ fecha })
-      .populate({
+    .populate({
+      path: "creador",
+      match: {
+        especialidad: { $in: especialidad },
+        localidadesLaborales: { $in: [localidad] },
+        creador: { $exists: true },
+      },
+      select: "descripcion creador img",
+      populate: {
         path: "creador",
-        match: {
-          especialidad: { $in: especialidad },
-          localidadesLaborales: { $in: [localidad] },
-          creador: { $exists: true },
-        },
-        populate: { path: "disponibilidad", path: "creador" },
-      })
-      .lean();
+        select: "nombre apellido telefono",
+      },
+    })
+    .lean();
+
+      console.log(profesionales)
 
     let buscarPorfesionales = profesionales.filter(
       (profesionalState) => profesionalState.creador !== null
@@ -82,6 +88,8 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
         msg: "No encontramos profesionales con disponibilidad para la fecha indicada intenta nuevamente",
       });
     }
+
+    console.log(buscarPorfesionales)
 
     return res.status(200).json(buscarPorfesionales);
   } catch (error) {
