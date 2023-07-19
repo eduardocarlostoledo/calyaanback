@@ -302,6 +302,8 @@ const payPreferenceManual = async (req, res) => {
       link_pago
     } = req.body;
 
+    console.log(req.body)
+
     let usuario = await Usuario.findOne({ _id: cliente_id });
 
     if (!usuario) {
@@ -665,8 +667,6 @@ const actualizarPago = async (req, res) => {
   try {
  
     const order = await Orden.findById(req.body.id)
-
-
 
     const factura = await Factura.findById(order.factura)
 
