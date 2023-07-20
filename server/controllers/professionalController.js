@@ -503,6 +503,10 @@ const obtenerHistorial = async (req, res) => {
   try {
     const ordenes = await Orden.find({ profesional_id: id })
     .populate({
+      path: 'factura', 
+      match: { estado_pago: 'approved' } 
+    })
+    .populate({
       path: "servicios",
       select: "idWP nombre"
     })
@@ -510,7 +514,7 @@ const obtenerHistorial = async (req, res) => {
       path: "cliente_id",
       select:"nombre"
     })
-    .select("cliente_id cita_servicio hora_servicio servicios estado_servicio");
+    .select("cliente_id cita_servicio hora_servicio servicios estado_servicio factura");
     console.log(ordenes)
     res.json(ordenes);
   } catch (error) {
