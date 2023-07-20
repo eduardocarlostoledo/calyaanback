@@ -509,14 +509,14 @@ const feedbackPendingManual = async (req, res) => {
       external_reference,
     } = req.query;
 
-    const order = await Orden.findById(external_reference);
+    const factura = await Factura.findById(external_reference);
 
-    order.payment_id = payment_id;
-    order.estadoPago = status;
-    order.payment_type = payment_type;
-    order.merchant_order_id = merchant_order_id;
+    factura.payment_id = payment_id;
+    factura.estadoPago = status;
+    factura.payment_type = payment_type;
+    factura.merchant_order_id = merchant_order_id;
 
-    await order.save();
+    await factura.save();
 
     res.redirect(`${process.env.FRONT}/resumen/${external_reference}`);
   } catch (error) {
@@ -535,15 +535,15 @@ const feedbackFailureManual = async (req, res) => {
       external_reference,
     } = req.query;
 
-    const order = await Orden.findById(external_reference);
+    const factura = await Factura.findById(external_reference);
 
     if (status === "null") {
-      order.estadoPago = "rejected";
-      order.payment_id = payment_id;
-      order.payment_type = payment_type;
-      order.merchant_order_id = merchant_order_id;
+      factura.estadoPago = "rejected";
+      factura.payment_id = payment_id;
+      factura.payment_type = payment_type;
+      factura.merchant_order_id = merchant_order_id;
 
-      await order.save();
+      await factura.save();
 
       res.redirect(`${process.env.FRONT}/servicios`);
     }
