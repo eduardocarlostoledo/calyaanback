@@ -231,10 +231,10 @@ const feedbackSuccess = async (req, res) => {
     await emailProfesional({
       cliente_nombre: order.cliente_id.nombre,
       cliente_apellido: order.cliente_id.apellido,
-      cliente_cedula:order.cliente_id.cedula,
-      profesional_email:order.profesional_id.creador.email,
+      cliente_cedula: order.cliente_id.cedula,
+      profesional_email: order.profesional_id.creador.email,
       profesional_nombre: order.profesional_id.creador.nombre,
-      profesional_telefono:order.profesional_id.creador.telefono,
+      profesional_telefono: order.profesional_id.creador.telefono,
       servicio: order.servicios[0].nombre,
       dia_servicio: order.cita_servicio,
       hora_servicio: order.hora_servicio,
@@ -267,7 +267,7 @@ const feedbackPending = async (req, res) => {
       .populate({ path: "cliente_id" })
       .populate({ path: "servicios" })
       .populate({ path: "factura" });
-      
+
     const factura = await Factura.findById(order.factura);
 
     factura.payment_id = payment_id;
@@ -296,10 +296,10 @@ const feedbackPending = async (req, res) => {
     await emailProfesional({
       cliente_nombre: order.cliente_id.nombre,
       cliente_apellido: order.cliente_id.apellido,
-      cliente_cedula:order.cliente_id.cedula,
-      profesional_email:order.profesional_id.creador.email,
+      cliente_cedula: order.cliente_id.cedula,
+      profesional_email: order.profesional_id.creador.email,
       profesional_nombre: order.profesional_id.creador.nombre,
-      profesional_telefono:order.profesional_id.creador.telefono,
+      profesional_telefono: order.profesional_id.creador.telefono,
       servicio: order.servicios[0].nombre,
       dia_servicio: order.cita_servicio,
       hora_servicio: order.hora_servicio,
@@ -328,7 +328,7 @@ const feedbackFailure = async (req, res) => {
     } = req.query;
 
     const order = await Orden.findById(external_reference)
-      
+
     const factura = await Factura.findById(order.factura);
 
     if (status === "null") {
@@ -557,19 +557,15 @@ const updatePayOrder = async (req, res) => {
 
   console.log("updatePayOrder req body", req.body)
   try {
-    const { _id } = req.body;
+    const { id } = req.body;
 
-    if (!_id) {
+    if (!id) {
       return res
         .status(400)
         .json({ error: "Se requiere un valor válido para _id" });
     }
 
-    const order = await Orden.findOneAndUpdate(
-      { _id },
-      { ...req.body },
-      { new: true }
-    );
+    const order = await Orden.findById(id)
 
     if (!order) {
       return res
@@ -577,36 +573,16 @@ const updatePayOrder = async (req, res) => {
         .json({ error: "No se encontró la orden especificada" });
     }
 
-    let disponibilidadProfesional = await Disponibilidad.findOne({
-      fecha: order.dia_servicio,
-      creador: order.profesional_id._id,
-    });
+    order.cita_servicio = "";
+    order.hora_servicio = "";
+    order.profesional_id = null;
 
-    if (!disponibilidadProfesional) {
-      return res
-        .status(404)
-        .json({ error: "No se encontró la disponibilidad del profesional" });
-    }
-
-    const index = disponibilidadProfesional.horarios.findIndex(
-      (item) => item.hora === order.hora_servicio
-    );
-
-    if (index !== -1) {
-      const fechaHoraServicio = new Date(`${order.dia_servicio}T${order.hora_servicio.split('-')[0]}:00`);
-      const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
-      indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false; });
-    }
-    console.log("orden almacenada actualizada con nueva reservacion");
-
-
-    await disponibilidadProfesional.save();
     await order.save();
 
-    await emailCompra(order);
-    await emailProfesional(order);
+    /*     await emailCompra(order);
+        await emailProfesional(order); */
 
-    res.status(200).json({ msg: "Orden agendada correctamente" });
+    res.status(200).json({ msg: "Orden actualizada correctamente" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error en el servidor" });
@@ -618,8 +594,7 @@ const liberarReserva = async (req, res) => {
   try {
     const {
       _id,
-      cliente_nombre,
-      cliente_apellido,
+      cliente_id,
       liberar_hora_servicio,
       liberar_dia_servicio,
       liberar_profesional_id,
@@ -661,8 +636,8 @@ const liberarReserva = async (req, res) => {
 
       await emailCancelacionProfesional({
         _id,
-        cliente_nombre,
-        cliente_apellido,
+        cliente_nombre: cliente_id.nombre,
+        cliente_apellido: cliente_id.apellido,
         liberar_hora_servicio,
         liberar_dia_servicio,
         liberar_profesional_id,
@@ -684,6 +659,18 @@ const agendarOrden = async (req, res) => {
     const { cita_servicio, hora_servicio, profesional_id } = req.body;
 
     const order = await Orden.findById(req.body.id)
+      .populate({
+        path: "profesional_id",
+        select:
+          "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
+        populate: {
+          path: "creador",
+          select: "_id nombre apellido email cedula telefono direccionDefault",
+        },
+      })
+      .populate({ path: "cliente_id" })
+      .populate({ path: "servicios" })
+      .populate({ path: "factura" });
 
     order.cita_servicio = cita_servicio
     order.hora_servicio = hora_servicio
@@ -691,7 +678,11 @@ const agendarOrden = async (req, res) => {
     let disponibilidadProfesional = await Disponibilidad.findOne({
       fecha: cita_servicio,
       creador: profesional_id,
-    });
+    }).populate({
+      path: "creador",
+      populate: { path: "creador" }
+    })
+
     //2 horas para atras
 
     const index = disponibilidadProfesional.horarios.findIndex(
@@ -714,10 +705,45 @@ const agendarOrden = async (req, res) => {
     order.profesional_id = req.body.profesional_id;
     order.estado_servicio = "Pendiente";
 
+
     await order.save()
+    await disponibilidadProfesional.save();
 
     console.log(order)
-    await disponibilidadProfesional.save();
+
+
+    await emailCompra({
+      cliente_email: order.cliente_id.email,
+      cliente_nombre: order.cliente_id.nombre,
+      cliente_apellido: order.cliente_id.apellido,
+      cliente_telefono: order.cliente_id.telefono,
+      profesional_nombre: disponibilidadProfesional.creador.creador.nombre,
+      servicio: order.servicios[0].nombre,
+      precio: order.factura.precioTotal,
+      dia_servicio: order.cita_servicio,
+      hora_servicio: order.hora_servicio,
+      direccion_Servicio: order.direccion_servicio,
+      adicional_direccion_Servicio: order.adicional_direccion_servicio,
+      ciudad_Servicio: order.ciudad_servicio,
+      localidad_Servicio: order.localidad_servicio,
+      estadoPago: order.factura.estadoPago,
+    });
+    await emailProfesional({
+      cliente_nombre: order.cliente_id.nombre,
+      cliente_apellido: order.cliente_id.apellido,
+      cliente_cedula: order.cliente_id.cedula,
+      profesional_email: disponibilidadProfesional.creador.creador.email,
+      profesional_nombre: disponibilidadProfesional.creador.creador.nombre,
+      profesional_telefono: disponibilidadProfesional.creador.creador.telefono,
+      servicio: order.servicios[0].nombre,
+      dia_servicio: order.cita_servicio,
+      hora_servicio: order.hora_servicio,
+      direccion_Servicio: order.direccion_servicio,
+      adicional_direccion_Servicio: order.adicional_direccion_servicio,
+      ciudad_Servicio: order.ciudad_servicio,
+      localidad_Servicio: order.localidad_servicio,
+      estadoPago: order.factura.estadoPago,
+    });
 
     res.status(200).json({ msg: "Profesional agendada correctamente" });
   } catch (error) {

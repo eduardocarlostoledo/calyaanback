@@ -9,6 +9,7 @@ const ordenSchema = mongoose.Schema(
     profesional_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "PerfilProfesional",
+      default: null,
     },
     servicios: {
       type: [mongoose.Schema.Types.ObjectId],
