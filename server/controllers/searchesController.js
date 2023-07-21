@@ -172,7 +172,7 @@ const obtenerProfesionales = async (req, res) => {
 
 
 const obtenerTodosUsuarios = async (req, res) => {
-  console.log("info redux", req.body)
+
 
   try {
     const usuarios = await Usuario.find();

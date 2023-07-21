@@ -51,7 +51,7 @@ const getAllOrden = async (req, res, next) => {
 
 //No valido
 const createOrden = async (req, res, next) => {
-  console.log("ENTRE A CREATEORDER CONTROLLER", req.body); //FLAG
+
   try {
     const orden = new Orden(req.body);
     const result = await orden.save();
@@ -117,13 +117,11 @@ const saveOrder = async (arrayPreference) => {
     coupon,
   });
   await newOrder.save();
-  console.log("SE HA GUARDADO UNA NUEVA ORDEN newOrder", newOrder);
   return newOrder;
 };
 
 const getOrdenById = async (req, res, next) => {
   try {
-    console.log(req.params.id)
     const orden = await Orden.find({_id:req.params.id})
       .sort({ createdAt: -1 })
       .populate({
@@ -150,8 +148,6 @@ const getOrdenById = async (req, res, next) => {
     if (!orden || orden.length < 1) {
       return res.status(404).json({ message: "Orden no encontrada" });
     }
-
-    console.log(orden)
 
     const ordenRequest = [...orden].map((factura) => {
 
@@ -289,7 +285,7 @@ const updateOrden = async (req, res, next) => {
     buscarorden.estado_servicio = estado_servicio;
 
     const ordenActualizada = await buscarorden.save();
-    console.log("ordenactualizada", ordenActualizada);
+
     res.json({
       msg: "Orden actualizada correctamente",
       ordenActualizada,

@@ -6,7 +6,7 @@ const isAdminRole = (req, res = response, next) => {
   }
 
   const { rol, nombre } = req.usuario;
-  console.log(rol);
+
 
   if (!(rol === "ADMIN" || rol === "SUPERADMIN")) {
     return res.status(401).json({

@@ -119,8 +119,6 @@ const create_Preference = async (req, res) => {
       };
     });
 
-    console.log(items)
-
     let preference = {
       items: items,
       back_urls: {
@@ -146,7 +144,6 @@ const create_Preference = async (req, res) => {
     mercadopago.preferences
       .create(preference)
       .then(function (response) {
-        console.log(response);
         res.send({
           id: response.body.id,
           data: response.body.items,
@@ -193,7 +190,6 @@ const feedbackSuccess = async (req, res) => {
     );
 
     if (index !== -1) {
-      console.log(index)
       const fechaHoraServicio = new Date(`${order.cita_servicio}T${order.cita_servicio.split('-')[0]}:00`);
       const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
       indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false; });
@@ -351,8 +347,6 @@ const feedbackFailure = async (req, res) => {
 
 const payPreferenceManual = async (req, res) => {
   try {
-    console.log("paypreferencemanual req body", req.body)
-
     const {
       cliente_id,
       direccion_servicio,
@@ -365,7 +359,6 @@ const payPreferenceManual = async (req, res) => {
       link_pago
     } = req.body;
 
-    console.log(req.body)
 
     let usuario = await Usuario.findOne({ _id: cliente_id });
 
@@ -467,7 +460,6 @@ const feedbackSuccessManual = async (req, res) => {
       external_reference,
     } = req.query;
 
-    console.log(req.query)
 
     const factura = await Factura.findById(external_reference);
 
@@ -555,7 +547,6 @@ const feedbackFailureManual = async (req, res) => {
 
 const updatePayOrder = async (req, res) => {
 
-  console.log("updatePayOrder req body", req.body)
   try {
     const { id } = req.body;
 
@@ -590,7 +581,7 @@ const updatePayOrder = async (req, res) => {
 };
 
 const liberarReserva = async (req, res) => {
-  console.log("liberarReserva", req.body);
+
   try {
     const {
       _id,
@@ -627,10 +618,6 @@ const liberarReserva = async (req, res) => {
         indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = true; });
       }
 
-      console.log(
-        "disponibilidad profesional restablecida"
-
-      );
       await disponibilidadProfesional.save();
       // Comentado por ahora, implementar la notificación de reprogramación si es necesario
 
@@ -654,7 +641,7 @@ const liberarReserva = async (req, res) => {
 
 const agendarOrden = async (req, res) => {
   try {
-    console.log("agendarOrden req body", req.body)
+
 
     const { cita_servicio, hora_servicio, profesional_id } = req.body;
 
@@ -693,12 +680,11 @@ const agendarOrden = async (req, res) => {
 
       const fechaHoraServicio = new Date(`${cita_servicio}T${hora_servicio.split('-')[0]}:00`);
       const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
-      console.log("indicesCumplenCondicion Agendar Orden", indicesCumplenCondicion)
       indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false; });
 
     }
 
-    console.log(req.body.profesional_id)
+
 
     order.cita_servicio = cita_servicio
     order.hora_servicio = hora_servicio
@@ -709,7 +695,6 @@ const agendarOrden = async (req, res) => {
     await order.save()
     await disponibilidadProfesional.save();
 
-    console.log(order)
 
 
     await emailCompra({

@@ -612,7 +612,7 @@ const obtenerDirecciones = async (req, res) => {
 };
 
 const crearDireccion = async (req, res) => {
-  console.log("REQ BODY CREAR DIRECCION", req.body);
+
   const { _id } = req.usuario;
 
   try {
@@ -643,7 +643,7 @@ const crearDireccion = async (req, res) => {
 
 const editarDireccion = async (req, res) => {
   const { id } = req.params;
-  console.log("REQ BODY EDITAR DIRECCION", req.body);
+
   try {
     const nuevaDireccion = await Direccion.findByIdAndUpdate(
       id,
@@ -731,7 +731,7 @@ const obtenerUsuarioEmail = async (req, res) => {
 
 const registrarUsuarioReserva = async (req, res) => {
   try {
-    console.log("registrarUsuarioReserva", req.body, req.params, req.query);
+
 
     const { email, cedula } = req.body;
 
@@ -748,7 +748,7 @@ const registrarUsuarioReserva = async (req, res) => {
     };
 
     const usuario = new Usuario(usuarioData);
-    console.log("usuarioNuevo", usuario);
+
 
     await usuario.save();
 

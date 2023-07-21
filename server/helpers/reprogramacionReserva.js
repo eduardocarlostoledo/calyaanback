@@ -10,7 +10,7 @@ const reprogramarReserva = async (guardarDatosReprogramacion) => {
     
     // disponibilidad false a true
 let disponibilidadProfesional = await Disponibilidad.findOne({ fecha: guardarDatosReprogramacion.dia_servicio, creador: guardarDatosReprogramacion.profesional_id });
-console.log("reprogramar reserva disponibilidad de profesional", disponibilidadProfesional.horarios);
+
 
 
 // const index = disponibilidadProfesional.horarios.findIndex(item => item.hora === '07:00-07:59');

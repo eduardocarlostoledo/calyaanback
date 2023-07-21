@@ -77,8 +77,6 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
     })
     .lean();
 
-      console.log(profesionales)
-
     let buscarPorfesionales = profesionales.filter(
       (profesionalState) => profesionalState.creador !== null
     );

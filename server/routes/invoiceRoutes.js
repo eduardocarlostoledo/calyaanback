@@ -110,7 +110,7 @@ invoiceRoutes.put("/updateinvoice", async (req, res, next) => {
     estado_facturacion,
     origen,
   } = req.body;
-  console.log(req.body, "body factura");
+
 
   try {
     const facturas = await Factura.findById(_id);
@@ -141,7 +141,7 @@ invoiceRoutes.put("/updateinvoice", async (req, res, next) => {
 
     let actualizado = await facturas.save();
 
-    console.log(actualizado, "factura actualizada 129");
+
 
     /*       const facturasRequest = await Orden.find().sort({ createdAt: -1 })
         .populate({ path: "cliente_id", select: "_id nombre apellido email cedula telefono direccionDefault", populate: { path: "direccionDefault", select: "-createdAt -updateAt -cliente" } })

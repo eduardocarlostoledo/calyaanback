@@ -6,12 +6,10 @@ import Orden from "../models/OrderModel.js";
 
 const actualizarProfesional = async (req, res) => {
   const { _id } = req.usuario;
-  console.log("usuario", req.usuario);
-  console.log("body", req.body);
+
   const { descripcion, especialidades, localidades } = req.body;
   try {
-    console.log("usuario", req.usuario);
-    console.log("body", req.body);
+
     // Comprobar si el usuario existe
     const profesional = await PerfilProfesional.findOne({
       creador: _id,
@@ -51,14 +49,13 @@ const actualizarProfesional = async (req, res) => {
 
 const actualizarProfesionalAdminDash = async (req, res) => {
   const { descripcion, especialidades, localidades, _id } = req.body;
-  console.log(_id, "el id");
-  console.log(req.body, "el body");
+
   try {
     // Comprobar si el usuario existe
     const profesional = await PerfilProfesional.findById({
       _id: _id,
     });
-    console.log(profesional, "profeso");
+
     if (!profesional) {
       const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
@@ -132,7 +129,7 @@ const obtenerDisponibilidadTotal = async (req, res) => {
       };
     });
 
-    console.log(disponibilidadTotal)
+
 
     return res.status(200).json(disponibilidadTotal);
   } catch (error) {
@@ -515,7 +512,7 @@ const obtenerHistorial = async (req, res) => {
       select:"nombre"
     })
     .select("cliente_id cita_servicio hora_servicio servicios estado_servicio factura");
-    console.log(ordenes)
+
     res.json(ordenes);
   } catch (error) {
     console.log(error);

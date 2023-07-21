@@ -15,7 +15,7 @@ const createSettlement = async (req, res, next) => {
       porcentajeProfesional,
       porcentajeCaalyan,
     } = req.body;
-    console.log(req.body);
+
     if (
       !numeroLiquidacion ||
       !estadoLiquidacion ||
@@ -74,7 +74,7 @@ const createSettlement = async (req, res, next) => {
 };
 
 const updateSettlement = async (req, res, next) => {
-  console.log("updateSettlement", req.body);
+
 
   try {
     const {
@@ -230,7 +230,7 @@ const deleteSettlement = async (req, res, next) => {
 
 const getSettlementesByUserId = async (req, res, next) => {
   try {
-    console.log("getSettlementesByUserId", req.params.id);
+
     const liquidaciones = await Liquidacion.find({ profesional: req.params.id })
       .sort({ createdAt: -1 })
       .populate({
