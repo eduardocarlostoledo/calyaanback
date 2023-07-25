@@ -9,7 +9,6 @@ const actualizarProfesional = async (req, res) => {
 
   const { descripcion, especialidades, localidades } = req.body;
   try {
-
     // Comprobar si el usuario existe
     const profesional = await PerfilProfesional.findOne({
       creador: _id,
@@ -93,8 +92,11 @@ const obtenerDisponibilidadTotal = async (req, res) => {
     const profesionales = await Disponibilidad.find()
       .populate({
         path: "creador",
-        select:"descripcion _id especialidad localidadesLaborales creador",
-        populate: { path: "creador",select:"_id nombre apellido telefono"},
+        select: "descripcion _id especialidad localidadesLaborales creador",
+        populate: {
+          path: "creador",
+          select: "_id nombre img apellido telefono img",
+        },
       })
       .sort({ fecha: 1 })
       .select("-id -createdAt -updatedAt")
@@ -128,8 +130,6 @@ const obtenerDisponibilidadTotal = async (req, res) => {
         disponibilidad: horariosDisponibles,
       };
     });
-
-
 
     return res.status(200).json(disponibilidadTotal);
   } catch (error) {
@@ -499,19 +499,21 @@ const obtenerHistorial = async (req, res) => {
 
   try {
     const ordenes = await Orden.find({ profesional_id: id })
-    .populate({
-      path: 'factura', 
-      match: { estado_pago: 'approved' } 
-    })
-    .populate({
-      path: "servicios",
-      select: "idWP nombre"
-    })
-    .populate({
-      path: "cliente_id",
-      select:"nombre"
-    })
-    .select("cliente_id cita_servicio hora_servicio servicios estado_servicio factura");
+      .populate({
+        path: "factura",
+        match: { estado_pago: "approved" },
+      })
+      .populate({
+        path: "servicios",
+        select: "idWP nombre",
+      })
+      .populate({
+        path: "cliente_id",
+        select: "nombre",
+      })
+      .select(
+        "cliente_id cita_servicio hora_servicio servicios estado_servicio factura"
+      );
 
     res.json(ordenes);
   } catch (error) {
