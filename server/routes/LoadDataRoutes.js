@@ -6,6 +6,6 @@ import { cargarProductosWP } from "../controllers/loadDataController.js";
 
 const loadData = express.Router();
 
-loadData.post("/products", checkAuth, cargarProductosWP);
+loadData.post("/products", cargarProductosWP);
 
 export default loadData;
