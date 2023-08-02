@@ -16,15 +16,13 @@ import { obtenerIndicesCumplenCondicion } from "../helpers/comparaDisponibilidad
 import Coupon from "../models/CouponModel.js";
 import couponRoutes from "../routes/couponRoutes.js";
 import product from "../routes/productsRoutes.js";
+import { extraerNumeroDeNombre } from "../helpers/extraerNumeroDeNombre.js";
+import { coincideOrdenFacturaPaquetes } from "../helpers/coincideOrdenFacturaPaquetes.js";
 
-//import {reprogramarReserva} from "../helpers/reprogramacionReserva.js";
 
-// let arrayPreference = {};
 const payPreference = async (req, res) => {
-
   try {
-
-    const { DateService, ProfessionalService, profile, dataCustomer, servicios, coupon } = req.body
+    const { DateService, ProfessionalService, profile, dataCustomer, servicios, coupon } = req.body;
 
     const parsedProfile = JSON.parse(profile);
     const parsedProfessionalService = JSON.parse(ProfessionalService);
@@ -32,79 +30,162 @@ const payPreference = async (req, res) => {
     const parsedDateService = JSON.parse(DateService);
 
     const productos = await Producto.find({ idWP: { $in: servicios } });
+    console.log("productos", productos);
 
-    const serviciosGuardar = productos.map((product) => product._id)
+    const serviciosGuardar = productos.map((product) => product._id);
 
     let precioNeto = productos.reduce((accum, product) => accum + product.precio, 0);
-
     let precioSubTotal = precioNeto;
 
     if (coupon) {
       const existeCupon = await Coupon.findOne({ codigo: coupon });
 
       if (!existeCupon) {
-        const error = new Error("Cupón no válido");
-        return res.status(404).json({ msg: error.message });
+        throw new Error("Cupón no válido");
       }
 
       if (existeCupon.vencimiento && existeCupon.vencimiento < new Date()) {
-        return res.status(400).json({ msg: 'El cupón ha vencido' });
+        throw new Error('El cupón ha vencido');
       }
 
       if (existeCupon.reclamados.includes(req.usuario._id)) {
-        return res.status(400).json({ msg: 'El cupón ya ha sido reclamado' });
+        throw new Error('El cupón ya ha sido reclamado');
       }
 
       if (existeCupon.tipoDescuento === 'porcentaje') {
-        precioSubTotal = valor - (valor * (existeCupon.descuento / 100));
+        precioSubTotal = precioNeto - (precioNeto * (existeCupon.descuento / 100));
       } else {
-        precioSubTotal = valor - existeCupon.descuento;
+        precioSubTotal = precioNeto - existeCupon.descuento;
       }
 
       if (precioSubTotal < 0) {
-        return res.status(400).json({ msg: 'No es posible redimir el cupón dado que es mayor al costo del servicio' });
+        throw new Error('No es posible redimir el cupón dado que es mayor al costo del servicio');
       }
     }
 
-    let precioTotal = precioSubTotal;
+    let precioTotal = precioSubTotal;      
 
-    const FacturaOrden = new Factura({
-      precioNeto,
-      precioSubTotal,
-      precioTotal,
-      coupon,
-      fecha_venta: new Date(),
-      origen: "Mercado Pago",
-      servicios: serviciosGuardar
-    })
+        const FacturaOrden = new Factura({
+        precioNeto,
+        precioSubTotal,
+        precioTotal,
+        coupon,
+        fecha_venta: new Date(),
+        origen: "Mercado Pago",
+        servicios: serviciosGuardar,
+        metodo_pago: "Mercado Pago"
+      });
+  
+      const factura = await FacturaOrden.save();
 
-    const factura = await FacturaOrden.save()
+      const OrdenPendiente = new Orden({
+        cliente_id: parsedProfile._id,
+        profesional_id: parsedProfessionalService.profesional_id,
+        servicios: serviciosGuardar,
+        factura: factura._id,
+        cita_servicio: parsedDateService.date,
+        hora_servicio: parsedDateService.time,
+        direccion_servicio: parsedData_customer.address,
+        adicional_direccion_servicio: parsedData_customer.address2,
+        localidad_servicio: parsedDateService.localidadServicio,
+        telefono_servicio: parsedData_customer.telefono,
+      });
+      const orden = await OrdenPendiente.save();
+      factura.orden = orden._id;
+      await factura.save();
 
-    const OrdenPendiente = new Orden({
-      cliente_id: parsedProfile._id,
-      profesional_id: parsedProfessionalService.profesional_id,
-      servicios: serviciosGuardar,
-      factura: factura._id,
-      cita_servicio: parsedDateService.date,
-      hora_servicio: parsedDateService.time,
-      direccion_servicio: parsedData_customer.address,
-      adicional_direccion_servicio: parsedData_customer.address2,
-      localidad_servicio: parsedDateService.localidadServicio,
-      telefono_servicio: parsedData_customer.telefono,
-    })
+      res.send({ orden, factura });     
 
-    const orden = await OrdenPendiente.save()
-
-    factura.orden = orden._id;
-
-    await factura.save()
-
-    res.send({ orden, factura });
   } catch (error) {
     console.log(error);
     res.status(500).send("Internal Server Error");
   }
 };
+
+// const payPreference = async (req, res) => {
+//   try {
+
+//     const { DateService, ProfessionalService, profile, dataCustomer, servicios, coupon } = req.body
+
+//     const parsedProfile = JSON.parse(profile);
+//     const parsedProfessionalService = JSON.parse(ProfessionalService);
+//     const parsedData_customer = JSON.parse(dataCustomer);
+//     const parsedDateService = JSON.parse(DateService);
+
+//     const productos = await Producto.find({ idWP: { $in: servicios } });
+
+//     const serviciosGuardar = productos.map((product) => product._id)
+
+//     let precioNeto = productos.reduce((accum, product) => accum + product.precio, 0);
+
+//     let precioSubTotal = precioNeto;
+
+//     if (coupon) {
+//       const existeCupon = await Coupon.findOne({ codigo: coupon });
+
+//       if (!existeCupon) {
+//         const error = new Error("Cupón no válido");
+//         return res.status(404).json({ msg: error.message });
+//       }
+
+//       if (existeCupon.vencimiento && existeCupon.vencimiento < new Date()) {
+//         return res.status(400).json({ msg: 'El cupón ha vencido' });
+//       }
+
+//       if (existeCupon.reclamados.includes(req.usuario._id)) {
+//         return res.status(400).json({ msg: 'El cupón ya ha sido reclamado' });
+//       }
+
+//       if (existeCupon.tipoDescuento === 'porcentaje') {
+//         precioSubTotal = valor - (valor * (existeCupon.descuento / 100));
+//       } else {
+//         precioSubTotal = valor - existeCupon.descuento;
+//       }
+
+//       if (precioSubTotal < 0) {
+//         return res.status(400).json({ msg: 'No es posible redimir el cupón dado que es mayor al costo del servicio' });
+//       }
+//     }
+
+//     let precioTotal = precioSubTotal;
+
+//     const FacturaOrden = new Factura({
+//       precioNeto,
+//       precioSubTotal,
+//       precioTotal,
+//       coupon,
+//       fecha_venta: new Date(),
+//       origen: "Mercado Pago",
+//       servicios: serviciosGuardar
+//     })
+
+//     const factura = await FacturaOrden.save()
+
+//     const OrdenPendiente = new Orden({
+//       cliente_id: parsedProfile._id,
+//       profesional_id: parsedProfessionalService.profesional_id,
+//       servicios: serviciosGuardar,
+//       factura: factura._id,
+//       cita_servicio: parsedDateService.date,
+//       hora_servicio: parsedDateService.time,
+//       direccion_servicio: parsedData_customer.address,
+//       adicional_direccion_servicio: parsedData_customer.address2,
+//       localidad_servicio: parsedDateService.localidadServicio,
+//       telefono_servicio: parsedData_customer.telefono,
+//     })
+
+//     const orden = await OrdenPendiente.save()
+
+//     factura.orden = orden._id;
+
+//     await factura.save()
+
+//     res.send({ orden, factura });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };
 
 const create_Preference = async (req, res) => {
 
@@ -166,12 +247,12 @@ const feedbackSuccess = async (req, res) => {
       merchant_order_id,
       external_reference,
     } = req.query;
-
+//se recibe el id de la factura por referencia externa
     const order = await Orden.findById(external_reference)
       .populate({ path: "profesional_id", populate: [{ path: "disponibilidad" }, { path: "creador" }] })
       .populate({ path: "cliente_id" })
       .populate({ path: "servicios" })
-      .populate({ path: "factura" });
+      .populate({ path: "factura" });    
 
     const factura = await Factura.findById(order.factura);
 
@@ -204,6 +285,8 @@ const feedbackSuccess = async (req, res) => {
       await cuponRedimido.save()
 
     }
+     //se envian los datos para editar las ordenes creadas por  paquetes contratado y pero sigue con el flujo natural de la orden sin hacer mas modificaciones
+     coincideOrdenFacturaPaquetes( order, factura )
 
     await disponibilidadProfesional.save();
     await order.save();
@@ -222,7 +305,7 @@ const feedbackSuccess = async (req, res) => {
       adicional_direccion_Servicio: order.adicional_direccion_servicio,
       ciudad_Servicio: order.ciudad_servicio,
       localidad_Servicio: order.localidad_servicio,
-      estadoPago: order.factura.estadoPago,
+      estadoPago: "approved",
     });
     await emailProfesional({
       cliente_nombre: order.cliente_id.nombre,
@@ -238,9 +321,9 @@ const feedbackSuccess = async (req, res) => {
       adicional_direccion_Servicio: order.adicional_direccion_servicio,
       ciudad_Servicio: order.ciudad_servicio,
       localidad_Servicio: order.localidad_servicio,
-      estadoPago: order.factura.estadoPago,
+      estadoPago: "approved",
     });
-
+   
     res.redirect(`${process.env.FRONT}/resumen/${external_reference}`);
   } catch (error) {
     console.error(error);
@@ -367,7 +450,7 @@ const payPreferenceManual = async (req, res) => {
       return res.status(404).json({ msg: error.message });
     }
 
-    const serviciosSearch = await Producto.find({ idWP: { $in: servicios } });
+    const serviciosSearch = await Producto.find({ idWP: { $in: servicios } })        
     const serviciosGuardar = serviciosSearch.map((product) => product._id)
 
     const arrayPreference = {
@@ -436,6 +519,8 @@ const payPreferenceManual = async (req, res) => {
 
     factura.orden = orden._id;
 
+         
+
     await newOrder.save();
     await factura.save();
 
@@ -463,7 +548,7 @@ const feedbackSuccessManual = async (req, res) => {
 
     const factura = await Factura.findById(external_reference);
 
-    const orden = await Orden.findById(factura.orden);
+    const orden = await Orden.findById(factura.orden) 
 
     factura.payment_id = payment_id;
     factura.estadoPago = status;
@@ -477,9 +562,7 @@ const feedbackSuccessManual = async (req, res) => {
 
       cuponRedimido.reclamados = [...cuponRedimido.reclamados, orden.cliente_id];
 
-      await cuponRedimido.save()
-    }
-
+      await cuponRedimido.save()   }
 
     await orden.save();
     await factura.save();
@@ -691,6 +774,10 @@ const agendarOrden = async (req, res) => {
     order.profesional_id = req.body.profesional_id;
     order.estado_servicio = "Pendiente";
 
+
+
+//se envian los datos para editar las ordenes creadas por  paquetes contratado y pero sigue con el flujo natural de la orden sin hacer mas modificaciones
+coincideOrdenFacturaPaquetes( order, order.factura )
 
     await order.save()
     await disponibilidadProfesional.save();

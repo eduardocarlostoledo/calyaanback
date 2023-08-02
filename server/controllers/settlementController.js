@@ -3,6 +3,7 @@ import Orden from "../models/OrderModel.js";
 import PerfilProfesional from "../models/ProfessionalModel.js";
 
 const createSettlement = async (req, res, next) => {
+  //console.log("req.body setlement", req.body);
   try {
     const {
       numeroLiquidacion,
@@ -32,18 +33,22 @@ const createSettlement = async (req, res, next) => {
         "Faltan datos para almacenar la liquidacion o existen datos no validos"
       );
     }
-    // Buscar documentos correspondientes a los _id de ordenes en el modelo Ordenes
-    const ordenesIds = await Promise.all(
-      ordenes.map(async (ordenId) => {
-        const orden = await Orden.findById(ordenId);
-        if (!orden) {
-          res.status(400);
-          throw new Error(`No se encontró la orden con el ID: ${ordenId}`);
-        }
-        await orden.save({ ...orden, liquidado: true });
-        return orden._id;
-      })
-    );
+    
+// Buscar documentos correspondientes a los _id de ordenes en el modelo Ordenes
+const ordenesIds = await Promise.all(
+  ordenes.map(async (ordenId) => {
+    const orden = await Orden.findById(ordenId);
+    if (!orden) {
+      res.status(400);
+      throw new Error(`No se encontró la orden con el ID: ${ordenId}`);
+    }
+    orden.liquidacion = true;
+    await orden.save(); // Corrected this line by adding ()
+    //console.log("orden returnada", orden._id);
+    return orden._id;
+  })
+);
+
 
     // Buscar el documento correspondiente al ID almacenado en la propiedad profesional
     const perfilProfesional = await PerfilProfesional.findById(profesional._id);
