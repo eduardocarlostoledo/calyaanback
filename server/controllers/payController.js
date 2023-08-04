@@ -388,7 +388,7 @@ const payPreferenceManual = async (req, res) => {
     let precioSubTotal = precioNeto;
 
     if (coupon) {
-      const existeCupon = await Coupon.findOne({ codigo: coupon });
+      const existeCupon = await Coupon.findById({ _id: arrayPreference.coupon });
 
       if (!existeCupon) {
         const error = new Error("Cupón no válido");
@@ -399,15 +399,16 @@ const payPreferenceManual = async (req, res) => {
         return res.status(400).json({ msg: 'El cupón ha vencido' });
       }
 
-      if (existeCupon.reclamados.includes(req.usuario._id)) {
-        return res.status(400).json({ msg: 'El cupón ya ha sido reclamado' });
+      if (existeCupon.reclamados.includes(arrayPreference.cliente_id)) {
+                return res.status(400).json({ msg: 'El cupón ya ha sido reclamado' });
       }
 
       if (existeCupon.tipoDescuento === 'porcentaje') {
-        precioSubTotal = valor - (valor * (existeCupon.descuento / 100));
+        precioSubTotal = precioNeto - (precioNeto * (existeCupon.descuento / 100));
       } else {
-        precioSubTotal = valor - existeCupon.descuento;
+        precioSubTotal = precioNeto - existeCupon.descuento;
       }
+
 
       if (precioSubTotal < 0) {
         return res.status(400).json({ msg: 'No es posible redimir el cupón dado que es mayor al costo del servicio' });
@@ -746,6 +747,8 @@ const actualizarPago = async (req, res) => {
 
     factura.payment_id = req.body.payment_id
     factura.origen = req.body.origen
+    factura.estadoPago = "approved"
+
 
     await factura.save()
 
