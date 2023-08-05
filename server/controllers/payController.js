@@ -467,7 +467,7 @@ const feedbackSuccessManual = async (req, res) => {
     const orden = await Orden.findById(factura.orden);
 
     factura.payment_id = payment_id;
-    factura.estadoPago = status;
+    factura.estadoPago = "approved";
     factura.payment_type = payment_type;
     factura.merchant_order_id = merchant_order_id;
     factura.origen = "Mercado Pago";
@@ -505,7 +505,7 @@ const feedbackPendingManual = async (req, res) => {
     const factura = await Factura.findById(external_reference);
 
     factura.payment_id = payment_id;
-    factura.estadoPago = status;
+    factura.estadoPago = "pending";
     factura.payment_type = payment_type;
     factura.merchant_order_id = merchant_order_id;
 
@@ -712,7 +712,7 @@ const agendarOrden = async (req, res) => {
       adicional_direccion_Servicio: order.adicional_direccion_servicio,
       ciudad_Servicio: order.ciudad_servicio,
       localidad_Servicio: order.localidad_servicio,
-      estadoPago: order.factura.estadoPago,
+      estadoPago: "approved",
     });
     await emailProfesional({
       cliente_nombre: order.cliente_id.nombre,
@@ -728,7 +728,7 @@ const agendarOrden = async (req, res) => {
       adicional_direccion_Servicio: order.adicional_direccion_servicio,
       ciudad_Servicio: order.ciudad_servicio,
       localidad_Servicio: order.localidad_servicio,
-      estadoPago: order.factura.estadoPago,
+      estadoPago: "approved",
     });
 
     res.status(200).json({ msg: "Profesional agendada correctamente" });
