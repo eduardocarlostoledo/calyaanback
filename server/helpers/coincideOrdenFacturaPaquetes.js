@@ -33,7 +33,7 @@ console.log("factura",factura)
         precioSubTotal,
         precioTotal,
         coupon: factura.coupon,
-        metodo_pago: "Mercado Pago"
+        metodo_pago: "Interno"
       });
 
       const facturaNueva = await FacturaOrden.save();
@@ -50,7 +50,7 @@ console.log("factura",factura)
         cita_servicio: i > 0 ? "Agendar" : order.cita_servicio,
         hora_servicio: i > 0 ? "Agendar" : order.hora_servicio,
         localidad_servicio: order.localidad_servicio,
-        
+
       });
 
       const ordenNueva = await OrdenPendiente.save();

@@ -101,7 +101,8 @@ const obtenerDisponibilidadTotal = async (req, res) => {
       .lean();
 
     const fechaActual = new Date();
-    const fechaLimite = new Date(fechaActual.getTime() + 5 * 60 * 60 * 1000);
+    const fechaLimite = new Date(fechaActual.getTime());
+    // const fechaLimite = new Date(fechaActual.getTime() + 5 * 60 * 60 * 1000);
 
     const profesionalesFiltrados = profesionales.filter((profesional) => {
       return (

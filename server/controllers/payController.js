@@ -429,6 +429,7 @@ const feedbackFailure = async (req, res) => {
 };
 
 const payPreferenceManual = async (req, res) => {
+  console.log("req.body preference manual", req.body);
   try {
     const {
       cliente_id,
@@ -469,9 +470,11 @@ const payPreferenceManual = async (req, res) => {
     let precioNeto = serviciosSearch.reduce((accum, product) => accum + product.precio, 0);
 
     let precioSubTotal = precioNeto;
-
+console.log("arraypreferencede manual", arrayPreference.coupon)
     if (coupon) {
-      const existeCupon = await Coupon.findOne({ codigo: coupon });
+      const existeCupon = await Coupon.findById({ _id: arrayPreference.coupon });
+      console.log("existeCupon", existeCupon);
+      
 
       if (!existeCupon) {
         const error = new Error("Cupón no válido");
@@ -482,14 +485,14 @@ const payPreferenceManual = async (req, res) => {
         return res.status(400).json({ msg: 'El cupón ha vencido' });
       }
 
-      if (existeCupon.reclamados.includes(req.usuario._id)) {
+      if (existeCupon.reclamados.includes(arrayPreference.cliente_id)) {
         return res.status(400).json({ msg: 'El cupón ya ha sido reclamado' });
       }
 
       if (existeCupon.tipoDescuento === 'porcentaje') {
-        precioSubTotal = valor - (valor * (existeCupon.descuento / 100));
+        precioSubTotal = precioNeto - (precioNeto * (existeCupon.descuento / 100));
       } else {
-        precioSubTotal = valor - existeCupon.descuento;
+        precioSubTotal = precioNeto - existeCupon.descuento;
       }
 
       if (precioSubTotal < 0) {
@@ -555,7 +558,7 @@ const feedbackSuccessManual = async (req, res) => {
     factura.payment_type = payment_type;
     factura.merchant_order_id = merchant_order_id;
     factura.origen = "Mercado Pago";
-
+console.log("factura feedback success manual", factura)
     if (factura.coupon) {
 
       const cuponRedimido = await Coupon.findOne({ _id: factura.coupon })
@@ -725,6 +728,7 @@ const liberarReserva = async (req, res) => {
 const agendarOrden = async (req, res) => {
   try {
 
+console.log("AGENDAR ORDEN",req.body)
 
     const { cita_servicio, hora_servicio, profesional_id } = req.body;
 
@@ -774,8 +778,6 @@ const agendarOrden = async (req, res) => {
     order.profesional_id = req.body.profesional_id;
     order.estado_servicio = "Pendiente";
 
-
-
 //se envian los datos para editar las ordenes creadas por  paquetes contratado y pero sigue con el flujo natural de la orden sin hacer mas modificaciones
 coincideOrdenFacturaPaquetes( order, order.factura )
 
@@ -798,7 +800,7 @@ coincideOrdenFacturaPaquetes( order, order.factura )
       adicional_direccion_Servicio: order.adicional_direccion_servicio,
       ciudad_Servicio: order.ciudad_servicio,
       localidad_Servicio: order.localidad_servicio,
-      estadoPago: order.factura.estadoPago,
+      estadoPago: "approved",
     });
     await emailProfesional({
       cliente_nombre: order.cliente_id.nombre,
@@ -814,8 +816,8 @@ coincideOrdenFacturaPaquetes( order, order.factura )
       adicional_direccion_Servicio: order.adicional_direccion_servicio,
       ciudad_Servicio: order.ciudad_servicio,
       localidad_Servicio: order.localidad_servicio,
-      estadoPago: order.factura.estadoPago,
-    });
+      estadoPago: "approved",
+        });
 
     res.status(200).json({ msg: "Profesional agendada correctamente" });
   } catch (error) {
@@ -825,6 +827,7 @@ coincideOrdenFacturaPaquetes( order, order.factura )
 };
 
 const actualizarPago = async (req, res) => {
+  console.log("ACTUALIZAR PAGO",req.body)
   try {
 
     const order = await Orden.findById(req.body.id)
@@ -833,6 +836,7 @@ const actualizarPago = async (req, res) => {
 
     factura.payment_id = req.body.payment_id
     factura.origen = req.body.origen
+    factura.estadoPago = "approved"
 
     await factura.save()
 
