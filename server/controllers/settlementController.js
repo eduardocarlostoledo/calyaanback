@@ -15,7 +15,7 @@ const createSettlement = async (req, res, next) => {
       porcentajeProfesional,
       porcentajeCaalyan,
     } = req.body;
-
+    console.log(req.body, "llega ppor body");
     if (
       !numeroLiquidacion ||
       !estadoLiquidacion ||
@@ -40,7 +40,8 @@ const createSettlement = async (req, res, next) => {
           res.status(400);
           throw new Error(`No se encontró la orden con el ID: ${ordenId}`);
         }
-        await orden.save({ ...orden, liquidado: true });
+        orden.liquidacion = true;
+        await orden.save();
         return orden._id;
       })
     );
@@ -74,8 +75,6 @@ const createSettlement = async (req, res, next) => {
 };
 
 const updateSettlement = async (req, res, next) => {
-
-
   try {
     const {
       _id,
@@ -230,7 +229,6 @@ const deleteSettlement = async (req, res, next) => {
 
 const getSettlementesByUserId = async (req, res, next) => {
   try {
-
     const liquidaciones = await Liquidacion.find({ profesional: req.params.id })
       .sort({ createdAt: -1 })
       .populate({
