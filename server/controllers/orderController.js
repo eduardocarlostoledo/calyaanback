@@ -129,7 +129,7 @@ const getOrdenById = async (req, res, next) => {
           select: "-createdAt -updateAt -cliente",
         },
       })
-      .populate({ path: "factura", select: "-__v -orden -servicios" })
+      .populate({ path: "factura", select: "-__v -orden -servicios", populate: {path:"coupon",select:"-reclamados -vencimiento -eliminado"} })
       .populate({
         path: "profesional_id",
         select:

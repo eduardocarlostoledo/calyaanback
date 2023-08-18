@@ -35,12 +35,13 @@ const payPreference = async (req, res) => {
 
     const serviciosGuardar = productos.map((product) => product._id)
 
-    let precioNeto = productos.reduce((accum, product) => accum + product.precio, 0);
+    let precioNeto = productos.reduce((accum, product) => accum + parseInt(product.precio, 10), 0);
 
     let precioSubTotal = precioNeto;
 
     if (coupon) {
-      const existeCupon = await Coupon.findOne({ codigo: coupon });
+      const existeCupon = await Coupon.findById({ _id:coupon});
+
 
       if (!existeCupon) {
         const error = new Error("Cupón no válido");
@@ -51,14 +52,14 @@ const payPreference = async (req, res) => {
         return res.status(400).json({ msg: 'El cupón ha vencido' });
       }
 
-      if (existeCupon.reclamados.includes(req.usuario._id)) {
-        return res.status(400).json({ msg: 'El cupón ya ha sido reclamado' });
+      if (existeCupon.reclamados.includes(parsedProfile._id)) {
+          return res.status(400).json({ msg: 'El cupón ya ha sido reclamado' });
       }
 
       if (existeCupon.tipoDescuento === 'porcentaje') {
-        precioSubTotal = valor - (valor * (existeCupon.descuento / 100));
+        precioSubTotal = precioNeto - (precioNeto * (existeCupon.descuento / 100));
       } else {
-        precioSubTotal = valor - existeCupon.descuento;
+        precioSubTotal = precioNeto - existeCupon.descuento;
       }
 
       if (precioSubTotal < 0) {
@@ -72,7 +73,7 @@ const payPreference = async (req, res) => {
       precioNeto,
       precioSubTotal,
       precioTotal,
-      coupon,
+      coupon: coupon ? coupon : undefined,
       fecha_venta: new Date(),
       origen: "Mercado Pago",
       servicios: serviciosGuardar
@@ -114,7 +115,7 @@ const create_Preference = async (req, res) => {
     let items = factura.servicios.map((producto) => {
       return {
         title: producto.nombre,
-        unit_price: Number(producto.precio),
+        unit_price: Number(factura?.precioTotal),
         quantity: 1
       };
     });
@@ -179,6 +180,15 @@ const feedbackSuccess = async (req, res) => {
     factura.estadoPago = status;
     factura.payment_type = payment_type;
     factura.merchant_order_id = merchant_order_id;
+
+    if (factura?.coupon) {
+
+      const cuponRedimido = await Coupon.findById({ _id: factura.coupon })
+
+      cuponRedimido.reclamados = [...cuponRedimido.reclamados, order.cliente_id];
+
+      await cuponRedimido.save()
+    }
 
     let disponibilidadProfesional = await Disponibilidad.findOne({
       fecha: order.cita_servicio,
