@@ -771,20 +771,13 @@ console.log("AGENDAR ORDEN",req.body)
 
     }
 
-
-
     order.cita_servicio = cita_servicio
     order.hora_servicio = hora_servicio
     order.profesional_id = req.body.profesional_id;
     order.estado_servicio = "Pendiente";
 
-//se envian los datos para editar las ordenes creadas por  paquetes contratado y pero sigue con el flujo natural de la orden sin hacer mas modificaciones
-coincideOrdenFacturaPaquetes( order, order.factura )
-
     await order.save()
     await disponibilidadProfesional.save();
-
-
 
     // await emailCompra({
     //   cliente_email: order.cliente_id.email,
@@ -847,6 +840,32 @@ const actualizarPago = async (req, res) => {
   }
 };
 
+
+const generarPaquetes = async (req, res) => {
+  console.log("GENERAR ORDENES",req.body)
+  try {
+    const order = await Orden.findById(req.body.id)
+    .populate({ path: "servicios" })
+    .populate({ path: "factura" });
+    
+    const factura = await Factura.findById(order.factura)   
+
+    //se envian los datos para editar las ordenes creadas por  paquetes contratado y pero sigue con el flujo natural de la orden sin hacer mas modificaciones
+    coincideOrdenFacturaPaquetes( order, factura )
+    
+    //seteamos la orden padre como paquete generado para que no se pueda volver a generar mas ordenes hijas.
+    order.paquetesGenerados = true;    
+    await order.save();
+
+    res.status(200).json({ msg: "SESIONES DEL PAQUETE GENERADAS" });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error al GENERAR ORDENES");
+  }
+};
+
+
+
 export {
   payPreference,
   create_Preference,
@@ -860,5 +879,6 @@ export {
   updatePayOrder,
   liberarReserva,
   agendarOrden,
-  actualizarPago
+  actualizarPago,
+  generarPaquetes
 };

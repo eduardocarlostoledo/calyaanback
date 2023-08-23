@@ -50,6 +50,10 @@ const ordenSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    paquetesGenerados: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

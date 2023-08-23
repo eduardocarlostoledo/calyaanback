@@ -47,10 +47,10 @@ console.log("factura",factura)
         adicional_direccion_servicio: order.adicional_direccion_servicio,
         localidad_servicio: order.localidad_servicio,
         telefono_servicio: order.telefono_servicio,
-        cita_servicio: i > 0 ? "Agendar" : order.cita_servicio,
-        hora_servicio: i > 0 ? "Agendar" : order.hora_servicio,
+        cita_servicio: i > 0 ? "" : order.cita_servicio,
+        hora_servicio: i > 0 ? "" : order.hora_servicio,
         localidad_servicio: order.localidad_servicio,
-
+        paquetesGenerados: true,
       });
 
       const ordenNueva = await OrdenPendiente.save();
