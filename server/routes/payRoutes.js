@@ -1,5 +1,5 @@
 import express from "express";
-import { payPreference, create_Preference, feedbackSuccess, feedbackPending, feedbackFailure, payPreferenceManual, feedbackSuccessManual, feedbackFailureManual, feedbackPendingManual, updatePayOrder, liberarReserva, agendarOrden, actualizarPago } from "../controllers/payController.js";
+import { payPreference, create_Preference, feedbackSuccess, feedbackPending, feedbackFailure, payPreferenceManual, feedbackSuccessManual, feedbackFailureManual, feedbackPendingManual, updatePayOrder, liberarReserva, agendarOrden, actualizarPago, generarPaquetes } from "../controllers/payController.js";
 
 const payRouter = express.Router();
 
@@ -16,5 +16,6 @@ payRouter.post("/finish/order", updatePayOrder);
 payRouter.post("/finish/liberar", liberarReserva);
 payRouter.post("/finish/agendar", agendarOrden);
 payRouter.post("/actualizar-pago", actualizarPago);
+payRouter.post("/generar-paquetes", generarPaquetes);
 
 export default payRouter;

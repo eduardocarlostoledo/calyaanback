@@ -16,6 +16,8 @@ import { obtenerIndicesCumplenCondicion } from "../helpers/comparaDisponibilidad
 import Coupon from "../models/CouponModel.js";
 import couponRoutes from "../routes/couponRoutes.js";
 import product from "../routes/productsRoutes.js";
+import { extraerNumeroDeNombre } from "../helpers/extraerNumeroDeNombre.js";
+import { coincideOrdenFacturaPaquetes } from "../helpers/coincideOrdenFacturaPaquetes.js";
 
 //import {reprogramarReserva} from "../helpers/reprogramacionReserva.js";
 
@@ -214,6 +216,8 @@ const feedbackSuccess = async (req, res) => {
       await cuponRedimido.save()
 
     }
+    //se envian los datos para editar las ordenes creadas por  paquetes contratado y pero sigue con el flujo natural de la orden sin hacer mas modificaciones
+    coincideOrdenFacturaPaquetes( order, factura )
 
     await disponibilidadProfesional.save();
     await order.save();
@@ -616,9 +620,10 @@ const liberarReserva = async (req, res) => {
       });
 
       if (!disponibilidadProfesional) {
-        throw new Error(
-          "No se encontró la disponibilidad del profesional para la reprogramación"
-        );
+        return res.status(404).json({ error: "Disponibilidad del profesional no encontrada" });
+        // throw new Error(
+        //   "No se encontró la disponibilidad del profesional para la reprogramación"
+        // );
       }
 
       const index = disponibilidadProfesional.horarios.findIndex(
@@ -643,18 +648,24 @@ const liberarReserva = async (req, res) => {
       //   liberar_profesional_email,
       //   liberar_profesional_telefono,
       // });
-      res.status(200).json({ msg: "Orden agendada correctamente" });
+      return res.status(200).json({ msg: "Orden agendada correctamente" });
+    } else {
+      return res.status(400).json({ error: "Faltan parámetros requeridos" });
     }
   } catch (error) {
     console.error(error);
-    throw new Error("Error al reprogramar la reserva");
+    return res.status(500).json({ error: "Error al reprogramar la reserva" });
   }
+  //     res.status(200).json({ msg: "Orden agendada correctamente" });
+  //   }
+  // } catch (error) {
+  //   console.error(error);
+  //   throw new Error("Error al reprogramar la reserva");
+  // }
 };
 
 const agendarOrden = async (req, res) => {
   try {
-
-
     const { cita_servicio, hora_servicio, profesional_id } = req.body;
 
     const order = await Orden.findById(req.body.id)
@@ -693,21 +704,15 @@ const agendarOrden = async (req, res) => {
       const fechaHoraServicio = new Date(`${cita_servicio}T${hora_servicio.split('-')[0]}:00`);
       const indicesCumplenCondicion = obtenerIndicesCumplenCondicion(disponibilidadProfesional, fechaHoraServicio);
       indicesCumplenCondicion.forEach(index => { disponibilidadProfesional.horarios[index].stock = false; });
-
     }
-
-
 
     order.cita_servicio = cita_servicio
     order.hora_servicio = hora_servicio
     order.profesional_id = req.body.profesional_id;
     order.estado_servicio = "Pendiente";
 
-
     await order.save()
     await disponibilidadProfesional.save();
-
-
 
     // await emailCompra({
     //   cliente_email: order.cliente_id.email,
@@ -751,15 +756,12 @@ const agendarOrden = async (req, res) => {
 
 const actualizarPago = async (req, res) => {
   try {
-
     const order = await Orden.findById(req.body.id)
-
     const factura = await Factura.findById(order.factura)
 
     factura.payment_id = req.body.payment_id
     factura.origen = req.body.origen
     factura.estadoPago = "approved"
-
 
     await factura.save()
 
@@ -767,6 +769,29 @@ const actualizarPago = async (req, res) => {
   } catch (error) {
     console.error(error);
     throw new Error("Error al porgramar");
+  }
+};
+
+const generarPaquetes = async (req, res) => {
+  console.log("GENERAR ORDENES",req.body)
+  try {
+    const order = await Orden.findById(req.body.id)
+    .populate({ path: "servicios" })
+    .populate({ path: "factura" });
+    
+    const factura = await Factura.findById(order.factura)   
+
+    //se envian los datos para editar las ordenes creadas por  paquetes contratado y pero sigue con el flujo natural de la orden sin hacer mas modificaciones
+    coincideOrdenFacturaPaquetes( order, factura )
+    
+    //seteamos la orden padre como paquete generado para que no se pueda volver a generar mas ordenes hijas.
+    order.paquetesGenerados = true;    
+    await order.save();
+
+    res.status(200).json({ msg: "SESIONES DEL PAQUETE GENERADAS" });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error al GENERAR ORDENES");
   }
 };
 
@@ -783,5 +808,7 @@ export {
   updatePayOrder,
   liberarReserva,
   agendarOrden,
-  actualizarPago
+  actualizarPago,
+  generarPaquetes
+
 };
