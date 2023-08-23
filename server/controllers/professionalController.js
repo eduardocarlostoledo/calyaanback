@@ -144,13 +144,9 @@ const obtenerDisponibilidadTotal = async (req, res) => {
 const actualizarProfesionalAdmin = async (req, res) => {
   const {
     _id,
-    // descripcion,
-    // especialidades,
-    // localidades,
-    ciudad,
     nombre,
     apellido,
-    // email,
+    email,
     telefono,
     cedula,
     sexo,
@@ -161,45 +157,25 @@ const actualizarProfesionalAdmin = async (req, res) => {
     const profesional = await Usuario.findOne({
       _id: _id,
     });
-    // .populate("reservas");
 
     if (!profesional) {
       const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
 
-    // if (descripcion) {
-    //   profesional.descripcion = descripcion;
-    // }
-
-    // if (especialidades && especialidades.length > 0) {
-    //   profesional.especialidad =
-    //     especialidades.map((especialidad) => especialidad) ||
-    //     profesional.especialidad;
-    // }
-
-    // if (localidades && localidades.length > 0) {
-    //   profesional.localidadesLaborales =
-    //     localidades.map((localidad) => localidad) ||
-    //     profesional.localidadesLaborales;
-    // }
-
-    // Actualizar los campos del perfil profesional si existen en la solicitud
-    // profesional.localidades = localidades || profesional.localidades;
-    profesional.ciudad = ciudad || profesional.ciudad;
     profesional.nombre = nombre || profesional.nombre;
     profesional.apellido = apellido || profesional.apellido;
-    // profesional.email = email || profesional.email;
+    profesional.email = email || profesional.email;
     profesional.telefono = telefono || profesional.telefono;
     profesional.cedula = cedula || profesional.cedula;
     profesional.sexo = sexo || profesional.sexo;
-    // profesional.direccionDefault =
-    //   direccionDefault || profesional.direccionDefault;
-
+    // if (direccionDefault.nombre) {
+    //   profesional.direccionDefault = direccionDefault;
+    // }
     await profesional.save();
 
     res.json({
-      msg: "Perfil profesional actualizado correctamente",
+      msg: "Perfil actualizado correctamente",
       profesional,
     });
   } catch (error) {
