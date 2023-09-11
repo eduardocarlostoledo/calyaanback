@@ -54,33 +54,76 @@ const cargarProductosWP = async (req, res) => {
     }
   }
 
+// Controlador para crear un nuevo producto
+const crearNuevoProducto = async (req, res) => {
+  try {
+    console.log(req.body);
+    // Extrae los datos del cuerpo de la solicitud
+    const { nombre, idWP, img, descripcion, precio, precio_regular, link } = req.body;
 
-// const cargarProductosWP = async (req, res) => {
-//   let { data } = await axios.get(
-//     "https://calyaan.com/wp-json/wc/v3/products?consumer_key=ck_07f6b677aea21f6f0e0766ddefddd5ffdec3f7e1&consumer_secret=cs_bcbd1af0cd51ddcd8b65dcf87990100945b5fddc"
-//   );
+    // Crea una nueva instancia de Producto con los datos proporcionados
+    const producto = new Producto({
+      nombre,
+      idWP,
+      img,
+      descripcion,
+      precio,
+      precio_regular,
+      link
+    });
 
-//   try {
-//     await data.map(async (productoState) => {
-//       let producto = await new Producto({
-//         nombre: productoState.name,
-//         idWP: productoState.id,
-//         img: productoState.images[0].src,
-//         descripcion: productoState.short_description,
-//         precio: productoState.price,
-//         precio_regular: productoState.regular_price,
-//         link: productoState.permalink
-//       });
+    // Guarda el nuevo producto en la base de datos
+    await producto.save();
 
-//       await producto.save();
-//     });
+    // Envía una respuesta con el producto creado
+    return res.status(201).json(producto);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Error al crear el producto" });
+  }
+};
 
-//     const allProductos =  await Producto.find()
+// //este endpoint se usa para cargar 1 id de wordpress a app de calyaan
+const crearNuevoProductoID = async (req, res) => {
+  try {
+    // Extrae el id del cuerpo de la solicitud se pasa solamente el ID DEL PRODUCTO DE WORDPRESS para que se guarde en la db de app calyaan
+    const productIds = [req.body.id];
+    const consumerKey = "ck_07f6b677aea21f6f0e0766ddefddd5ffdec3f7e1";
+    const consumerSecret = "cs_bcbd1af0cd51ddcd8b65dcf87990100945b5fddc";
 
-//     return res.json(allProductos);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
+    const allProductos = [];
 
-export { cargarProductosWP };
+    for (const id of productIds) {
+      const url = `https://calyaan.com/wp-json/wc/v3/products/${id}?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`;
+      const { data } = await axios.get(url);
+
+      const nombre = data.name ?? "";
+      const idWP = data.id ?? "";
+      const img = data.images?.[0]?.src ?? "";
+      const descripcion = data.short_description ?? "";
+      const precio = data.price ?? "";
+      const precio_regular = data.regular_price ?? "";
+      const link = data.permalink ?? "";
+
+      const producto = new Producto({
+        nombre,
+        idWP,
+        img,
+        descripcion,
+        precio,
+        precio_regular,
+        link
+      });
+
+      await producto.save();
+      allProductos.push(producto);
+    }
+
+    return res.json(allProductos);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Error al cargar los productos" });
+  }
+};
+
+export { cargarProductosWP, crearNuevoProducto, crearNuevoProductoID };
