@@ -22,7 +22,7 @@ import sendWhatsapp from "./routes/sendWhatsapp.js";
 import couponRoutes from "./routes/couponRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import settlementRoutes from "./routes/settlementRoutes.js";
-
+import siigoRoutes from "./routes/siigoRoutes.js";
 
 
 
@@ -76,6 +76,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routing
 app.use("/api/auth", authRoutes);
+app.use("/api/siigo", siigoRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/profesional", profesionalRoutes);
 app.use("/api/buscar", busquedasRoutes);
