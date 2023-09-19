@@ -26,7 +26,7 @@ console.log("factura",factura)
         payment_type: factura.payment_type,
         merchant_order_id: factura.merchant_order_id,  
         descuentoFidelidad: factura.descuentoFidelidad,     
-        origen: "Mercado Pago",
+        origen: factura.origen,
         servicios: factura.servicios,
         orden: factura.orden, 
         precioNeto: factura.precioNeto,
