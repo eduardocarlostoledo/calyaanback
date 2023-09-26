@@ -54,6 +54,10 @@ const ordenSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    nroSesion: {
+      type: String,
+      default: "Sesión 1",
+    }
   },
   {
     timestamps: true,

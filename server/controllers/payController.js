@@ -777,7 +777,7 @@ const generarPaquetes = async (req, res) => {
   try {
     const order = await Orden.findById(req.body.id)
     .populate({ path: "servicios" })
-    .populate({ path: "factura" });
+    .populate({ path: "factura" });    
     
     const factura = await Factura.findById(order.factura)   
 

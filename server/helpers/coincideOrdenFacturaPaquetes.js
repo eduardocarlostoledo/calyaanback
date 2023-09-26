@@ -4,8 +4,8 @@ import { extraerNumeroDeNombre } from "./extraerNumeroDeNombre.js";
 
 export async function coincideOrdenFacturaPaquetes(order, factura) {
 
-console.log("order",order)
-console.log("factura",factura)
+console.log("order", order.servicios[0].nombre)
+console.log("factura",factura.id)
 
   try {
     
@@ -19,7 +19,8 @@ console.log("factura",factura)
     const precioSubTotal = factura.precioSubTotal;
     const precioTotal = precioSubTotal / numeroDePaquete;
 
-    for (let i = 1; i < numeroDePaquete; i++) {
+    for (let i = 1; i < numeroDePaquete; i++) {      
+
       const FacturaOrden = new Factura({
         estadoPago: factura.estadoPago,
         payment_id: factura.payment_id,
@@ -36,12 +37,13 @@ console.log("factura",factura)
         metodo_pago: factura.metodo_pago
       });
 
-      const facturaNueva = await FacturaOrden.save();
-
+      const facturaNueva = await FacturaOrden.save();         
+      
       const OrdenPendiente = new Orden({
         cliente_id: order.cliente_id,
         profesional_id: order.profesional_id,
         servicios: order.servicios,
+        nroSesion: `Sesion ${i+1}`,        
         factura: facturaNueva._id,
         direccion_servicio: order.direccion_servicio,
         adicional_direccion_servicio: order.adicional_direccion_servicio,
@@ -51,9 +53,10 @@ console.log("factura",factura)
         hora_servicio: i > 0 ? "" : order.hora_servicio,
         localidad_servicio: order.localidad_servicio,
         paquetesGenerados: true,
-      });
-
+      }); 
+     
       const ordenNueva = await OrdenPendiente.save();
+      console.log("ORDEN NUEVA")
       facturaNueva.orden = ordenNueva._id;
       await facturaNueva.save();
       console.log("Factura y orden adicionales creadas:", facturaNueva._id, ordenNueva._id);
