@@ -1,7 +1,7 @@
 import express from "express";
 import authValidation from "../middlewares/siigo.authValidation.js";
 import { siigoLogin, AccountGroup } from "../controllers/siigo.auth.controller.js";
-import { createInvoice, getInvoice, getInvoicePDF, getElectronicInvoiceErrors } from "../controllers/siigo.invoice.controller.js";
+import { createInvoiceSiigo, getInvoiceSiigo, getInvoicePDFSiigo, getElectronicInvoiceErrorsSiigo } from "../controllers/siigo.invoice.controller.js";
 import { createCustomer, getCustomer, updateCustomer, deleteCustomer } from "../controllers/siigo.customer.controller.js";
 import { getDocumentType } from "../controllers/siigo.document-type.controller.js";
 import { createProduct, getProduct, updateProduct, deleteProduct } from "../controllers/siigo.product.controller.js";
@@ -16,14 +16,14 @@ const siigoRoutes = express.Router();
 siigoRoutes.post("/auth", siigoLogin); 
 siigoRoutes.get("/account-groups", authValidation, AccountGroup)
 siigoRoutes.get("/document-type/", authValidation, getDocumentType)
-siigoRoutes.route('/payment-types/:type').get(authValidation, getPaymentType)
+siigoRoutes.route('/payment-type/').get(authValidation, getPaymentType)
 
 
 siigoRoutes
-  .post('/invoice', authValidation, createInvoice)
-  .get('/invoice/:id?', authValidation, getInvoice)
-  .get('/invoice/:id?/PDF', authValidation, getInvoicePDF)
-  .get('/invoice/:id?/errors', authValidation, getElectronicInvoiceErrors)
+  .post('/invoice', authValidation, createInvoiceSiigo)
+  .get('/invoice/:id?', authValidation, getInvoiceSiigo)
+  .get('/invoice/:id?/PDF', authValidation, getInvoicePDFSiigo)
+  .get('/invoice/:id?/errors', authValidation, getElectronicInvoiceErrorsSiigo)
 
 
 

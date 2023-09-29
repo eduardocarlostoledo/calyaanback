@@ -4,7 +4,9 @@ import * as SiigoApi from 'siigo_api';
 // Handle index actions
 //const environment = require("../config/environment");
 
-const createInvoice = async function (req, res) {
+const createInvoiceSiigo = async function (req, res) {
+  try {
+
   const opts = {
     document: {
       id: req.body.document.id
@@ -18,9 +20,8 @@ const createInvoice = async function (req, res) {
     items: req.body.items,
     payments: req.body.payments
   };
-
-  try {
-    const apiInstance = new  SiigoApi.InvoiceApi();
+  
+    const apiInstance = new SiigoApi.InvoiceApi();
 
     const data = await apiInstance.createInvoice(opts);
     res.status(201).json(data);
@@ -33,7 +34,7 @@ const createInvoice = async function (req, res) {
   }
 };
 
-const getInvoice = async (req, res) => {
+const getInvoiceSiigo = async (req, res) => {
   if (req.params.id == undefined) {
     try {
       const apiInstance = new  SiigoApi.InvoiceApi();
@@ -78,7 +79,7 @@ const getInvoice = async (req, res) => {
   }
 };
 
-const getInvoicePDF = async (req, res) => {
+const getInvoicePDFSiigo = async (req, res) => {
   try {
     const apiInstance = new  SiigoApi.InvoiceApi();
     const id = req.params.id;
@@ -93,7 +94,7 @@ const getInvoicePDF = async (req, res) => {
   }
 };
 
-const getElectronicInvoiceErrors = async (req, res) => {
+const getElectronicInvoiceErrorsSiigo = async (req, res) => {
   try {
     const apiInstance = new  SiigoApi.InvoiceApi();
     const id = req.params.id;
@@ -108,4 +109,4 @@ const getElectronicInvoiceErrors = async (req, res) => {
   }
 };
 
-export { createInvoice, getInvoice, getInvoicePDF, getElectronicInvoiceErrors };
+export { createInvoiceSiigo, getInvoiceSiigo, getInvoicePDFSiigo, getElectronicInvoiceErrorsSiigo };

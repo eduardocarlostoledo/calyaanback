@@ -24,11 +24,7 @@ const getDocumentType = async (req, res) => {
 
     let apiInstance = new SiigoApi.DocumentTypeApi();
     const data = await apiInstance.getDocumentTypes(req.query);
-    res.status(200).json({
-      status: 'Ok',
-      info: "Sin datos", 
-      data: data,
-    })
+    res.status(200).json(data)
 //    const response = obtenerTiposDocumentos(type);
     //res.status(200).json(response);
   } catch (error) {

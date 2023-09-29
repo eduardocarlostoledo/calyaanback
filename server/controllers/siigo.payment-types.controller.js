@@ -6,12 +6,12 @@
 
 const getPaymentType = async (req, res) => {
   try {
-    const apiInstance = new  SiigoApi.PaymentTypeApi()
+    console.log("getDocumentTypes", req.query);    
     const opts = {
-      documentType: req.params.type
-    }
-
-    const data = await apiInstance.getPaymentType(opts)
+      documentType: req.query.document_type,
+    };
+    const apiInstance = new  SiigoApi.PaymentTypeApi()
+    const data = await apiInstance.getPaymentTypes(opts);
     res.status(200).json(data)
   } catch (error) {
     res.json({
