@@ -4,14 +4,14 @@
 // Handle index actions
 //const environment = require('../config/environment')
 
-const getPaymentTypes = async (req, res) => {
+const getPaymentType = async (req, res) => {
   try {
-    const apiInstance = new  SiigoApi.PaymentTypesApi()
+    const apiInstance = new  SiigoApi.PaymentTypeApi()
     const opts = {
       documentType: req.params.type
     }
 
-    const data = await apiInstance.getPaymentTypes(opts)
+    const data = await apiInstance.getPaymentType(opts)
     res.status(200).json(data)
   } catch (error) {
     res.json({
@@ -22,4 +22,4 @@ const getPaymentTypes = async (req, res) => {
   }
 }
 
-export { getPaymentTypes }
+export { getPaymentType }

@@ -1,11 +1,18 @@
 // invoiceController.js
 // Import user model
+
 import * as SiigoApi from 'siigo_api';
+//import { SiigoApi } from "../controllers/siigo.auth.controller.js";
+import { getAccessToken } from "../helpers/siigoAccessToken.js";
 
-const authValidation = async (req, res, next) => {
-  if (SiigoApi.ApiClient.instance != undefined) { next() }
+const authValidation = async (req, res, next) => { 
+  let accessToken = getAccessToken()
+  if (accessToken != undefined) { 
+    console.log("EL TOKEN ES VALIDO")
+    next() 
+  }
 
-  if (SiigoApi.ApiClient.instance == undefined) {
+  if (accessToken == undefined) {
     res.status(401).json({
       status: 'Error',
       message: 'You are not authenticated'
