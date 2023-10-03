@@ -4,10 +4,12 @@
 // Handle index actions
 //const environment = require('../config/environment')
 
-const getCustomer = async (req, res) => {
+const getCustomerSiigo = async (req, res) => {
+  console.log("params getCustomer", req.params, "query getCustomer", req.query)
   let data = {}
   if (req.params.id == undefined) {
     try {
+      console.log("params con id undefined")
       const apiInstance = new  SiigoApi.CustomerApi()
       const opts = {
         identification: req.body.identification,
@@ -36,6 +38,7 @@ const getCustomer = async (req, res) => {
     }
   } else {
     try {
+      console.log("params con id definido")
       const apiInstance = new  SiigoApi.CustomerApi()
       const id = req.params.id
 
@@ -51,25 +54,25 @@ const getCustomer = async (req, res) => {
   }
 }
 
-const createCustomer = async (req, res) => {
+const createCustomerSiigo = async (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'createCustomer works!'
   })
 }
 
-const updateCustomer = async (req, res) => {
+const updateCustomerSiigo = async (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'updateCustomer works!'
   })
 }
 
-const deleteCustomer = async (req, res) => {
+const deleteCustomerSiigo = async (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'deleteCustomer works!'
   })
 }
 
-export { getCustomer, createCustomer, updateCustomer, deleteCustomer }
+export { getCustomerSiigo, createCustomerSiigo, updateCustomerSiigo, deleteCustomerSiigo }

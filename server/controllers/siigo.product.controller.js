@@ -4,7 +4,7 @@
 // Handle index actions
 //const environment = require('../config/environment')
 
-const getProduct = async (req, res) => {
+const getProductSiigo = async (req, res) => {
   if (req.params.id == undefined) {
     try {
       const apiInstance = new  SiigoApi.ProductApi()
@@ -37,6 +37,7 @@ const getProduct = async (req, res) => {
   } else {
     try {
       const apiInstance = new  SiigoApi.ProductApi()
+      console.log("id: ", req.params.id)
       const id = req.params.id
 
       const data = await apiInstance.getProduct(id)
@@ -51,25 +52,25 @@ const getProduct = async (req, res) => {
   }
 }
 
-const createProduct = async (req, res) => {
+const createProductSiigo = async (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'createProduct works!'
   })
 }
 
-const updateProduct = async (req, res) => {
+const updateProductSiigo = async (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'updateProduct works!'
   })
 }
 
-const deleteProduct = async (req, res) => {
+const deleteProductSiigo = async (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'deleteProduct works!'
   })
 }
 
-export {   getProduct,   createProduct,   updateProduct,   deleteProduct }
+export {   getProductSiigo,   createProductSiigo,   updateProductSiigo,   deleteProductSiigo }

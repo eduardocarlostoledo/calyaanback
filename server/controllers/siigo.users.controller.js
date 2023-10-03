@@ -3,7 +3,7 @@
  import * as SiigoApi from 'siigo_api';
 // Handle index actions
 //const environment = require('../config/environment')
-const getUsers = async (req, res) => {
+const getUsersSiigo = async (req, res) => {
   try {
     const apiInstance = new  SiigoApi.UsersApi()
     const opts = {
@@ -22,4 +22,4 @@ const getUsers = async (req, res) => {
   }
 }
 
-export { getUsers }
+export { getUsersSiigo }

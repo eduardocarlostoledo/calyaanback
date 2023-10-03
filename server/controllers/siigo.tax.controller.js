@@ -4,7 +4,7 @@
 // Handle index actions
 //const environment = require('../config/environment')
 
-const getTaxes = async (req, res) => {
+const getTaxesSiigo = async (req, res) => {
   try {
     const apiInstance = new  SiigoApi.TaxesApi()
 
@@ -19,4 +19,4 @@ const getTaxes = async (req, res) => {
   }
 }
 
-export { getTaxes }
+export { getTaxesSiigo }
