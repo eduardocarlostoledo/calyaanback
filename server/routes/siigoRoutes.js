@@ -13,12 +13,17 @@ import { getTaxesSiigo } from "../controllers/siigo.tax.controller.js";
 const siigoRoutes = express.Router();
 //router.route('/auth').post(AuthController.login)
 
+//AUTH
 siigoRoutes.post("/auth", siigoLogin); 
 siigoRoutes.get("/account-groups", authValidation, AccountGroup)
+
+//DOCUMENT TYPE
 siigoRoutes.get("/document-type/", authValidation, getDocumentType)
+
+//PAYMENT TYPE
 siigoRoutes.route('/payment-type/').get(authValidation, getPaymentType)
 
-
+//INVOICE
 siigoRoutes
   .post('/invoice', authValidation, createInvoiceSiigo)
   .get('/invoice/:id?', authValidation, getInvoiceSiigo)
@@ -26,20 +31,24 @@ siigoRoutes
   .get('/invoice/:id?/errors', authValidation, getElectronicInvoiceErrorsSiigo)
 
 
-
+//CUSTOMER
   siigoRoutes
   .post('/create-customer/', authValidation, createCustomerSiigo)
   .get('/get-customer/', authValidation, getCustomerSiigo)
   .put('/update-customer/', authValidation, updateCustomerSiigo)
   .delete('/delete-customer/', authValidation, deleteCustomerSiigo)
 
+//PRODUCT
   siigoRoutes
   .post('/product/', authValidation, createProductSiigo)
   .get('/product/:id?', authValidation, getProductSiigo)
   .put('/product/:id?', authValidation, updateProductSiigo)
   .delete('/product/:id?', authValidation, deleteProductSiigo)
 
+//USERS
   siigoRoutes.route('/users').get(authValidation, getUsersSiigo)
+
+//TAXES
   siigoRoutes.route('/taxes').get(authValidation, getTaxesSiigo)
 
 export default siigoRoutes;
