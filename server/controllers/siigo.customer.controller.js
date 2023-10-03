@@ -6,11 +6,12 @@
 
 const getCustomerSiigo = async (req, res) => {
   console.log("params getCustomer", req.params, "query getCustomer", req.query)
-  //let data = {}
+  let data = {}
   if (req.params.id == undefined) {
     try {
       console.log("params con id undefined")
       const apiInstance = new  SiigoApi.CustomerApi()
+      console.log("apiInstance", apiInstance)
       const opts = {
         identification: req.body.identification,
         branchOffice: req.body.branchOffice,
@@ -26,10 +27,12 @@ const getCustomerSiigo = async (req, res) => {
         page: req.body.page,
         pageSize: req.body.pageSize
       }
-console.log("data", data, "opts", opts)
-const data = await apiInstance.getCustomers(opts);
-      //data = await apiInstance.getCustomers(opts)
+      console.log("opts", opts)
+
+data = await apiInstance.getCustomers(opts);
+      
       console.log("data despues de GetCustomers", data)
+
       res.status(200).json(data)
     } catch (error) {
       res.json({
