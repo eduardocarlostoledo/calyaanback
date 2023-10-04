@@ -4,60 +4,108 @@
 // Handle index actions
 //const environment = require('../config/environment')
 
-const getCustomerSiigo = async (req, res) => {
-  console.log("params getCustomer", req.params, "query getCustomer", req.query)
-  let data = {}
-  if (req.params.id == undefined) {
-    try {
-      console.log("params con id undefined")
-      const apiInstance = new  SiigoApi.CustomerApi()
-      console.log("apiInstance", apiInstance)
-      const opts = {
-        identification: req.body.identification,
-        branchOffice: req.body.branchOffice,
-        active: req.body.active,
-        type: req.body.type,
-        personType: req.body.personType,
-        createdStart: req.body.createdStart,
-        createdEnd: req.body.createdEnd,
-        dateStart: req.body.dateStart,
-        dateEnd: req.body.createdEnd,
-        updatedStart: req.body.updatedStart,
-        updatedEnd: req.body.updatedEnd,
-        page: req.body.page,
-        pageSize: req.body.pageSize
-      }
-      console.log("opts", opts)
+const getAllCustomersSiigo = async (req, res) => {
+  try {
+    const apiInstance = new SiigoApi.CustomerApi();
+    const opts = {
+      identification: req.body.identification,
+      branchOffice: req.body.branchOffice,
+      active: req.body.active,
+      type: req.body.type,
+      personType: req.body.personType,
+      createdStart: req.body.createdStart,
+      createdEnd: req.body.createdEnd,
+      dateStart: req.body.dateStart,
+      dateEnd: req.body.dateEnd, // Corregido, debe ser dateEnd: req.body.dateEnd
+      updatedStart: req.body.updatedStart,
+      updatedEnd: req.body.updatedEnd,
+      page: req.body.page,
+      pageSize: req.body.pageSize
+    };
 
-data = await apiInstance.getCustomers(opts);
-      
-      console.log("data despues de GetCustomers", data)
-
-      res.status(200).json(data)
-    } catch (error) {
-      res.json({
-        status: 'Error',
-        message: 'Something was wrong',
-        error: error
-      })
-    }
-  } else {
-    try {
-      console.log("params con id definido", req.params.id)
-      const apiInstance = new  SiigoApi.CustomerApi()
-      const id = req.params.id
-
-      data = await apiInstance.getCustomer(id)
-      res.status(200).json(data)
-    } catch (error) {
-      res.json({
-        status: 'Error',
-        message: 'Something was wrong',
-        error: error
-      })
-    }
+    const data = await apiInstance.getCustomers(opts);
+    res.status(200).json(data);
+  } catch (error) {
+    res.json({
+      status: 'Error',
+      message: 'Something was wrong',
+      error: error
+    });
   }
-}
+};
+
+const getCustomerByIdSiigo = async (req, res) => {
+  try {
+    const apiInstance = new SiigoApi.CustomerApi();
+    const id = req.params.id;
+
+    const data = await apiInstance.getCustomer(id);
+    res.status(200).json(data);
+  } catch (error) {
+    res.json({
+      status: 'Error',
+      message: 'Something was wrong',
+      error: error
+    });
+  }
+};
+// const getCustomerSiigo = async (req, res) => {    
+//     console.log("params getCustomer", req.params, "query getCustomer", req.query)
+//   //let data = {}
+//   if (req.params.id == undefined) {
+//     try {
+//       console.log("params con id undefined")
+//       const apiInstance = new  SiigoApi.CustomerApi()
+//       console.log("apiInstance", apiInstance)
+//       const opts = {
+//         identification: req.body.identification,
+//         branchOffice: req.body.branchOffice,
+//         active: req.body.active,
+//         type: req.body.type,
+//         personType: req.body.personType,
+//         createdStart: req.body.createdStart,
+//         createdEnd: req.body.createdEnd,
+//         dateStart: req.body.dateStart,
+//         dateEnd: req.body.createdEnd,
+//         updatedStart: req.body.updatedStart,
+//         updatedEnd: req.body.updatedEnd,
+//         page: req.body.page,
+//         pageSize: req.body.pageSize
+//       }
+//       console.log("opts", opts)
+
+// // const data = await apiInstance.getCustomers(opts).then((data) => {
+// //   console.log('API called successfully. Returned data: ' + data);
+// // }, (error) => {
+// //   console.error(error);
+// // });
+//       data = await apiInstance.getCustomers(opts);      
+//       console.log("data despues de GetCustomers", data)
+//       res.status(200).json(data)
+//     } catch (error) {
+//       res.json({
+//         status: 'Error',
+//         message: 'Something was wrong',
+//         error: error
+//       })
+//     }
+//   } else {
+//     try {
+//       console.log("params con id definido", req.params.id)
+//       const apiInstance = new  SiigoApi.CustomerApi()
+//       const id = req.params.id
+
+//       data = await apiInstance.getCustomer(id)
+//       res.status(200).json(data)
+//     } catch (error) {
+//       res.json({
+//         status: 'Error',
+//         message: 'Something was wrong',
+//         error: error
+//       })
+//     }
+//   }
+// }
 
 const createCustomerSiigo = async (req, res) => {
   res.status(200).json({
@@ -80,4 +128,4 @@ const deleteCustomerSiigo = async (req, res) => {
   })
 }
 
-export { getCustomerSiigo, createCustomerSiigo, updateCustomerSiigo, deleteCustomerSiigo }
+export { getAllCustomersSiigo, getCustomerByIdSiigo,  createCustomerSiigo, updateCustomerSiigo, deleteCustomerSiigo }

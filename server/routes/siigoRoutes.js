@@ -2,9 +2,9 @@ import express from "express";
 import authValidation from "../middlewares/siigo.authValidation.js";
 import { siigoLogin, AccountGroup } from "../controllers/siigo.auth.controller.js";
 import { createInvoiceSiigo, getInvoiceSiigo, getInvoicePDFSiigo, getElectronicInvoiceErrorsSiigo } from "../controllers/siigo.invoice.controller.js";
-import { createCustomerSiigo, getCustomerSiigo, updateCustomerSiigo, deleteCustomerSiigo } from "../controllers/siigo.customer.controller.js";
+import { createCustomerSiigo, getAllCustomersSiigo, getCustomerByIdSiigo, updateCustomerSiigo, deleteCustomerSiigo } from "../controllers/siigo.customer.controller.js";
 import { getDocumentType } from "../controllers/siigo.document-type.controller.js";
-import { createProductSiigo, getProductSiigo, updateProductSiigo, deleteProductSiigo } from "../controllers/siigo.product.controller.js";
+import { createProductSiigo, getAllProductsSiigo, getProductByIdSiigo, updateProductSiigo, deleteProductSiigo } from "../controllers/siigo.product.controller.js";
 import { getPaymentType } from "../controllers/siigo.payment-types.controller.js";
 import { getUsersSiigo } from "../controllers/siigo.users.controller.js";
 import { getTaxesSiigo } from "../controllers/siigo.tax.controller.js";
@@ -34,16 +34,18 @@ siigoRoutes
 //CUSTOMER
   siigoRoutes
   .post('/create-customer/', authValidation, createCustomerSiigo)
-  .get('/get-customer/', authValidation, getCustomerSiigo)
+  .get('/get-customer/', authValidation, getAllCustomersSiigo)
+  .get('/get-customer/:id', authValidation, getCustomerByIdSiigo)
   .put('/update-customer/', authValidation, updateCustomerSiigo)
   .delete('/delete-customer/', authValidation, deleteCustomerSiigo)
 
-//PRODUCT
+  //PRODUCT
   siigoRoutes
-  .post('/product/', authValidation, createProductSiigo)
-  .get('/product/:id?', authValidation, getProductSiigo)
-  .put('/product/:id?', authValidation, updateProductSiigo)
-  .delete('/product/:id?', authValidation, deleteProductSiigo)
+    .post('/product/', authValidation, createProductSiigo)
+    .get('/products', authValidation, getAllProductsSiigo)
+    .get('/product/:id', authValidation, getProductByIdSiigo)
+    .put('/product/:id', authValidation, updateProductSiigo)
+    .delete('/product/:id', authValidation, deleteProductSiigo)
 
 //USERS
   siigoRoutes.route('/users').get(authValidation, getUsersSiigo)
