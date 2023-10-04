@@ -74,11 +74,7 @@ const AccountGroup = async (req, res) => {
 
     // configuration for the SDK  
 
-    res.status(200).json({
-      status: 'Ok',
-      info: "Sin datos",
-      data: data,
-    })
+    res.status(200).json(data)
   } catch (error) {
     res.json({
       status: 'Error',
