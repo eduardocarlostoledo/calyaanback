@@ -1,7 +1,7 @@
 import * as SiigoApi from 'siigo_api';
 
 const getAllProductsSiigo = async (req, res) => {
-  try {
+  try {    
     const apiInstance = new SiigoApi.ProductApi();
     const opts = {
       code: req.body.code,
@@ -34,7 +34,7 @@ const getAllProductsSiigo = async (req, res) => {
 const getProductByIdSiigo = async (req, res) => {
   try {
     const apiInstance = new SiigoApi.ProductApi();
-    console.log("id: ", req.params.id);
+    console.log("id: ", req.query.id);
     const id = req.params.id;
 
     const data = await apiInstance.getProduct(id);

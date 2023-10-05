@@ -62,38 +62,98 @@ const getCustomerByIdSiigo = async (req, res) => {
 
 const createCustomerSiigo = async (req, res) => {
   try {
-    const opts = {
-      personType: req.body.person_type,
-      idType: req.body.id_type,
+
+
+    const opts = {      
+      person_type: req.body.person_type,
+      id_type: req.body.id_type,
       identification: req.body.identification,
       name: req.body.name,
       address: req.body.address,
       phones: req.body.phones,
       contacts: req.body.contacts,
+      comments: req.body.comments,
+      related_users: req.body.related_users,
+      type: req.body.type
     };
-    
-    const data = await axios.get('https://api.siigo.com/v1/customers', {
+console.log("OPTIONS CREATE CUSTOMER", opts)
+    // Cambia axios.get a axios.post y asegúrate de especificar la URL correcta para crear un cliente.
+    const data = await axios.post('https://api.siigo.com/v1/customers', opts, {
       headers: {
-        Authorization: `Bearer ${getAccessToken()}`
-      },
-      body: opts
-    });    
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAccessToken()}`,
+        'Partner-Id': "calyaanapp",
+      }
+    });
 
     res.status(200).json({
       status: 'success',
       message: 'Customer created successfully!',
-      data: data
+      data: data.data // El resultado de la solicitud POST debe estar en data.data
     });
   } catch (error) {
-    console.error('Error creating customer:', error);
 
-    res.status(500).json({
-      status: 'error',
-      message: 'Something went wrong',
-      error: error.message
-    });
+    if (error.response && error.response.data) {
+      // If the error response contains 'data' with 'Status' and 'Errors'
+      console.error('Error Status:', error.response.data.Status);
+      console.error('Errors:', error.response.data.Errors);
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      // If there's no specific error response structure, log a general error
+      console.error('Error:', error.message);
+      res.status(500).json({ error: 'An error occurred' });
+    }
+
+    // console.error('Error creating customer:', error);
+
+    // res.status(500).json({
+    //   status: 'error',
+    //   message: 'Something went wrong',
+    //   error: error.message
+    // });
   }
 }
+
+// const createCustomerSiigo = async (req, res) => {
+//   try {
+//     const opts = {
+//       type: req.body.type,
+//       personType: req.body.person_type,
+//       idType: req.body.id_type,
+//       identification: req.body.identification,
+//       name: req.body.name,
+//       address: req.body.address,
+//       phones: req.body.phones,
+//       contacts: req.body.contacts,
+//       comments: req.body.comments,
+//       related_users: req.body.related_users
+//     };
+    
+//     let newOpts=JSON.stringify(opts)
+//     console.log("OPTIONS CREATE CUSTOMER", newOpts)
+
+//     const data = await axios.post('https://api.siigo.com/v1/customers', {
+//       headers: {
+//         Authorization: `Bearer ${getAccessToken()}`
+//       },
+//       body: newOpts
+//     });    
+
+//     res.status(200).json({
+//       status: 'success',
+//       message: 'Customer created successfully!',
+//       data: data
+//     });
+//   } catch (error) {
+//     console.error('Error creating customer:', error);
+
+//     res.status(500).json({
+//       status: 'error',
+//       message: 'Something went wrong',
+//       error: error.message
+//     });
+//   }
+// }
 
 // const createCustomerSiigo = async (req, res) => {
 //   try {
