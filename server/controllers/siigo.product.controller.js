@@ -48,6 +48,37 @@ const getProductByIdSiigo = async (req, res) => {
   }
 };
 
+const getProductByCodeSiigo = async (req, res) => {
+  try {    
+    const apiInstance = new SiigoApi.ProductApi();
+    const opts = {
+      code: req.body.code,
+      accountGroup: req.body.accountGroup,
+      type: req.body.type,
+      stockControl: req.body.stockControl,
+      active: req.body.active,
+      ids: req.params.ids,
+      createdStart: req.body.createdStart,
+      createdEnd: req.body.createdEnd,
+      dateStart: req.body.dateStart,
+      dateEnd: req.body.dateEnd,
+      updatedStart: req.body.updatedStart,
+      updatedEnd: req.body.updatedEnd,
+      page: req.body.page,
+      pageSize: req.body.pageSize
+    };
+
+    const data = await apiInstance.getProducts(opts);
+    res.status(200).json(data);
+  } catch (error) {
+    res.json({
+      status: 'Error',
+      message: 'Something was wrong',
+      error: error
+    });
+  }
+};
+
 const createProductSiigo = async (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -69,7 +100,7 @@ const deleteProductSiigo = async (req, res) => {
   });
 };
 
-export { getAllProductsSiigo, getProductByIdSiigo, createProductSiigo, updateProductSiigo, deleteProductSiigo };
+export { getProductByCodeSiigo, getAllProductsSiigo, getProductByIdSiigo, createProductSiigo, updateProductSiigo, deleteProductSiigo };
 
 // // productController.js
 // // Import user model

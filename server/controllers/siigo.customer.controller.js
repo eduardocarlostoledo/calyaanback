@@ -62,8 +62,6 @@ const getCustomerByIdSiigo = async (req, res) => {
 
 const createCustomerSiigo = async (req, res) => {
   try {
-
-
     const opts = {      
       person_type: req.body.person_type,
       id_type: req.body.id_type,
@@ -77,7 +75,6 @@ const createCustomerSiigo = async (req, res) => {
       type: req.body.type
     };
 console.log("OPTIONS CREATE CUSTOMER", opts)
-    // Cambia axios.get a axios.post y asegúrate de especificar la URL correcta para crear un cliente.
     const data = await axios.post('https://api.siigo.com/v1/customers', opts, {
       headers: {
         'Content-Type': 'application/json',
@@ -89,23 +86,18 @@ console.log("OPTIONS CREATE CUSTOMER", opts)
     res.status(200).json({
       status: 'success',
       message: 'Customer created successfully!',
-      data: data.data // El resultado de la solicitud POST debe estar en data.data
+      data: data.data
     });
   } catch (error) {
 
     if (error.response && error.response.data) {
-      // If the error response contains 'data' with 'Status' and 'Errors'
       console.error('Error Status:', error.response.data.Status);
       console.error('Errors:', error.response.data.Errors);
       res.status(error.response.status).json(error.response.data);
     } else {
-      // If there's no specific error response structure, log a general error
       console.error('Error:', error.message);
       res.status(500).json({ error: 'An error occurred' });
     }
-
-    // console.error('Error creating customer:', error);
-
     // res.status(500).json({
     //   status: 'error',
     //   message: 'Something went wrong',
@@ -114,98 +106,53 @@ console.log("OPTIONS CREATE CUSTOMER", opts)
   }
 }
 
-// const createCustomerSiigo = async (req, res) => {
-//   try {
-//     const opts = {
-//       type: req.body.type,
-//       personType: req.body.person_type,
-//       idType: req.body.id_type,
-//       identification: req.body.identification,
-//       name: req.body.name,
-//       address: req.body.address,
-//       phones: req.body.phones,
-//       contacts: req.body.contacts,
-//       comments: req.body.comments,
-//       related_users: req.body.related_users
-//     };
-    
-//     let newOpts=JSON.stringify(opts)
-//     console.log("OPTIONS CREATE CUSTOMER", newOpts)
-
-//     const data = await axios.post('https://api.siigo.com/v1/customers', {
-//       headers: {
-//         Authorization: `Bearer ${getAccessToken()}`
-//       },
-//       body: newOpts
-//     });    
-
-//     res.status(200).json({
-//       status: 'success',
-//       message: 'Customer created successfully!',
-//       data: data
-//     });
-//   } catch (error) {
-//     console.error('Error creating customer:', error);
-
-//     res.status(500).json({
-//       status: 'error',
-//       message: 'Something went wrong',
-//       error: error.message
-//     });
-//   }
-// }
-
-// const createCustomerSiigo = async (req, res) => {
-//   try {
-//     const apiInstance = new SiigoApi.CustomerApi();
-// const opts = {
-//   type: req.body.type,
-//   personType: req.body.person_type,
-//   identification: req.body.identification,
-//   name: [
-//     req.body.name
-//   ],
-//   address: { 
-//     address: req.body.address.address,
-//     city: {
-//       country_code: req.body.address.city.country_code,
-//       state_code: req.body.address.city.state_code,
-//       city_code: req.body.address.city.city_code,    
-//     },
-//   },
-//   phones: [{
-//     number : req.body.phones
-//   }],
-//   contacts: [
-//     {
-//         first_name: req.body.contacts.first_name,
-//         last_name: req.body.contacts.last_name,
-//         email: req.body.contacts.email,
-//     }
-// ]
-// };
-//     const data = await apiInstance.getCustomers(opts);
-    
-//     res.status(200).json({
-//       status: 'success',
-//       message: 'createCustomer works!',
-//       data: data
-//     })  
-//   } catch (error) {
-//     res.json({
-//       status: 'Error',
-//       message: 'Something was wrong',
-//       error: error
-//     });
-//   }
-  
-// }
-
 const updateCustomerSiigo = async (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'updateCustomer works!'
-  })
+  try {
+    let apiInstance = new SiigoApi.CustomerApi();
+    const id = req.params.id;
+
+    const opts = {      
+      type: req.body.type,
+      person_type: req.body.person_type,
+      id_type: req.body.id_type,
+      identification: req.body.identification,
+      name: req.body.name,
+      commercial_name: req.body.commercial_name,
+      address: req.body.address,
+      phones: req.body.phones,
+      contacts: req.body.contacts,
+      comments: req.body.comments,
+      related_users: req.body.related_users,
+      custom_fields: req.body.custom_fields,      
+    };
+console.log("OPTIONS UPDATE CUSTOMER", id, opts)
+const data = await apiInstance.updateCustomer(id, opts);
+    // const data = await axios.put(`https://api.siigo.com/v1/customers/${id}`, opts, {
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: `Bearer ${getAccessToken()}`,
+    //     'Partner-Id': "calyaanapp",
+    //   }
+    // });
+    // res.status(200).json({
+    //   status: 'success',
+    //   message: 'Customer updated successfully!',
+    //   data: data.data // El resultado de la solicitud put debe estar en data.data
+    // });
+    res.status(200).json(data);
+  } catch (error) {
+    console.log("ERROR UPDATE CUSTOMER", error)
+    if (error.response && error.response.data) {
+      //si la respuesta contiene 'data' con un 'Status' and 'Errors'
+      console.error('Error Status:', error.response.data.Status);
+      console.error('Errors:', error.response.data.Errors);
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      // si no, que muestre el error que retorna la api.
+      console.error('Error:', error.message);
+      res.status(500).json({ error: 'An error occurred' });
+    }
+  }
 }
 
 const deleteCustomerSiigo = async (req, res) => {
