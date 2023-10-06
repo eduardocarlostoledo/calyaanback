@@ -2,7 +2,7 @@ import express from "express";
 import authValidation from "../middlewares/siigo.authValidation.js";
 import { siigoLogin, AccountGroup } from "../controllers/siigo.auth.controller.js";
 import { createInvoiceSiigo, getInvoiceSiigo, getInvoicePDFSiigo, getElectronicInvoiceErrorsSiigo } from "../controllers/siigo.invoice.controller.js";
-import { createCustomerSiigo, getAllCustomersSiigo, getCustomerByIdSiigo, updateCustomerSiigo, deleteCustomerSiigo } from "../controllers/siigo.customer.controller.js";
+import { createCustomerSiigo, getAllCustomersSiigo, getCustomerByIdSiigo, updateCustomerSiigo, deleteCustomerSiigo, getCustomersIdentificationSiigo } from "../controllers/siigo.customer.controller.js";
 import { getDocumentType } from "../controllers/siigo.document-type.controller.js";
 import { createProductSiigo, getAllProductsSiigo, getProductByIdSiigo, updateProductSiigo, deleteProductSiigo, getProductByCodeSiigo } from "../controllers/siigo.product.controller.js";
 import { getPaymentType } from "../controllers/siigo.payment-types.controller.js";
@@ -35,17 +35,18 @@ siigoRoutes
   siigoRoutes
   .post('/create-customer/', authValidation, createCustomerSiigo)
   .get('/get-customer/', authValidation, getAllCustomersSiigo)
+  .post('/get-customer-identification/', authValidation, getCustomersIdentificationSiigo)
   .get('/get-customer/:id', authValidation, getCustomerByIdSiigo)
   .put('/update-customer/:id', authValidation, updateCustomerSiigo)
   .delete('/delete-customer/', authValidation, deleteCustomerSiigo)
 
   //PRODUCT
   siigoRoutes
-    .post('/product/', authValidation, createProductSiigo)
+    .post('/create-product/', authValidation, createProductSiigo)
     .get('/products', authValidation, getAllProductsSiigo)
     .get('/product/:id', authValidation, getProductByIdSiigo)
-    .get('/product-code/', authValidation, getProductByCodeSiigo)
-    .put('/product/:id', authValidation, updateProductSiigo)
+    .post('/product-code/', authValidation, getProductByCodeSiigo)
+    .put('/update-product/:id', authValidation, updateProductSiigo)
     .delete('/product/:id', authValidation, deleteProductSiigo)
 
 //USERS

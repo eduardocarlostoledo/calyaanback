@@ -44,6 +44,44 @@ const getAllCustomersSiigo = async (req, res) => {
   }
 };
 
+const getCustomersIdentificationSiigo = async (req, res) => {
+  try {
+    const apiInstance = new SiigoApi.CustomerApi();
+    const opts = {
+      identification: req.body.identification,
+      branchOffice: req.body.branchOffice,
+      active: req.body.active,
+      type: req.body.type,
+      personType: req.body.personType,
+      createdStart: req.body.createdStart,
+      createdEnd: req.body.createdEnd,
+      dateStart: req.body.dateStart,
+      dateEnd: req.body.dateEnd, // Corregido, debe ser dateEnd: req.body.dateEnd
+      updatedStart: req.body.updatedStart,
+      updatedEnd: req.body.updatedEnd,
+      page: req.body.page,
+      pageSize: req.body.pageSize
+    };
+    
+    //const data = await apiInstance.getCustomers(opts);
+    const data = await axios.get('https://api.siigo.com/v1/customers', {
+      headers: {
+        Authorization: `Bearer ${getAccessToken()}`
+      },
+      params: opts
+    });
+    res.status(200).json(data.data);
+    
+  } catch (error) {
+    res.json({
+      status: 'Error',
+      message: 'Something was wrong',
+      error: error
+    });
+  }
+};
+
+
 const getCustomerByIdSiigo = async (req, res) => {
   try {
     const apiInstance = new SiigoApi.CustomerApi();
@@ -162,4 +200,4 @@ const deleteCustomerSiigo = async (req, res) => {
   })
 }
 
-export { getAllCustomersSiigo, getCustomerByIdSiigo,  createCustomerSiigo, updateCustomerSiigo, deleteCustomerSiigo }
+export { getAllCustomersSiigo, getCustomerByIdSiigo,  createCustomerSiigo, updateCustomerSiigo, deleteCustomerSiigo, getCustomersIdentificationSiigo }
