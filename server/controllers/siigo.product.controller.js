@@ -86,7 +86,8 @@ const createProductSiigo = async (req, res) => {
     const opts = {            
       code: req.body.code,      
       name: req.body.name,      
-      account_group: req.body.account_group
+      account_group: req.body.account_group,
+      description: req.body.description,
     };
 console.log("OPTIONS CREATE PRODUCT", opts)
 const data = await axios.post('https://api.siigo.com/v1/products', opts, {

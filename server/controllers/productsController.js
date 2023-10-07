@@ -26,11 +26,11 @@ const getProducts = async (req, res, next) => {
 };
 
 const getProductName = async (req, res, next) => {
-
+console.log("entro a getProductName", req.params);
   const {nombre} = req.params;
 
   try {
-    const product = await Producto.findOne({nombre}).select("-createdAt -updatedAt");
+    const product = await Producto.findOne({"nombre": nombre}).select("-createdAt -updatedAt");
     res.status(200).json(product);
   } catch (err) {
     next(err);

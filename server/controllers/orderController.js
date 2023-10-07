@@ -23,7 +23,7 @@ const getAllOrden = async (req, res, next) => {
           select: "_id nombre apellido email cedula telefono direccionDefault",
         },
       })
-      .populate({ path: "servicios", select: "_id nombre precio link img" })
+      .populate({ path: "servicios", select: "_id idWP nombre precio link img" })
       .lean();
 
     const ordenes = orden.map((orden) => {
