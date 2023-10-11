@@ -47,7 +47,7 @@ const actualizarProfesional = async (req, res) => {
 };
 
 const actualizarProfesionalAdminDash = async (req, res) => {
-  
+  console.log("actualizarProfesionalAdminDash", req.body);
   const { descripcion, especialidades, localidades, fecha, horarios, _id} = req.body;
 
   try {
@@ -121,15 +121,15 @@ const actualizarProfesionalAdminDash = async (req, res) => {
 };
 
 const obtenerDisponibilidadProfesionalAdminDash= async (req, res) => {
-  const { fecha, _id } = req.params;
-  //console.log(fecha);
+  const { fecha, _id } = req.query;
+  console.log(fecha, _id);
   try {
-    const disponibilidad = await Disponibilidad.findOne({
+    const disponibilidadParaDashboard = await Disponibilidad.findOne({
       fecha,
       creador: _id,
     });
 
-    res.json(disponibilidad);
+    res.json(disponibilidadParaDashboard);
   } catch (error) {
     console.log(error);
     return res
@@ -433,10 +433,9 @@ const crearDisponibilidad = async (req, res) => {
 };
 
 const obtenerDisponibilidad = async (req, res) => {
+  console.log("estoy entrando donde quiero nomas...")
   const { fecha } = req.params;
-
   //console.log(fecha);
-
   try {
     const disponibilidad = await Disponibilidad.findOne({
       fecha,

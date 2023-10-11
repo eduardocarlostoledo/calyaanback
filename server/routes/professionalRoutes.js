@@ -40,7 +40,7 @@ profesionalRoutes.get(
 profesionalRoutes.get(
   "/disponibilidad-profesional-admin-dash",
   // checkAuth,  
-);obtenerDisponibilidadProfesionalAdminDash
+  obtenerDisponibilidadProfesionalAdminDash);
 
 profesionalRoutes.get(
   "/perfil-profesional-id/:id",
