@@ -342,8 +342,8 @@ const crearDisponibilidad = async (req, res) => {
     const profesional = await PerfilProfesional.findById(
       req.usuario.profesional
     );
-    // console.log("profesional", profesional);
-    //console.log(fecha, horarios, profesional._id);
+    
+    console.log("FECHA Y HORA A CREAR",fecha, horarios, profesional._id);
 
     const actualizaDisponibilidad = await Disponibilidad.findOne(
       { fecha, creador: profesional._id },
