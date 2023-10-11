@@ -18,6 +18,7 @@ import {
   GetPerfilProfesional,
   obtenerDisponibilidadTotal,
   GetPerfilProfesionalID,
+  obtenerDisponibilidadProfesionalAdminDash,
 } from "../controllers/professionalController.js";
 
 const profesionalRoutes = express.Router();
@@ -35,6 +36,11 @@ profesionalRoutes.get(
   // checkAuth,
   obtenerDisponibilidadTotal
 );
+
+profesionalRoutes.get(
+  "/disponibilidad-profesional-admin-dash",
+  // checkAuth,  
+);obtenerDisponibilidadProfesionalAdminDash
 
 profesionalRoutes.get(
   "/perfil-profesional-id/:id",

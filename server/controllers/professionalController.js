@@ -47,7 +47,8 @@ const actualizarProfesional = async (req, res) => {
 };
 
 const actualizarProfesionalAdminDash = async (req, res) => {
-  const { descripcion, especialidades, localidades, _id } = req.body;
+  
+  const { descripcion, especialidades, localidades, fecha, horarios, _id} = req.body;
 
   try {
     // Comprobar si el usuario existe
@@ -76,6 +77,38 @@ const actualizarProfesionalAdminDash = async (req, res) => {
         profesional.localidadesLaborales;
     }
 
+    if (fecha && horarios) {
+      console.log("FECHA Y HORA A CREAR",fecha, horarios, profesional._id);
+
+      const disponibilidad = await Disponibilidad.findOne(
+        { fecha, creador: profesional._id },
+        { new: true }
+      );
+
+      if (disponibilidad) {
+        const updateDisponibilidad = await Disponibilidad.updateOne(
+          { fecha, creador: profesional._id },
+          { $set: { fecha, horarios, creador: profesional._id } }
+        );
+
+        res.json({
+          msg: "Disponibilidad actualizada",
+          disponibilidad: updateDisponibilidad,
+        });
+        return;
+      }
+
+      const nuevaDisponibilidad = new Disponibilidad({
+        fecha,
+        horarios,
+        creador: profesional._id,
+      });
+
+      await nuevaDisponibilidad.save();
+      profesional.disponibilidad.push(nuevaDisponibilidad._id);
+    }
+
+
     await profesional.save();
 
     res.json({
@@ -84,6 +117,24 @@ const actualizarProfesionalAdminDash = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+  }
+};
+
+const obtenerDisponibilidadProfesionalAdminDash= async (req, res) => {
+  const { fecha, _id } = req.params;
+  //console.log(fecha);
+  try {
+    const disponibilidad = await Disponibilidad.findOne({
+      fecha,
+      creador: _id,
+    });
+
+    res.json(disponibilidad);
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ msg: "Error intentado acceder a la informacion" });
   }
 };
 
@@ -523,4 +574,5 @@ export {
   obtenerIDSReferidos,
   GetPerfilProfesional,
   GetPerfilProfesionalID,
+  obtenerDisponibilidadProfesionalAdminDash
 };
