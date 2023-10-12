@@ -47,7 +47,7 @@ const actualizarProfesional = async (req, res) => {
 };
 
 const actualizarProfesionalAdminDash = async (req, res) => {
-  console.log("actualizarProfesionalAdminDash", req.body);
+  //console.log("actualizarProfesionalAdminDash", req.body);
   const { descripcion, especialidades, localidades, fecha, horarios, _id } =
     req.body;
 
@@ -122,7 +122,7 @@ const actualizarProfesionalAdminDash = async (req, res) => {
 
 const obtenerDisponibilidadProfesionalAdminDash = async (req, res) => {
   const { fecha, _id } = req.query;
-  console.log(fecha, _id);
+  //console.log(fecha, _id);
   try {
     const disponibilidadParaDashboard = await Disponibilidad.findOne({
       fecha,
@@ -388,14 +388,14 @@ const crearDisponibilidad = async (req, res) => {
   // console.log("crear disponibilidad api/profesional", req.body);
   // console.log("req.usuario.profesional", req.usuario.profesional);
   const { fecha, horarios, _id } = req.body;
-  console.log(req.body, "body");
+  //console.log(req.body, "body");
   try {
     const profesional = await PerfilProfesional.findById(
       _id || req.usuario.profesional
     );
     // console.log(idProfesional, "id");
 
-    console.log("FECHA Y HORA A CREAR", profesional);
+    //console.log("FECHA Y HORA A CREAR", profesional);
 
     const actualizaDisponibilidad = await Disponibilidad.findOne(
       { fecha, creador: profesional._id },
