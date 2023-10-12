@@ -222,39 +222,39 @@ const feedbackSuccess = async (req, res) => {
     await disponibilidadProfesional.save();
     await order.save();
     await factura.save()
-    // await emailCompra({
-    //   cliente_email: order.cliente_id.email,
-    //   cliente_nombre: order.cliente_id.nombre,
-    //   cliente_apellido: order.cliente_id.apellido,
-    //   cliente_telefono: order.cliente_id.telefono,
-    //   profesional_nombre: order.profesional_id.creador.nombre,
-    //   servicio: order.servicios[0].nombre,
-    //   precio: order.factura.precioTotal,
-    //   dia_servicio: order.cita_servicio,
-    //   hora_servicio: order.hora_servicio,
-    //   direccion_Servicio: order.direccion_servicio,
-    //   adicional_direccion_Servicio: order.adicional_direccion_servicio,
-    //   ciudad_Servicio: order.ciudad_servicio,
-    //   localidad_Servicio: order.localidad_servicio,
-    //   estadoPago: order.factura.estadoPago,
-    // });
+    await emailCompra({
+      cliente_email: order.cliente_id.email,
+      cliente_nombre: order.cliente_id.nombre,
+      cliente_apellido: order.cliente_id.apellido,
+      cliente_telefono: order.cliente_id.telefono,
+      profesional_nombre: order.profesional_id.creador.nombre,
+      servicio: order.servicios[0].nombre,
+      precio: order.factura.precioTotal,
+      dia_servicio: order.cita_servicio,
+      hora_servicio: order.hora_servicio,
+      direccion_Servicio: order.direccion_servicio,
+      adicional_direccion_Servicio: order.adicional_direccion_servicio,
+      ciudad_Servicio: order.ciudad_servicio,
+      localidad_Servicio: order.localidad_servicio,
+      estadoPago: order.factura.estadoPago,
+    });
 
-    // await emailProfesional({
-    //   cliente_nombre: order.cliente_id.nombre,
-    //   cliente_apellido: order.cliente_id.apellido,
-    //   cliente_cedula: order.cliente_id.cedula,
-    //   profesional_email: order.profesional_id.creador.email,
-    //   profesional_nombre: order.profesional_id.creador.nombre,
-    //   profesional_telefono: order.profesional_id.creador.telefono,
-    //   servicio: order.servicios[0].nombre,
-    //   dia_servicio: order.cita_servicio,
-    //   hora_servicio: order.hora_servicio,
-    //   direccion_Servicio: order.direccion_servicio,
-    //   adicional_direccion_Servicio: order.adicional_direccion_servicio,
-    //   ciudad_Servicio: order.ciudad_servicio,
-    //   localidad_Servicio: order.localidad_servicio,
-    //   estadoPago: order.factura.estadoPago,
-    // });
+    await emailProfesional({
+      cliente_nombre: order.cliente_id.nombre,
+      cliente_apellido: order.cliente_id.apellido,
+      cliente_cedula: order.cliente_id.cedula,
+      profesional_email: order.profesional_id.creador.email,
+      profesional_nombre: order.profesional_id.creador.nombre,
+      profesional_telefono: order.profesional_id.creador.telefono,
+      servicio: order.servicios[0].nombre,
+      dia_servicio: order.cita_servicio,
+      hora_servicio: order.hora_servicio,
+      direccion_Servicio: order.direccion_servicio,
+      adicional_direccion_Servicio: order.adicional_direccion_servicio,
+      ciudad_Servicio: order.ciudad_servicio,
+      localidad_Servicio: order.localidad_servicio,
+      estadoPago: order.factura.estadoPago,
+    });
 
     res.redirect(`${process.env.FRONT}/resumen/${external_reference}`);
   } catch (error) {
