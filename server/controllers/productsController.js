@@ -26,7 +26,7 @@ const getProducts = async (req, res, next) => {
 };
 
 const getProductName = async (req, res, next) => {
-console.log("entro a getProductName", req.params);
+//console.log("entro a getProductName", req.params);
   const {nombre} = req.params;
 
   try {

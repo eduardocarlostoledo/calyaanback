@@ -15,7 +15,7 @@ const createSettlement = async (req, res, next) => {
       porcentajeProfesional,
       porcentajeCaalyan,
     } = req.body;
-    console.log(req.body, "llega ppor body");
+    //console.log(req.body, "llega ppor body");
     if (
       !numeroLiquidacion ||
       !estadoLiquidacion ||

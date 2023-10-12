@@ -223,7 +223,7 @@ const updateOrden = async (req, res) => {
     const options = { new: true };
     const update = {};
 
-    console.log("updat perfil", profesional_id);
+    //console.log("updat perfil", profesional_id);
 
     if (estado_servicio) {
       update.estado_servicio = estado_servicio;
@@ -241,7 +241,7 @@ const updateOrden = async (req, res) => {
       });
     }
 
-    console.log(update.profesional_id, "updat");
+    //console.log(update.profesional_id, "updat");
     const ordenActualizada = await Orden.findByIdAndUpdate(_id, update, options)
       .populate({
         path: "cliente_id",
@@ -263,7 +263,7 @@ const updateOrden = async (req, res) => {
       return res.status(404).json({ message: "Orden not found" });
     }
 
-    console.log(ordenActualizada.profesional_id, profesional_id, "Actualizada");
+    //console.log(ordenActualizada.profesional_id, profesional_id, "Actualizada");
     res.json({
       msg: "Orden actualizada correctamente",
       ordenActualizada,

@@ -79,7 +79,7 @@ const actualizarProfesionalAdminDash = async (req, res) => {
     }
 
     if (fecha && horarios) {
-      console.log("FECHA Y HORA A CREAR", fecha, horarios, profesional._id);
+      //console.log("FECHA Y HORA A CREAR", fecha, horarios, profesional._id);
 
       const disponibilidad = await Disponibilidad.findOne(
         { fecha, creador: profesional._id },
@@ -434,7 +434,7 @@ const crearDisponibilidad = async (req, res) => {
 };
 
 const obtenerDisponibilidad = async (req, res) => {
-  console.log("estoy entrando donde quiero nomas...");
+  //console.log("estoy entrando donde quiero nomas...");
   const { fecha } = req.params;
   //console.log(fecha);
   try {

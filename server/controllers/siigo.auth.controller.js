@@ -25,7 +25,7 @@ const siigoLogin = async (req, res) => {
   if (!req.body.username || !req.body.access_key) { res.status(400).send('Error: Incomplete Data') }
   try {
     const { username, access_key } = req.body;
-    console.log("ACCESS", username, access_key);
+    //console.log("ACCESS", username, access_key);
 
 
     // Iniciar sesión para obtener el token

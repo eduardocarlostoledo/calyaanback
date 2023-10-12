@@ -773,7 +773,7 @@ const actualizarPago = async (req, res) => {
 };
 
 const generarPaquetes = async (req, res) => {
-  console.log("GENERAR ORDENES",req.body)
+  //console.log("GENERAR ORDENES",req.body)
   try {
     const order = await Orden.findById(req.body.id)
     .populate({ path: "servicios" })

@@ -57,7 +57,7 @@ const cargarProductosWP = async (req, res) => {
 // Controlador para crear un nuevo producto
 const crearNuevoProducto = async (req, res) => {
   try {
-    console.log(req.body);
+    //console.log(req.body);
     // Extrae los datos del cuerpo de la solicitud
     const { nombre, idWP, img, descripcion, precio, precio_regular, link } = req.body;
 

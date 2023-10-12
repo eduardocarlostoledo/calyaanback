@@ -87,7 +87,7 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
       });
     }
 
-    console.log(buscarPorfesionales)
+    //console.log(buscarPorfesionales)
 
     return res.status(200).json(buscarPorfesionales);
   } catch (error) {
