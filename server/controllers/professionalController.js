@@ -3,6 +3,8 @@ import PerfilProfesional from "../models/ProfessionalModel.js";
 import Disponibilidad from "../models/AvailableModel.js";
 import Reserva from "../models/BookingModel.js";
 import Orden from "../models/OrderModel.js";
+import { ObjectId } from 'mongodb';
+
 
 const actualizarProfesional = async (req, res) => {
   const { _id } = req.usuario;
@@ -383,55 +385,99 @@ const perfilReferido = async (req, res) => {
     console.log(error);
   }
 };
-
 const crearDisponibilidad = async (req, res) => {
-  // console.log("crear disponibilidad api/profesional", req.body);
-  // console.log("req.usuario.profesional", req.usuario.profesional);
   const { fecha, horarios, _id } = req.body;
-  //console.log(req.body, "body");
   try {
-    const profesional = await PerfilProfesional.findById(
-      _id || req.usuario.profesional
-    );
-    // console.log(idProfesional, "id");
-
-    //console.log("FECHA Y HORA A CREAR", profesional);
-
-    const actualizaDisponibilidad = await Disponibilidad.findOne(
-      { fecha, creador: profesional._id },
-      { new: true }
-    );
+    const profesional = await PerfilProfesional.findById(_id);
+    const actualizaDisponibilidad = await Disponibilidad.findOne({
+      fecha,
+      creador: new ObjectId(profesional._id),
+    });
 
     if (actualizaDisponibilidad) {
       const updateDisponibilidad = await Disponibilidad.updateOne(
-        { fecha, creador: profesional._id },
-        { $set: { fecha, horarios, creador: profesional._id } }
+        { fecha,       creador: new ObjectId(profesional._id),
+        },
+        { $set: { 
+          fecha, 
+          horarios,
+          creador: new ObjectId(profesional._id),
+        } }
       );
-
       res.json({
         msg: "Disponibilidad actualizada",
         disponibilidad: updateDisponibilidad,
       });
-      return;
+    } else {
+      const nuevaDisponibilidad = new Disponibilidad({
+        fecha,
+        horarios,
+        creador: new ObjectId(profesional._id),
+      });
+
+      await nuevaDisponibilidad.save();
+      profesional.disponibilidad.push(nuevaDisponibilidad._id);
+      await profesional.save();
+
+      res.json({
+        msg: "Disponibilidad agregada",
+      });
     }
-
-    const nuevaDisponibilidad = new Disponibilidad({
-      fecha,
-      horarios,
-      creador: profesional._id,
-    });
-
-    await nuevaDisponibilidad.save();
-    profesional.disponibilidad.push(nuevaDisponibilidad._id);
-    await profesional.save();
-
-    res.json({
-      msg: "Disponibilidad agregada",
-    });
   } catch (err) {
     console.log(err);
+    res.status(500).json({ error: "Error del servidor" }); // Manejo básico de errores
   }
 };
+
+// const crearDisponibilidad = async (req, res) => {
+//   // console.log("crear disponibilidad api/profesional", req.body);
+//   // console.log("req.usuario.profesional", req.usuario.profesional);
+//   const { fecha, horarios, _id } = req.body;
+
+//   console.log(req.body, "crearDisponibilidad body");
+//   try {
+// //    const { _id } = req.usuario;
+//     const profesional = await PerfilProfesional.findById(_id)
+//     // console.log(idProfesional, "id");
+
+//     console.log("FECHA Y HORA A CREAR", profesional);
+
+//     const actualizaDisponibilidad = await Disponibilidad.findOne(
+//       { fecha, creador: profesional._id },
+//       { new: true }
+//     );
+//     console.log("FECHA Y HORA A creada", actualizaDisponibilidad);
+
+//     if (actualizaDisponibilidad) {
+//       const updateDisponibilidad = await Disponibilidad.updateOne(
+//         { fecha, creador: profesional._id },
+//         { $set: { fecha, horarios, creador: profesional._id } }
+//       );      
+
+//       res.json({
+//         msg: "Disponibilidad actualizada",
+//         disponibilidad: updateDisponibilidad,
+//       });
+//       return;
+//     }
+
+//     const nuevaDisponibilidad = new Disponibilidad({
+//       fecha,
+//       horarios,
+//       creador: profesional._id,
+//     });
+
+//     await nuevaDisponibilidad.save();
+//     profesional.disponibilidad.push(nuevaDisponibilidad._id);
+//     await profesional.save();
+
+//     res.json({
+//       msg: "Disponibilidad agregada",
+//     });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
 
 const obtenerDisponibilidad = async (req, res) => {
   //console.log("estoy entrando donde quiero nomas...");

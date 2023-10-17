@@ -58,6 +58,7 @@ const obtenerProEspecialidadFechaHora = async (req, res) => {
 
 //"/profesionales/fecha",
 const obtenerProfesionalesPorFecha = async (req, res) => {
+  //console.log("OBTENERPROFESIONALPORFECHA" , req.body)
   const { fecha, especialidad, localidad } = req.body;
 
   try {
@@ -76,7 +77,7 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
       },
     })
     .lean();
-
+//console.log("endpoint",profesionales)
     let buscarPorfesionales = profesionales.filter(
       (profesionalState) => profesionalState.creador !== null
     );
