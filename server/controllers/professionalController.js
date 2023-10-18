@@ -194,6 +194,90 @@ const obtenerDisponibilidadTotal = async (req, res) => {
   }
 };
 
+const obtenerDisponibilidadTotalOrdenada = async (req, res) => {
+  try {
+    const { matchEspecialidad, matchLocalidadLaboral } = req.body;
+
+    if (!matchEspecialidad || !matchLocalidadLaboral) {
+      return res.status(400).json({ message: 'Especialidad y Localidad son campos obligatorios.' });
+    }
+
+    const profesionales = await Disponibilidad.find()
+      .populate({
+        path: "creador",
+        select: "descripcion _id especialidad localidadesLaborales creador",
+        populate: {
+          path: "creador",
+          select: "_id nombre img apellido telefono img",
+        },
+      })
+      .sort({ fecha: 1 })
+      .select("-id -createdAt -updatedAt")
+      .lean();
+
+    const fechaActual = new Date();
+    const fechaLimite = new Date(fechaActual.getTime());
+    // const fechaLimite = new Date(fechaActual.getTime() + 5 * 60 * 60 * 1000);
+
+    const profesionalesFiltrados = profesionales.filter((profesional) => {
+      return (
+        profesional.creador !== null &&
+        profesional.creador.especialidad !== null &&
+        profesional.creador.localidadesLaborales !== null &&
+        profesional.horarios.length > 0 &&
+        new Date(profesional.fecha) > fechaLimite
+      );
+    });
+
+    if (profesionalesFiltrados.length === 0) {
+      return res.status(200).json({
+        msg: "No encontramos profesionales con disponibilidad para la fecha indicada. Por favor, intenta nuevamente.",
+      });
+    }
+    const disponibilidadTotal = profesionalesFiltrados.map((profesional) => {
+      const horariosDisponibles = profesional.horarios.filter((horario) => {
+        return horario.stock === true;
+      });
+
+      return {
+        ...profesional,
+        disponibilidad: horariosDisponibles,
+      };
+    });
+
+    const mapeado = profesionalesFiltrados.flatMap((disponibilidad) => {
+      const horasDisponibles = disponibilidad.horarios
+        .filter((horario) => horario.stock === true)
+        .map((disponible) => ({
+          disponibilidad_id: disponibilidad._id,
+          fechaDisponibilidad: disponibilidad.fecha,
+          hora: disponible.hora,
+          id: disponible._id,
+          especialidad: disponibilidad.creador.especialidad,
+          localidadesLaborales: disponibilidad.creador.localidadesLaborales,
+          nombre: disponibilidad.creador.creador.nombre,
+          apellido: disponibilidad.creador.creador.apellido,
+          telefono: disponibilidad.creador.creador.telefono,
+          id_profesional: disponibilidad.creador.creador._id
+        }));
+      
+      return horasDisponibles;
+    });
+    const resultados = mapeado.filter((profesional) => {
+      return (
+        profesional.especialidad.includes(matchEspecialidad) && 
+        profesional.localidadesLaborales.includes(matchLocalidadLaboral)
+      );
+    });
+     return res.status(200).json(resultados);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      msg: "Hubo un problema intentando acceder a los profesionales.",
+    });
+  }
+};
+
 const actualizarProfesionalAdmin = async (req, res) => {
   const {
     _id,
@@ -621,4 +705,5 @@ export {
   GetPerfilProfesional,
   GetPerfilProfesionalID,
   obtenerDisponibilidadProfesionalAdminDash,
+  obtenerDisponibilidadTotalOrdenada
 };
