@@ -126,4 +126,70 @@ const crearNuevoProductoID = async (req, res) => {
   }
 };
 
+/* funcion para llenar una db de productos directo en la api 
+
+const cargarProductosWP = async (req, res) => {
+  try {
+    const { data } = await axios.get(
+      "https://calyaanback-production.up.railway.app/api/products"
+    );
+
+    for (const productoState of data) {
+      const {
+        nombre,
+        idWP,
+        images,
+        short_description,
+        price,
+        regular_price,
+        permalink
+      } = productoState;
+
+      const img = images?.[0]?.src ?? "";
+      const descripcion = short_description ?? "";
+      const precio = price ? price : 0; // Reemplaza 0 con el valor predeterminado que desees en caso de que 'price' esté vacío
+      const precio_regular = regular_price ?? "";
+      const link = permalink ?? "";
+
+      if (precio === '') {
+        console.error('El precio del producto no puede estar vacío');
+        continue; // Salta este producto y pasa al siguiente
+      }
+
+      let productoExistente = await Producto.findOne({ idWP });
+
+      if (productoExistente) {
+        Object.assign(productoExistente, {
+          nombre,
+          img,
+          descripcion,
+          precio,
+          precio_regular,
+          link
+        });
+
+        await productoExistente.save();
+      } else {
+        const nuevoProducto = new Producto({
+          nombre,
+          idWP,
+          img,
+          descripcion,
+          precio,
+          precio_regular,
+          link
+        });
+
+        await nuevoProducto.save();
+      }
+    }
+
+    res.json({ message: "Productos actualizados y creados exitosamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al actualizar los productos" });
+  }
+};
+
+*/
 export { cargarProductosWP, crearNuevoProducto, crearNuevoProductoID };

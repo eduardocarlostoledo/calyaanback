@@ -50,12 +50,27 @@ dotenv.config();
 conectarDB();
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // update to match the domain you will make the request from
+  const allowedOrigins = ['http://localhost', 'https://calyaan.netlify.app', 'http://calyaanback-production.up.railway.app', 'http://calyaan.com', 'http://calyaan.com.co'];
+
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   next();
 });
+
+
+
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', '*'); // update to match the domain you will make the request from
+//   res.header('Access-Control-Allow-Credentials', 'true');
+//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+//   next();
+// });
 
 // Configurar CORS
 // const whitelist = [process.env.FRONTEND_URL];
