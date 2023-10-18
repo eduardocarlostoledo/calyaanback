@@ -70,6 +70,34 @@ const registrar = async (req, res) => {
 };
 
 // CONFIRMAR LAS CUENTAS
+const confirmarEmail = async (req, res) => {  
+  const { email } = req.body;
+
+  // Comprobar si el usuario existe
+  const confirmarUsuario = await Usuario.findOne({ email });
+  console.log(confirmarUsuario, "confirmar usuario")
+
+  if (!confirmarUsuario) {
+    const error = new Error("usuario inexistente");
+    return res.status(403).json({ msg: error.message });
+  }
+
+  if (confirmarUsuario.confirmado) {
+    const error = new Error("El usuario ya esta confirmado");
+    return res.status(403).json({ msg: error.message });
+  }
+
+  try {
+    confirmarUsuario.token = "";
+    confirmarUsuario.confirmado = true;
+    await confirmarUsuario.save();
+    return res.json({ msg: "Usuario Confirmado Correctamente" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// CONFIRMAR LAS CUENTAS
 const confirmar = async (req, res) => {
   // acceder al token
   const { token } = req.params;
@@ -813,5 +841,6 @@ export {
   GetPerfil,
   obtenerUsuarioEmail,
   registrarUsuarioReserva,
-  getUser
+  getUser,
+  confirmarEmail
 };

@@ -30,7 +30,8 @@ import {
   GetPerfil,
   obtenerUsuarioEmail,
   registrarUsuarioReserva,
-  getUser
+  getUser,
+  confirmarEmail
 } from "../controllers/userController.js";
 
 // Instanciando el router de express
@@ -56,6 +57,7 @@ usuarioRoutes.post(
 
 // confirmar cuenta
 usuarioRoutes.get("/confirmar/:token", confirmar);
+usuarioRoutes.post("/confirmar/", confirmarEmail);
 
 //validar token y definir nuevo password
 usuarioRoutes.post(
