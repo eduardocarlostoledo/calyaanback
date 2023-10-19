@@ -40,19 +40,19 @@ profesionalRoutes.get(
 
 profesionalRoutes.post(
   "/disponibilidades-totales-ordenadas",
-  // checkAuth,
+  //checkAuth,
   obtenerDisponibilidadTotalOrdenada
 );
 
 
 profesionalRoutes.get(
   "/disponibilidad-profesional-admin-dash",
-  // checkAuth,  
+  checkAuth, isAdminRole,
   obtenerDisponibilidadProfesionalAdminDash);
 
 profesionalRoutes.get(
   "/perfil-profesional-id/:id",
-  // checkAuth,
+  checkAuth,
   GetPerfilProfesionalID
 );
 
@@ -61,14 +61,14 @@ profesionalRoutes.get("/perfil-referido", checkAuth, perfilReferido);
 //  actualizar el perfil profesional del usuario ( descripcion, localidades y especialidades)
 profesionalRoutes.put(
   "/actualizar-profesional-admin",
-  // checkAuth,
+  checkAuth, isAdminRole,
   actualizarProfesionalAdminDash
 );
 
 // Actualizar el perfil de usuaio del profesional
 profesionalRoutes.put(
   "/actualizar-profesional-admin-dash",
-  // checkAuth,
+  checkAuth, isAdminRole,
   actualizarProfesionalAdmin
 );
 

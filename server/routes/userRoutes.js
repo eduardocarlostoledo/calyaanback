@@ -110,44 +110,24 @@ usuarioRoutes.get("/excel-usuarios", [checkAuth, isAdminRole], usuariosExcel);
 usuarioRoutes.get("/excel-cliente", [checkAuth, isAdminRole], clientesExcel);
 
 //generar excel de profesionales
-usuarioRoutes.get(
-  "/excel-profesional",
-  [checkAuth, isAdminRole],
-  profesionalesExcel
+usuarioRoutes.get("/excel-profesional", [checkAuth, isAdminRole], profesionalesExcel
 );
 
 //generar excel de administradores
-usuarioRoutes.get(
-  "/excel-admin",
-  [checkAuth, isAdminRole],
-  administradoresExcel
+usuarioRoutes.get("/excel-admin", [checkAuth, isAdminRole], administradoresExcel
 );
 
 //generar excel de horarios
 usuarioRoutes.get("/excel-horarios", [checkAuth, isAdminRole], horariosExcel);
 
 //obtener un usario
-usuarioRoutes.get(
-  "/:id",
-  [checkAuth, check("id", "no es un id válido").isMongoId(), validarCampos],
-  obtenerUsuario
-);
+usuarioRoutes.get("/:id", [checkAuth, check("id", "no es un id válido").isMongoId(), validarCampos], obtenerUsuario);
 
 //desactivar un usuario
-usuarioRoutes.delete(
-  "/:id",
-  [
-    checkAuth,
-    isSuperAdminRole,
-    check("id", "no es un id válido").isMongoId(),
-    validarCampos,
-  ],
-  desactivarUsuario
-);
+usuarioRoutes.delete("/:id", [checkAuth, isAdminRole, check("id", "no es un id válido").isMongoId(), validarCampos, ], desactivarUsuario);
 
 //PROFESIONAL
-usuarioRoutes.post(
-  "/registro-profesional",
+usuarioRoutes.post("/registro-profesional",
   [
     check("nombre", "El nombre es obligatorio").not().isEmpty(),
     check("apellido", "El apellido es obligatorio").not().isEmpty(),
@@ -165,10 +145,10 @@ usuarioRoutes.post(
 usuarioRoutes.get("/historial/:id", checkAuth, obtenerHistorial);
 
 // Obtener usuario por email
-usuarioRoutes.post("/email", checkAuth, obtenerUsuarioEmail);
+usuarioRoutes.post("/email",   checkAuth, isAdminRole, obtenerUsuarioEmail);
 
 // Crear usuario en reserva 
-usuarioRoutes.post("/reserva-usuario", checkAuth, registrarUsuarioReserva);
+usuarioRoutes.post("/reserva-usuario",   checkAuth, isAdminRole, registrarUsuarioReserva);
 
 
 export default usuarioRoutes;

@@ -32,8 +32,7 @@ busquedasRoutes.get("/profesionales", checkAuth, obtenerProfesionales);
 busquedasRoutes.get("/all",[checkAuth,isAdminRole],obtenerAll)
 
 busquedasRoutes.get("/obtenertodosusuarios",
-// [checkAuth,isAdminRole],
-obtenerTodosUsuarios) 
+checkAuth, isAdminRole, obtenerTodosUsuarios) 
 
 busquedasRoutes.get("/ordenes",[checkAuth,isAdminRole],obtenerOrdenes)
 

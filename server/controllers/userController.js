@@ -385,16 +385,18 @@ const registrarProfesional = async (req, res) => {
     usuario.profesional = nuevoPerfilProfesional;
     await usuario.save();
 
+    /*
+    se desactiva este fragmento para evitar que los profesionales confirmen su cuenta y accedan al perfil de profesional
     // Enviar el email de confirmacion
     const { nombre, email, token } = usuario;
     emailRegistro({
       email,
       nombre,
       token,
-    });
+    });*/
 
     res.json({
-      msg: "Usuario Profesional creado correctamente, Revisa tu Email para confirmar tu cuenta",
+      msg: "Usuario profesional creado. Contacta al Administrador para autorizar tu cuenta",
     });
   } catch (error) {
     console.log(error);

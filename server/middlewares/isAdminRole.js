@@ -1,10 +1,11 @@
-const isAdminRole = (req, res = response, next) => {
+const isAdminRole = (req, res, next) => {
+  //console.log("VERIFICANDO ROL")
   if (!req.usuario) {
     return res.status(500).json({
       msg: "Se quiere validar el rol sin validar el token primero",
     });
   }
-
+//console.log("req.usuario ISADMINROLE",req.usuario);
   const { rol, nombre } = req.usuario;
 
 

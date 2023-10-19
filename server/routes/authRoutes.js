@@ -1,7 +1,11 @@
 import express from "express";
 import { check } from "express-validator";
-import { login, googleSignIn } from "../controllers/authController.js";
+import { login, googleSignIn, getLogs } from "../controllers/authController.js";
 import validarCampos from "../middlewares/fieldsValidation.js";
+import Log from "../models/LogModel.js";
+import isAdminRole from "../middlewares/isAdminRole.js";
+import checkAuth from "../middlewares/checkAuth.js";
+
 
 const authRoutes = express.Router();
 
@@ -23,5 +27,9 @@ authRoutes.post(
   ],
   googleSignIn
 );
+
+// Endpoint que retorna los logs
+authRoutes.get('/logs', 
+checkAuth, isAdminRole, getLogs);
 
 export default authRoutes;
