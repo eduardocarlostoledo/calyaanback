@@ -47,7 +47,7 @@ app.use(morgan("dev"));
 conectarDB();
 
 app.use((req, res, next) => {
-  const allowedOrigins = ['http://localhost', 'https://calyaan.netlify.app', 'http://calyaanback-production.up.railway.app', 'http://calyaan.com', 'http://calyaan.com.co'];
+  const allowedOrigins = ['http://localhost', 'https://calyaan.netlify.app', 'http://calyaanback-production.up.railway.app', 'http://calyaan.com', 'http://calyaan.com.co', 'https://sdk.mercadopago.com', "https://www.mercadolibre.com.co", "https://www.mercadopago.com.co", "https://api.whatsapp.com"];
 
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -58,6 +58,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   next();
 });
+
 
 // app.use((req, res, next) => {
 //   res.header('Access-Control-Allow-Origin', '*'); // update to match the domain you will make the request from
