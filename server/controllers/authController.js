@@ -37,51 +37,114 @@ const almacenarLog = async (nombre, email, rol, tipo) => {
   }
 };
 
-// AUTENTICAR A LOS USUARIOS
+// // AUTENTICAR A LOS USUARIOS (le agregamos validaciones y una respuesta de error mas amigable)
+
 const login = async (req, res) => {
-  // verificamos si el email ya existe en nuestra base de datos
-  const { email, password, rol } = req.body;
-//console.log("LOGIN", email, password, rol)
+  try {
+    const { email, password, rol } = req.body;
+//console.log("login", req.body, email, password, rol)
+    // Buscando al usuario en la base de datos
+    const usuario = await Usuario.findOne({ email, rol });
 
-  const usuario = await Usuario.findOne({ email, rol });
-  //console.log("USUARIO", usuario)
+    // Si no se encuentra ningún usuario con el email y rol proporcionados
+    if (!usuario) {
+      return res.status(404).json({ msg: 'Usuario no encontrado' });
+    }
 
-  if (!usuario) {
-    const error = new Error('Usuario no registrado');
-    return res.status(404).json({ msg: error.message });
-  }
-  if (usuario.google === true) {
-    const error = new Error('Debe iniciar sesión por medio de google');
-    return res.status(404).json({ msg: error.message });
-  }
-  if (!usuario.confirmado) {
-    // Comprobar si el usuario está confirmado
-    const error = new Error('Tu cuenta no ha sido confirmada');
-    return res.status(403).json({ msg: error.message });
-  }
+    // Si el usuario ha iniciado sesión a través de Google
+    if (usuario.google === true) {
+      return res.status(404).json({ msg: 'Debe iniciar sesión por medio de Google' });
+    }
 
-  // Comprobar el password del usuario
-  if (await usuario.comprobarPassword(password)) {
-    usuario.ultimaConexion = new Date();
-    await usuario.save();
+    // Si la cuenta del usuario no está confirmada
+    if (!usuario.confirmado) {
+      return res.status(403).json({ msg: 'Tu cuenta no ha sido confirmada' });
+    }
 
-    const token = generarJWT(usuario._id);
-    await almacenarLog(usuario.nombre, usuario.email, usuario.rol, 'login');
+    // Verificando la contraseña del usuario
+    const isPasswordValid = await usuario.comprobarPassword(password);
 
-    res.json({
-      _id: usuario._id,
-      nombre: usuario.nombre,
-      email: usuario.email,
-      rol: usuario.rol,
-      confirmado: usuario.confirmado,
-      profesionalId: usuario.profesional,
-      token: token,
-    });
-  } else {
-    const error = new Error('Credenciales Incorrectas');
-    return res.status(403).json({ msg: error.message });
+    if (isPasswordValid) {
+      // Actualizando la última conexión del usuario y guardando
+      usuario.ultimaConexion = new Date();
+      await usuario.save();
+
+      // Generando un token JWT
+      const token = generarJWT(usuario._id);
+
+      // Almacenando un registro de inicio de sesión
+      await almacenarLog(usuario.nombre, usuario.email, usuario.rol, 'login');
+
+      // Respondiendo con los datos del usuario y el token
+      res.json({
+        _id: usuario._id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        rol: usuario.rol,
+        confirmado: usuario.confirmado,
+        profesionalId: usuario.profesional,
+        token: token,
+      });
+    } else {
+      // Si las credenciales son incorrectas
+      return res.status(403).json({ msg: 'Credenciales incorrectas' });
+    }
+  } catch (error) {
+    // Si ocurre algún error durante el proceso
+    console.error('Error durante el proceso de inicio de sesión:', error);
+    return res.status(500).json({ msg: 'Error interno del servidor' });
   }
 };
+
+
+// const login = async (req, res) => {
+//   // verificamos si el email ya existe en nuestra base de datos
+//   const { email, password, rol } = req.body;
+// //console.log("LOGIN", email, password, rol)
+
+//   const usuario = await Usuario.findOne({ email, rol });
+//   console.log("USUARIO", usuario)
+//   if (usuario===null) {
+//     const error = new Error('No se han encontrado coincidencias o los datos son Incorrectos');
+//     return res.status(404).json({ msg: error.message });
+//   }
+
+//   if (!usuario) {
+//     const error = new Error('Usuario no registrado');
+//     return res.status(404).json({ msg: error.message });
+//   }
+//   if (usuario.google === true) {
+//     const error = new Error('Debe iniciar sesión por medio de google');
+//     return res.status(404).json({ msg: error.message });
+//   }
+//   if (!usuario.confirmado) {
+//     // Comprobar si el usuario está confirmado
+//     const error = new Error('Tu cuenta no ha sido confirmada');
+//     return res.status(403).json({ msg: error.message });
+//   }
+
+//   // Comprobar el password del usuario
+//   if (await usuario.comprobarPassword(password)) {
+//     usuario.ultimaConexion = new Date();
+//     await usuario.save();
+
+//     const token = generarJWT(usuario._id);
+//     await almacenarLog(usuario.nombre, usuario.email, usuario.rol, 'login');
+
+//     res.json({
+//       _id: usuario._id,
+//       nombre: usuario.nombre,
+//       email: usuario.email,
+//       rol: usuario.rol,
+//       confirmado: usuario.confirmado,
+//       profesionalId: usuario.profesional,
+//       token: token,
+//     });
+//   } else {
+//     const error = new Error('Credenciales Incorrectas');
+//     return res.status(403).json({ msg: error.message });
+//   }
+// };
 
 const googleSignIn = async (req, res) => {
   try {

@@ -24,8 +24,6 @@ import invoiceRoutes from "./routes/invoiceRoutes.js";
 import settlementRoutes from "./routes/settlementRoutes.js";
 import siigoRoutes from "./routes/siigoRoutes.js";
 
-
-
 dotenv.config();
 
 const ACCESS_TOKEN_MERCADOPAGO = process.env.ACCESS_TOKEN_MERCADOPAGO;
@@ -44,8 +42,7 @@ app.use(express.json());
 // Morgan
 app.use(morgan("dev"));
 
-dotenv.config();
-
+//dotenv.config();
 
 conectarDB();
 
@@ -61,8 +58,6 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   next();
 });
-
-
 
 // app.use((req, res, next) => {
 //   res.header('Access-Control-Allow-Origin', '*'); // update to match the domain you will make the request from
@@ -86,6 +81,7 @@ app.use((req, res, next) => {
 //   },
 // };
 // app.use(cors(corsOption));
+
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 
