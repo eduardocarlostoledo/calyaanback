@@ -1,6 +1,8 @@
 import Usuario from "../models/UserModel.js";
 import Producto from "../models/ProductModel.js";
 import Orden from "../models/OrderModel.js";
+import PerfilProfesional from "../models/ProfessionalModel.js";
+import Disponibilidad from "../models/AvailableModel.js";
 
 const obtenerAll = async (req, res) => {
   try {
@@ -169,21 +171,46 @@ const obtenerProfesionales = async (req, res) => {
   }
 };
 
-
-
 const obtenerTodosUsuarios = async (req, res) => {
-
-
   try {
     const usuarios = await Usuario.find();
-
     res.json(usuarios);
   } catch (error) {
     res.status(500).json({ msg: "Error al obtener los usuarios de la base de datos" });
   }
 };
 
+const obtenerProfesionalesHorarios = async (req, res) => {
+  try {
+    
+    //generamos la fecha actual y la fecha limite para retornar las disponibilidades de los proximos 7 dias
+    const fechaActual = new Date();        
+    const fechaActualFormat = fechaActual.toISOString().slice(0, 10);
+    
+    //definimos que retorne profesionales con disponibilidad a futuro
+    const usuarios = await Disponibilidad.find({      
+      fecha: {$gte: fechaActualFormat}
+    })
+     .populate({
+        path: "creador",
+        select: "descripcion _id especialidad localidadesLaborales creador",
+        populate: {
+          path: "creador",
+          select: "_id nombre img apellido telefono img",
+        },
+      })
+    
+    
+
+    res.json(usuarios);
+  } catch (error) {
+    res.status(500).json({ msg: "Error al obtener los usuarios de la base de datos" });
+  }
+}
 
 
 
-export { buscarUsuarios, obtenerUsuarios, obtenerProfesionales, obtenerAll, obtenerOrdenes, obtenerTodosUsuarios };
+
+
+
+export { buscarUsuarios, obtenerUsuarios, obtenerProfesionales, obtenerAll, obtenerOrdenes, obtenerTodosUsuarios, obtenerProfesionalesHorarios };

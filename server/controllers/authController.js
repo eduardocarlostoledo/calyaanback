@@ -6,13 +6,14 @@ import generarJWT from '../helpers/generateJWT.js';
 
 const getLogs = async (req, res) => {
   try {
-    const logs = await Log.find();
+    const logs = await Log.find().sort({createdAt: -1}); // Ordenar por fecha de creación en orden descendente
     res.json(logs);
   } catch (error) {
     console.error('Error al obtener los logs', error);
     res.status(500).json({ error: 'Error al obtener los logs' });
   }
 }
+
 
 
 // Función para almacenar logs de inicio de sesión

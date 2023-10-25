@@ -278,6 +278,48 @@ const obtenerDisponibilidadTotalOrdenada = async (req, res) => {
   }
 };
 
+const obtenerDisponibilidadTotalporId = async (req, res) => {
+  try {
+    const { _id } = req.body;
+    
+    //generamos la fecha actual y la fecha limite para retornar las disponibilidades de los proximos 7 dias
+    const fechaActual = new Date();    
+    const fechaLimite = new Date();
+    fechaLimite.setDate(fechaActual.getDate() + 7); // Agrega 7 días a la fecha actual
+    //convertimos de new Date "2023-10-24T14:56:37.063Z" a "2023-10-24"
+    const fechaActualFormat = fechaActual.toISOString().slice(0, 10);
+    const fechaLimiteFormat = fechaLimite.toISOString().slice(0, 10);
+    console.log(fechaActualFormat, fechaLimiteFormat);
+    
+
+    const disponibilidades = await Disponibilidad.find({
+      fecha: { $gte: fechaActualFormat, $lte: fechaLimiteFormat }, // Filtra las fechas entre hoy y los próximos 7 días
+      creador: _id,
+    })
+      // .populate({
+      //   path: "creador",
+      //   select: "descripcion _id especialidad localidadesLaborales creador",
+      //   populate: {
+      //     path: "creador",
+      //     select: "_id nombre img apellido telefono img",
+      //   },
+      // })
+      .sort({ fecha: 1 })
+      .select("-id -createdAt -updatedAt")
+      .lean();
+
+    return res.status(200).json(disponibilidades);
+  } catch (error) {
+    console.error("Error al obtener las disponibilidades:", error);
+    return res.status(500).json({
+      msg: "Hubo un problema intentando acceder a los profesionales. Por favor, inténtelo de nuevo más tarde.",
+      error: error.message, // Agrega más detalles del error si es necesario
+    });
+  }
+};
+
+
+
 const actualizarProfesionalAdmin = async (req, res) => {
   const {
     _id,
@@ -705,5 +747,6 @@ export {
   GetPerfilProfesional,
   GetPerfilProfesionalID,
   obtenerDisponibilidadProfesionalAdminDash,
-  obtenerDisponibilidadTotalOrdenada
+  obtenerDisponibilidadTotalOrdenada,
+  obtenerDisponibilidadTotalporId,
 };

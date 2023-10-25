@@ -11,7 +11,8 @@ import {
   obtenerProfesionales,
   obtenerAll,
   obtenerOrdenes,
-  obtenerTodosUsuarios
+  obtenerTodosUsuarios,
+  obtenerProfesionalesHorarios
 } from "../controllers/searchesController.js";
 
 const busquedasRoutes = express.Router();
@@ -35,5 +36,9 @@ busquedasRoutes.get("/obtenertodosusuarios",
 checkAuth, isAdminRole, obtenerTodosUsuarios) 
 
 busquedasRoutes.get("/ordenes",[checkAuth,isAdminRole],obtenerOrdenes)
+
+busquedasRoutes.get("/get-profesionales",
+//[checkAuth,isAdminRole],
+obtenerProfesionalesHorarios)
 
 export default busquedasRoutes;
