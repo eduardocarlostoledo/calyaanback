@@ -31,7 +31,8 @@ import {
   obtenerUsuarioEmail,
   registrarUsuarioReserva,
   getUser,
-  confirmarEmail
+  confirmarEmail,
+  actualizarUsuarioAdmin
 } from "../controllers/userController.js";
 
 // Instanciando el router de express
@@ -99,6 +100,9 @@ usuarioRoutes.get("/perfil/:id", checkAuth, GetPerfil);
 
 // actualizar el perfil de un usuario
 usuarioRoutes.put("/actualizar-perfil", checkAuth, actualizarPerfil);
+
+//definir un nuevo administrador
+usuarioRoutes.put("/actualizar-usuario-admin", [checkAuth, isAdminRole], actualizarUsuarioAdmin);
 
 //cambiar el password
 usuarioRoutes.put("/cambiar-password", checkAuth, cambiarPassword);

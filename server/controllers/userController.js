@@ -75,7 +75,7 @@ const confirmarEmail = async (req, res) => {
 
   // Comprobar si el usuario existe
   const confirmarUsuario = await Usuario.findOne({ email });
-  console.log(confirmarUsuario, "confirmar usuario")
+  //console.log(confirmarUsuario, "confirmar usuario")
 
   if (!confirmarUsuario) {
     const error = new Error("usuario inexistente");
@@ -294,6 +294,36 @@ const actualizarPerfil = async (req, res) => {
   }
 };
 
+// ACTUALIZAR ROL A ADMINISTRADOR
+const actualizarUsuarioAdmin = async (req, res) => {  
+  //datos a actualizar provenientes del formulario
+  const {    
+   email,
+   rol,
+  } = req.body;
+
+  try {
+    // Comprobar si el usuario existe y si email y rol coinciden
+    const usuario = await Usuario.findOne({ email, rol });
+    
+
+    if (!usuario) {
+      const error = new Error("Usuario no encontrado con los datos proporcionados");
+      return res.status(404).json({ msg: error.message });
+    }       
+
+    usuario.rol = "ADMIN";
+
+    await usuario.save();
+
+    res.json({
+      msg: "Se ha creado un nuevo administrador con Éxito",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // CAMBIAR PASSWORD
 const cambiarPassword = async (req, res) => {
   const { _id } = req.usuario;
@@ -346,16 +376,33 @@ const obtenerUsuario = async (req, res) => {
 // DESACTIVAR USUARIO
 const desactivarUsuario = async (req, res) => {
   const { id } = req.params;
-
+//nueva funcion de toggle usuario, para activar y desactivar
   try {
-    const usuario = await Usuario.findByIdAndUpdate(id, { estado: false });
+    const usuario = await Usuario.findById(id);
 
-    res
-      .status(200)
-      .json({ msg: `Usuario ${usuario.email} fue desactivado exitosamente` });
+    if (!usuario) {
+      return res.status(404).json({ msg: 'Usuario no encontrado' });
+    }
+
+    const nuevoEstado = !usuario.estado;
+    usuario.estado = nuevoEstado;
+    await usuario.save();
+
+    const estadoMensaje = nuevoEstado ? 'activado' : 'desactivado';
+    res.status(200).json({ msg: `Usuario ${usuario.email} fue ${estadoMensaje} exitosamente` });
   } catch (error) {
-    res.status(500).json({ msg: "Error intentando desactivar al usuario" });
+    res.status(500).json({ msg: 'Error al intentar cambiar el estado del usuario' });
   }
+
+  // try {
+  //   const usuario = await Usuario.findByIdAndUpdate(id, { estado: false });
+
+  //   res
+  //     .status(200)
+  //     .json({ msg: `Usuario ${usuario.email} fue desactivado exitosamente` });
+  // } catch (error) {
+  //   res.status(500).json({ msg: "Error intentando desactivar al usuario" });
+  // }
 };
 
 // PROFESIONAL
@@ -844,5 +891,6 @@ export {
   obtenerUsuarioEmail,
   registrarUsuarioReserva,
   getUser,
-  confirmarEmail
+  confirmarEmail,
+  actualizarUsuarioAdmin
 };

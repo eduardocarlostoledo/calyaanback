@@ -38,7 +38,7 @@ checkAuth, isAdminRole, obtenerTodosUsuarios)
 busquedasRoutes.get("/ordenes",[checkAuth,isAdminRole],obtenerOrdenes)
 
 busquedasRoutes.get("/get-profesionales",
-//[checkAuth,isAdminRole],
+[checkAuth,isAdminRole],
 obtenerProfesionalesHorarios)
 
 export default busquedasRoutes;

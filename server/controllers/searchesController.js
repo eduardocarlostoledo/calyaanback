@@ -128,7 +128,17 @@ const obtenerOrdenes = async (req, res) => {
         .limit(Number(limite))
         .sort({ createdAt: -1 })
         .populate("cliente_id")
-        .populate("profesional_id")
+        .populate({ path: "servicios", select: "_id idWP nombre precio link img" })
+        .populate({
+          path: "profesional_id",
+          select: "creador",
+          populate: {
+            path: "creador",
+            select: "_id nombre img apellido telefono img",
+          },
+        })
+        
+          
     ]);
 
     res.json({
@@ -193,15 +203,15 @@ const obtenerProfesionalesHorarios = async (req, res) => {
     })
      .populate({
         path: "creador",
-        select: "descripcion _id especialidad localidadesLaborales creador",
+        select: "_id especialidad localidadesLaborales creador",
         populate: {
           path: "creador",
-          select: "_id nombre img apellido telefono img",
+          select: "_id nombre apellido telefono email",
         },
       })
     
     
-
+//console.log(usuarios)
     res.json(usuarios);
   } catch (error) {
     res.status(500).json({ msg: "Error al obtener los usuarios de la base de datos" });
