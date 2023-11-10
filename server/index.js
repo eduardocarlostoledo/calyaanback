@@ -23,6 +23,7 @@ import couponRoutes from "./routes/couponRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import settlementRoutes from "./routes/settlementRoutes.js";
 import siigoRoutes from "./routes/siigoRoutes.js";
+import chat from "./routes/chatRoutes.js";
 
 dotenv.config();
 
@@ -59,30 +60,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', '*'); // update to match the domain you will make the request from
-//   res.header('Access-Control-Allow-Credentials', 'true');
-//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-//   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-//   next();
-// });
-
-// Configurar CORS
-// const whitelist = [process.env.FRONTEND_URL];
-// const corsOption = {
-//   origin: function (origin, callback) {
-//     if (whitelist.includes(origin)) {
-//       // Puede consultar la API
-//       callback(null, true);
-//     } else {
-//       // No esta permitido
-//       callback(new Error("Error de Cors"));
-//     }
-//   },
-// };
-// app.use(cors(corsOption));
-
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 
@@ -102,6 +79,7 @@ app.use("/api/ordenes", orderRoutes);
 app.use("/api/facturas", invoiceRoutes);
 app.use("/api/liquidaciones", settlementRoutes);
 app.use('/whatsapp',sendWhatsapp);
+app.use("/api/chat", chat)
 
 
 // Definiendo PORT

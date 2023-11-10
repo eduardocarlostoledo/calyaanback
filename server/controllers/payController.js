@@ -34,7 +34,6 @@ const payPreference = async (req, res) => {
     const parsedDateService = JSON.parse(DateService);
 
     const productos = await Producto.find({ idWP: { $in: servicios } });
-
     const serviciosGuardar = productos.map((product) => product._id)
 
     let precioNeto = productos.reduce((accum, product) => accum + parseInt(product.precio, 10), 0);
@@ -381,9 +380,11 @@ const payPreferenceManual = async (req, res) => {
       const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
-
+console.log("SERVICIOS",servicios)
     const serviciosSearch = await Producto.find({ idWP: { $in: servicios } });
+console.log("servicios search",serviciosSearch)
     const serviciosGuardar = serviciosSearch.map((product) => product._id)
+console.log("servicios guardar",serviciosGuardar)
 
     const arrayPreference = {
       cliente_id: usuario._id,

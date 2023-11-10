@@ -153,6 +153,107 @@ const obtenerOrdenes = async (req, res) => {
   }
 };
 
+// const obtenerOrdenesBusquedaReservas = async (req, res) => {
+//   console.log(req.query);
+//   try {
+//     let { clienteNombre, emailCliente, profesionalNombre, diaCompra, horaReserva, diaReserva } = req.query;
+
+//     let resultados;
+
+//     if (clienteNombre) {
+//       const clienteNombreArray = clienteNombre?.split(/\s+/);      
+//       const nombre = clienteNombreArray[0].toString();
+//       const apellido = clienteNombreArray.length > 1 ? clienteNombreArray[1].toString() : "";
+
+//       console.log(nombre, apellido);
+
+//       resultados = await Orden.find({ nombre, apellido})
+//         .sort({ createdAt: 1 })
+//         .populate({
+//           path: "cliente_id",
+//           select: "nombre apellido email",
+//         })
+//         .populate({
+//           path: "profesional_id",
+//           select: "creador",
+//           populate: {
+//             path: "creador",
+//             select: "nombre apellido",
+//           },
+//         })
+//         .populate({
+//           path: "servicios",
+//           select: "nombre",
+//         });
+//     }
+
+//     if (profesionalNombre) {
+//       const profesionalNombreArray = profesionalNombre?.split(/\s+/);
+//       profesionalNombre = profesionalNombreArray[0].toString();
+//       const profesionalApellido = profesionalNombreArray.length > 1 ? profesionalNombreArray[1].toString() : "";
+
+//       resultados = await Orden.find({
+//         'profesional_id.creador.nombre': profesionalNombre,
+//         'profesional_id.creador.apellido': profesionalApellido,       
+//       })
+//         .sort({ createdAt: 1 })
+//         .populate({
+//           path: "cliente_id",
+//           select: "nombre apellido email",
+//         })
+//         .populate({
+//           path: "profesional_id",
+//           select: "creador",
+//           populate: {
+//             path: "creador",
+//             select: "nombre apellido",
+//           },
+//         })
+//         .populate({
+//           path: "servicios",
+//           select: "nombre",
+//         });
+//     }
+
+//     res.json({
+//       resultados,
+//     });
+
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ msg: "Error intentando acceder a los usuarios" });
+//   }
+// };
+
+const obtenerOrdenesBusquedaReservas = async (req, res) => {  
+  console.log(req.query)
+    try {      
+      const { emailCliente, horaReserva, diaReserva, servicio } = req.query;
+
+      const orden = await Orden.find({"cliente_id.email":emailCliente, hora_servicio: horaReserva, cita_servicio: diaReserva, nombre: servicio})
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "cliente_id",
+        select: "nombre apellido email",        
+      })      
+      .populate({
+        path: "profesional_id",
+        select:
+          "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
+        populate: {
+          path: "creador",
+          select: "_id nombre apellido",
+        },
+      })
+      .populate({ path: "servicios", select: "nombre" })      
+         
+      res.json(orden);
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({ msg: "Error intentando acceder a los usuarios" });
+    }
+  };
+
 const obtenerProfesionales = async (req, res) => {
   const { limite = 10, pagina = 1 } = req.query;
 
@@ -223,4 +324,4 @@ const obtenerProfesionalesHorarios = async (req, res) => {
 
 
 
-export { buscarUsuarios, obtenerUsuarios, obtenerProfesionales, obtenerAll, obtenerOrdenes, obtenerTodosUsuarios, obtenerProfesionalesHorarios };
+export { buscarUsuarios, obtenerUsuarios, obtenerProfesionales, obtenerAll, obtenerOrdenes, obtenerOrdenesBusquedaReservas, obtenerTodosUsuarios, obtenerProfesionalesHorarios };

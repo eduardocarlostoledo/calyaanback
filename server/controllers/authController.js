@@ -6,7 +6,8 @@ import generarJWT from '../helpers/generateJWT.js';
 
 const getLogs = async (req, res) => {
   try {
-    const logs = await Log.find().sort({createdAt: -1}); // Ordenar por fecha de creación en orden descendente
+    const logs = await Log.find().sort({ createdAt: 1 }); // Ordenar por fecha de creación en orden ascendente
+    logs.reverse(); // Invertir el orden para mostrar la fecha más reciente primero
     res.json(logs);
   } catch (error) {
     console.error('Error al obtener los logs', error);

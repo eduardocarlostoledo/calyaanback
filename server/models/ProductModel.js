@@ -27,7 +27,15 @@ const productoSchema = mongoose.Schema(
     cantidad:{
       type:Number,
       default:1
-    }
+    },
+    porcetajeCalyaan:{
+      type:Number,
+      default:39
+    },
+    porcetajeProfesional:{
+      type:Number,
+      default:61
+    },
   },
   {
     timestamps: true,

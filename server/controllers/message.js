@@ -12,7 +12,7 @@ const client = twilio(accountSid, authToken);
 const sendWhatsappfn = async (args) => {
     try {
         let { number, message } = args;
-
+console.log(args)
         // Verificar si el número ya tiene el código de país
         if (!number.startsWith("+57") && !number.startsWith("57") && !number.startsWith("+")) {
             // Agregar el código de país por defecto

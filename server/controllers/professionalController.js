@@ -712,8 +712,8 @@ const obtenerHistorial = async (req, res) => {
         select: "nombre",
       })
       .select(
-        "cliente_id cita_servicio hora_servicio servicios estado_servicio factura"
-      );
+        "cliente_id cita_servicio hora_servicio servicios estado_servicio factura nroSesion"
+      )      .sort({ createdAt: -1 }); // Ordena por la propiedad 'createdAt' de manera descendente;
 
     res.json(ordenes);
   } catch (error) {

@@ -780,7 +780,7 @@ const obtenerHistorial = async (req, res) => {
         },
         select: "creador"
       })
-      .select("profesional_id cita_servicio hora_servicio servicios estado_servicio");
+      .select("profesional_id cita_servicio hora_servicio servicios estado_servicio").sort({ createdAt: -1 });
 
     res.json(ordenes);
   } catch (error) {

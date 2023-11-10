@@ -11,6 +11,7 @@ import {
   obtenerProfesionales,
   obtenerAll,
   obtenerOrdenes,
+  obtenerOrdenesBusquedaReservas,
   obtenerTodosUsuarios,
   obtenerProfesionalesHorarios
 } from "../controllers/searchesController.js";
@@ -36,6 +37,7 @@ busquedasRoutes.get("/obtenertodosusuarios",
 checkAuth, isAdminRole, obtenerTodosUsuarios) 
 
 busquedasRoutes.get("/ordenes",[checkAuth,isAdminRole],obtenerOrdenes)
+busquedasRoutes.post("/ordenes-busqueda-reservas/",[checkAuth,isAdminRole],obtenerOrdenesBusquedaReservas)
 
 busquedasRoutes.get("/get-profesionales",
 [checkAuth,isAdminRole],

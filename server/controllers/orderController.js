@@ -23,7 +23,8 @@ const getAllOrden = async (req, res, next) => {
           select: "_id nombre apellido email cedula telefono direccionDefault",
         },
       })
-      .populate({ path: "servicios", select: "_id idWP nombre precio link img" })
+      .populate({ path: "servicios", select: "_id idWP nombre precio link img porcetajeCalyaan porcetajeProfesional" })
+
       .lean();
 
     const ordenes = orden.map((orden) => {
@@ -141,7 +142,7 @@ const getOrdenById = async (req, res, next) => {
       })
       .populate({
         path: "servicios",
-        select: "_id nombre precio link img cantidad",
+        select: "_id nombre precio link img cantidad porcetajeCalyaan porcetajeProfesional",
       })
       .lean();
 
