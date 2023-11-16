@@ -1,8 +1,11 @@
 import dotenv from 'dotenv'
 import Chat from "../models/ChatModel.js";
-import Orden from "../models/OrderModel.js";
 import Order from "../models/OrderModel.js";
 import {sendWhatsappfn} from "./message.js";
+import {
+    emailNotificacionCliente, emailNotificacionProfesional
+  } from "../helpers/emails.js";
+
 dotenv.config();
 
 const getChatMessages = async (req, res) => {
@@ -58,9 +61,48 @@ const saveChatMessage = async (req, res) => {
   }
 };
 
+const enviarNotificacion = async (req, res) => {
+    try {
+        const { id, email } = req.body;    
+
+        const buscarOrden = await Order.findById(id)
+        .populate({
+            path: "cliente_id",
+            select: "nombre apellido email telefono ",          
+          })          
+          .populate({
+            path: "profesional_id",
+            select:
+              "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
+            populate: {
+              path: "creador",
+              select: "nombre apellido email telefono",
+            },
+          });
+
+        console.log(email, "profile.email")
+        
+if (buscarOrden)  // validammos que la orden exista y la poblamos con los datos del cliente y del profesional para enviarle la notificacoin por correo
+{    
+        const emailCliente = buscarOrden.cliente_id.email;
+        const emailProfesional = buscarOrden.profesional_id.creador.email;
+         email === emailCliente ? 
+         emailNotificacionProfesional ( id, emailProfesional)         
+         : 
+         emailNotificacionCliente ( id, emailCliente)
+}
+
+        res.status(200).json({ message: 'Notificacion enviada con exito' });
+    } catch (error) {
+        console.error('Error saving chat message:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export {
   getChatMessages,
   saveChatMessage,
+  enviarNotificacion,
 };
 
 //para traer el dato del profesional .... -.-"

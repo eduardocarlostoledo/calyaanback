@@ -706,7 +706,9 @@ const emailCompra = async (data) => {
 
   try {    
   
-  const { cliente_id,    
+  const { 
+    order_id,
+    cliente_id,    
         cliente_email,
         cliente_nombre,
         cliente_apellido,
@@ -795,6 +797,7 @@ const emailCompra = async (data) => {
   <p>Nos complace informarle que su solicitud de servicio ha sido procesada con éxito. Usted ha contratado nuestro servicio de ${servicio} para su hogar en la dirección: ${direccion_Servicio}, cuyos datos adicionales: ${adicional_direccion_Servicio}, ubicada en la localidad de ${localidad_Servicio}, ciudad de ${ciudad_Servicio}.</p>
   <p>Su solicitud ha sido asignada a nuestr@ profesional: ${profesional_nombre}, quien estará disponible para brindarle el servicio el día: ${dia_servicio} a las: ${hora_servicio}.</p>
   <p>Le recordamos que el costo del servicio es de $${precio} y que el estado de su pago es: ${pagoServicio} </p>
+  <p>Puede coordinar los detalles de su reserva en el siguiente Chat: https://calyaan.netlify.app/resumen/${order_id}</p>
   <p>Si tiene alguna pregunta o inquietud, no dude en ponerse en contacto con nuestro equipo de soporte al cliente, siempre estamos dispuestos a ayudarle.</p>
   <p>Le agradecemos por confiar en nosotros y esperamos poder brindarle un excelente servicio.</p>
   <div class="signature">
@@ -831,6 +834,7 @@ const emailProfesional = async (data) => {
     
   
   const {
+    order_id,
     cliente_id,    
         cliente_email,
         cliente_nombre,
@@ -921,6 +925,7 @@ const emailProfesional = async (data) => {
         <p>Estimado/a ${profesional_nombre}: </p>
         <p>Le informamos que hemos procesado una solicitud de servicio de <strong> ${servicio} </strong> para el cliente: ${cliente_nombre} ${cliente_apellido}, cédula: ${cliente_cedula}. La prestación se llevará a cabo el día: ${dia_servicio} a las: ${hora_servicio}, ubicado en: ${direccion_Servicio}, datos adicionales: ${adicional_direccion_Servicio}, en la localidad de ${localidad_Servicio}, ciudad de ${ciudad_Servicio}.</p>
         <p>Le recordamos que el estado del pago del servicio es: ${pagoServicio}.</p>
+        <p>Puede coordinar los detalles de su reserva en el siguiente Chat: https://calyaan.netlify.app/resumen-profesional/${order_id}</p>
         <p>Si tiene alguna pregunta o inquietud, no dude en ponerse en contacto con el equipo de soporte. </p>
         
       </div>
@@ -1063,4 +1068,181 @@ if (liberar_profesional_telefono) await sendWhatsappfn(args);
 }
 };
 
-export { emailRegistro, emailOlvidePassword, emailCompra, emailProfesional, emailCancelacionProfesional };
+const emailNotificacionCliente = async (id, emailCliente) => {
+  try { 
+  
+  const transport = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  //cuerpo email 
+  const emailHTML = `<!DOCTYPE html>
+  <html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <title>Orden de trabajo</title>
+    <style>
+      body {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #444444;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .logo {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .logo img {
+        max-width: 150px;
+      }
+      .message {
+        background-color: #f8f8f8;
+        border: 1px solid #dddddd;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .message p {
+        margin-bottom: 10px;
+      }
+      .signature {
+        text-align: right;
+      }
+      .signature p {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo">
+        <img src="https://calyaan.b-cdn.net/wp-content/uploads/2022/01/Logo-Calyaan2.png" alt="Logo de la empresa">
+      </div>
+      <div class="message">
+        <p>Estimado/a: </p>
+        <p>Tienes un mensaje de parte de tu Esteticista</p>
+        <a href="${process.env.FRONT}/resumen/${id}" style="text-decoration: none; background-color: #008CBA; color: #ffffff; padding: 10px 20px; border-radius: 5px; display: inline-block;">
+        Accede al siguiente Chat en línea y coordina los detalles de tu reserva
+    </a>
+      </div>
+      <div class="signature">
+        <p>Cordialmente,</p>
+        <p>El equipo de Calyann</p>
+      </div>
+    </div>
+</body>
+
+  </html>
+`
+const info = await transport.sendMail({
+  from: process.env.EMAIL_USER,
+  to: emailCliente,
+  subject: "Tienes un Mensaje de tu Esteticista",
+  text: "calyaan",    
+  html: emailHTML,
+});
+
+} catch (error) {
+  console.log(error);
+}
+};
+
+const emailNotificacionProfesional = async (id, emailProfesional) => {
+  try {  
+  
+  const transport = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  //cuerpo email 
+  const emailHTML = `<!DOCTYPE html>
+  <html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <title>Orden de trabajo</title>
+    <style>
+      body {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #444444;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .logo {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .logo img {
+        max-width: 150px;
+      }
+      .message {
+        background-color: #f8f8f8;
+        border: 1px solid #dddddd;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .message p {
+        margin-bottom: 10px;
+      }
+      .signature {
+        text-align: right;
+      }
+      .signature p {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo">
+        <img src="https://calyaan.b-cdn.net/wp-content/uploads/2022/01/Logo-Calyaan2.png" alt="Logo de la empresa">
+      </div>
+      <div class="message">
+        <p>Estimado/a: </p>
+        <p>Tienes un mensaje de parte de tu Paciente</p>
+        <a href="${process.env.FRONT}/resumen-profesional/${id}" style="text-decoration: none; background-color: #008CBA; color: #ffffff; padding: 10px 20px; border-radius: 5px; display: inline-block;">
+        Accede al siguiente Chat en línea y coordina los detalles de tu reserva
+    </a>
+      </div>
+      <div class="signature">
+        <p>Cordialmente,</p>
+        <p>El equipo de Calyann</p>
+      </div>
+    </div>
+  </body>
+  </html>
+`
+const info = await transport.sendMail({
+  from: process.env.EMAIL_USER,
+  to: emailProfesional,
+  subject: "Tienes un Mensaje de tu Paciente",
+  text: "calyaan",    
+  html: emailHTML,
+});
+
+} catch (error) {
+  console.log(error);
+}
+};
+
+export { emailRegistro, emailOlvidePassword, emailCompra, emailProfesional, emailCancelacionProfesional, emailNotificacionCliente, emailNotificacionProfesional };

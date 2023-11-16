@@ -222,6 +222,7 @@ const feedbackSuccess = async (req, res) => {
     await order.save();
     await factura.save()
     await emailCompra({
+      order_id: order._id,
       cliente_email: order.cliente_id.email,
       cliente_nombre: order.cliente_id.nombre,
       cliente_apellido: order.cliente_id.apellido,
@@ -239,6 +240,7 @@ const feedbackSuccess = async (req, res) => {
     });
 
     await emailProfesional({
+      order_id: order._id,
       cliente_nombre: order.cliente_id.nombre,
       cliente_apellido: order.cliente_id.apellido,
       cliente_cedula: order.cliente_id.cedula,
