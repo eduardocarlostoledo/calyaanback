@@ -224,17 +224,28 @@ const obtenerOrdenes = async (req, res) => {
 //     res.status(500).json({ msg: "Error intentando acceder a los usuarios" });
 //   }
 // };
+// modelo de body que llegaria del endpoint
+// {
+//   "clienteNombre":"Cliente Prueba",
+//   "emailCliente":"eduardocarlostoledo@hotmail.com",
+//   "profesionalNombre":"Esteticista",
+//   "diaCompra":"2023-07-21",
+//   "horaReserva":"06:00-07:00",
+//   "diaReserva":"2023-07-23",
+//   "servicio":"Masaje reductor"
+//   }
 
 const obtenerOrdenesBusquedaReservas = async (req, res) => {  
-  console.log(req.query)
-    try {      
-      const { emailCliente, horaReserva, diaReserva, servicio } = req.query;
+  
+    try {            
+      const { emailCliente, horaReserva, diaReserva, servicio } = req.body;
+      console.log("emailCliente, horaReserva, diaReserva, servicio", emailCliente, horaReserva, diaReserva, servicio)
 
-      const orden = await Orden.find({"cliente_id.email":emailCliente, hora_servicio: horaReserva, cita_servicio: diaReserva, nombre: servicio})
+      const orden = await Orden.find()
       .sort({ createdAt: -1 })
       .populate({
         path: "cliente_id",
-        select: "nombre apellido email",        
+        select: "nombre apellido email telefono",        
       })      
       .populate({
         path: "profesional_id",
@@ -242,15 +253,42 @@ const obtenerOrdenesBusquedaReservas = async (req, res) => {
           "-referidos -reservas -preferencias -especialidad -codigoreferido -createdAt -updatedAt -disponibilidad -localidadesLaborales",
         populate: {
           path: "creador",
-          select: "_id nombre apellido",
+          select: "_id nombre apellido telefono email",
         },
       })
-      .populate({ path: "servicios", select: "nombre" })      
-         
-      res.json(orden);
+      .populate({ path: "servicios", select: "nombre" })     
+      .lean();
+
+      let resultadoFiltrado = orden;
+
+      if (emailCliente) {
+        resultadoFiltrado = resultadoFiltrado.filter((orden) => orden.cliente_id.email && orden.cliente_id.email === emailCliente);
+      }
+      
+      if (horaReserva) {
+        resultadoFiltrado = resultadoFiltrado.filter((orden) => orden.hora_servicio && orden.hora_servicio === horaReserva);
+      }
+      
+      if (diaReserva) {
+        resultadoFiltrado = resultadoFiltrado.filter((orden) => orden.cita_servicio && orden.cita_servicio === diaReserva);
+      }
+      
+      if (servicio) {
+        resultadoFiltrado = resultadoFiltrado.filter((orden) => 
+          orden.servicios[0] && orden.servicios[0].nombre === servicio
+        );
+      }
+      
+      res.json(resultadoFiltrado);
+      
     } catch (error) {
-      console.log(error)
-      res.status(500).json({ msg: "Error intentando acceder a los usuarios" });
+      console.error(error);
+    
+      if (error.name === "ValidationError") {
+        res.status(400).json({ msg: "Error de validación de datos" });
+      } else {
+        res.status(500).json({ msg: "Error interno del servidor" });
+      }
     }
   };
 
