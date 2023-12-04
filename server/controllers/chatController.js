@@ -9,10 +9,14 @@ import {
 dotenv.config();
 
 const getChatMessages = async (req, res) => {
-    console.log("ENTRO A CHAT CONTROLLER", req.params.id); // Accede al valor de ID como req.params.id
+    //console.log("ENTRO A CHAT CONTROLLER", req.params.id); // Accede al valor de ID como req.params.id
     try {
         const id = req.params.id;
         const chat = await Chat.findOne({ orderId: id });
+
+        if (!chat) {
+            return res.status(404).json({ error: 'No hay mensajes' });
+        }
 
         // Ordena los mensajes por fecha de manera descendente (de la más reciente a la más antigua)
         chat.messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));

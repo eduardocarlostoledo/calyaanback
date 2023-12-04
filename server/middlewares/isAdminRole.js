@@ -14,7 +14,7 @@ const isAdminRole = (req, res, next) => {
       msg: `${nombre} no es un administrador - No puedes realizar esta accion`,
     });
   }
-console.log("ROL OK")
+//console.log("ROL OK")
   return next();
 };
 export default isAdminRole;
