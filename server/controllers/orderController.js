@@ -143,7 +143,7 @@ const getOrdenById = async (req, res, next) => {
       .populate({
         path: "servicios",
         select: "_id nombre precio link img cantidad porcetajeCalyaan porcetajeProfesional",
-      })
+      })      
       .lean();
 
     if (!orden || orden.length < 1) {

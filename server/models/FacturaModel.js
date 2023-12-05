@@ -67,7 +67,10 @@ const FacturaSchema = new mongoose.Schema({
   link_pago:{
     type:String,
     default:""
-  }
+  },
+  comprobante: {
+    type: String,
+  },
 });
 
 const Factura = mongoose.model("Factura", FacturaSchema);

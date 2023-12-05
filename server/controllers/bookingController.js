@@ -87,9 +87,7 @@ const obtenerProfesionalesPorFecha = async (req, res) => {
         msg: "No encontramos profesionales con disponibilidad para la fecha indicada intenta nuevamente",
       });
     }
-
     //console.log(buscarPorfesionales)
-
     return res.status(200).json(buscarPorfesionales);
   } catch (error) {
     console.log(error);

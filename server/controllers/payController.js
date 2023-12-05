@@ -759,12 +759,14 @@ const agendarOrden = async (req, res) => {
 
 const actualizarPago = async (req, res) => {
   try {
+    console.log("BODYPAGO", req.body)
     const order = await Orden.findById(req.body.id)
     const factura = await Factura.findById(order.factura)
 
     factura.payment_id = req.body.payment_id
     factura.origen = req.body.origen
     factura.estadoPago = "approved"
+    factura.comprobante= req.body.comprobante
 
     await factura.save()
 
