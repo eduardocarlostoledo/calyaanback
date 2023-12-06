@@ -13,7 +13,8 @@ const getAllOrden = async (req, res, next) => {
           select: "-createdAt -updateAt -cliente",
         },
       })
-      .populate({ path: "factura", select: "-__v -orden -servicios" })
+      //.populate({ path: "factura", select: "-__v -orden -servicios" }) agrego lo de abajo porque necesito el cupon para facturar
+      .populate({ path: "factura", select: "-__v -orden -servicios", populate: {path:"coupon",select:"-reclamados -vencimiento -eliminado"} })
       .populate({
         path: "profesional_id",
         select:
