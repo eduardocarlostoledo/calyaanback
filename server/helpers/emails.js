@@ -1068,7 +1068,8 @@ if (liberar_profesional_telefono) await sendWhatsappfn(args);
 }
 };
 
-const emailNotificacionCliente = async (id, emailCliente) => {
+const emailNotificacionCliente = async (id, emailCliente, cliente_telefono) => {
+  console.log(id, emailCliente, cliente_telefono)
   try { 
   
   const transport = nodemailer.createTransport({
@@ -1152,12 +1153,19 @@ const info = await transport.sendMail({
   html: emailHTML,
 });
 
+const args = {
+  number: cliente_telefono,
+  message: `Tu esteticista desea comunicarse contigo. Inicia sesión en la plataforma https://calyaan.netlify.app y coordina los detalles de tu reservación en el chat https://calyaan.netlify.app/resumen/${id}`
+};
+if (cliente_telefono) await sendWhatsappfn(args);  
+
+
 } catch (error) {
   console.log(error);
 }
 };
 
-const emailNotificacionProfesional = async (id, emailProfesional) => {
+const emailNotificacionProfesional = async (id, emailProfesional, profesional_telefono) => {
   try {  
   
   const transport = nodemailer.createTransport({
@@ -1239,6 +1247,12 @@ const info = await transport.sendMail({
   text: "calyaan",    
   html: emailHTML,
 });
+
+const args = {
+  number: profesional_telefono,
+  message: `Tu cliente desea comunicarse contigo. Inicia sesión en la plataforma https://calyaan.netlify.app y coordina los detalles de tu reservación en el chat https://calyaan.netlify.app/resumen-profesional/${id}`
+};
+if (profesional_telefono) await sendWhatsappfn(args);  
 
 } catch (error) {
   console.log(error);

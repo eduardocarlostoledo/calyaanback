@@ -83,6 +83,46 @@ const crearNuevoProducto = async (req, res) => {
   }
 };
 
+const editarProducto = async (req, res) => {
+  try {
+    // Extrae el ID del producto a editar desde los parámetros de la URL
+    const { _id } = req.body;
+
+    // Busca el producto en la base de datos por su ID
+    const producto = await Producto.findById(_id);
+
+    // Si el producto no existe, devuelve un error 404
+    if (!producto) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    // Extrae los datos actualizados del cuerpo de la solicitud
+    const { porcetajeCalyaan, porcetajeProfesional, nombre, idWP, img, descripcion, precio, precio_regular, link } = req.body;
+
+    // Actualiza los campos del producto con los nuevos datos
+    producto.porcetajeCalyaan = porcetajeCalyaan || producto.porcetajeCalyaan;
+    producto.porcetajeProfesional= porcetajeProfesional || producto.porcetajeProfesional;
+    producto.nombre = nombre || producto.nombre;
+    producto.idWP = idWP || producto.idWP;
+    producto.img = img || producto.img;
+    producto.descripcion = descripcion || producto.descripcion;
+    producto.precio = precio || producto.precio;
+    producto.precio_regular = precio_regular || producto.precio_regular;
+    producto.link = link || producto.link;
+    
+
+
+    // Guarda los cambios en la base de datos
+    await producto.save();
+
+    // Envía una respuesta con el producto actualizado
+    return res.status(200).json(producto);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Error al editar el producto" });
+  }
+};
+
 // //este endpoint se usa para cargar 1 id de wordpress a app de calyaan
 const crearNuevoProductoID = async (req, res) => {
   try {
@@ -192,4 +232,4 @@ const cargarProductosWP = async (req, res) => {
 };
 
 */
-export { cargarProductosWP, crearNuevoProducto, crearNuevoProductoID };
+export { cargarProductosWP, crearNuevoProducto, crearNuevoProductoID, editarProducto };

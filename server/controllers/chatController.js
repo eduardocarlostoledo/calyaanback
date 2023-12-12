@@ -84,16 +84,19 @@ const enviarNotificacion = async (req, res) => {
             },
           });
 
-        console.log(email, "profile.email")
+        //console.log(email, "profile.email")
+        //console.log(buscarOrden, "DATOS DE LA ORDEN")        
         
 if (buscarOrden)  // validammos que la orden exista y la poblamos con los datos del cliente y del profesional para enviarle la notificacoin por correo
 {    
         const emailCliente = buscarOrden.cliente_id.email;
         const emailProfesional = buscarOrden.profesional_id.creador.email;
+        const cliente_telefono = buscarOrden.cliente_id.telefono
+        const profesional_telefono = buscarOrden.profesional_id.creador.telefono
          email === emailCliente ? 
-         emailNotificacionProfesional ( id, emailProfesional)         
+         emailNotificacionProfesional ( id, emailProfesional, profesional_telefono )       
          : 
-         emailNotificacionCliente ( id, emailCliente)
+         emailNotificacionCliente ( id, emailCliente, cliente_telefono )
 }
 
         res.status(200).json({ message: 'Notificacion enviada con exito' });

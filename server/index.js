@@ -48,7 +48,7 @@ app.use(morgan("dev"));
 conectarDB();
 
 app.use((req, res, next) => {
-  const allowedOrigins = ['http://localhost', 'https://calyaan.netlify.app', 'http://calyaanback-production.up.railway.app', 'http://calyaan.com', 'http://calyaan.com.co', 'https://sdk.mercadopago.com', "https://www.mercadolibre.com.co", "https://www.mercadopago.com.co", "https://api.whatsapp.com"];
+  const allowedOrigins = ['http://localhost', 'https://calyaan.netlify.app', 'http://calyaanback-production.up.railway.app', 'http://calyaan.com', 'http://calyaan.com.co', 'https://sdk.mercadopago.com', "https://www.mercadolibre.com.co", "https://www.mercadopago.com.co", "https://api.whatsapp.com", "https://res.cloudinary.com", "https://cloudinary.com"];
 
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
