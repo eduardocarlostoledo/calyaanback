@@ -57,6 +57,9 @@ const ordenSchema = mongoose.Schema(
     nroSesion: {
       type: String,
       default: "Sesión 1",
+    },
+    registroFirmaCliente: {
+      type: String,
     }
   },
   {

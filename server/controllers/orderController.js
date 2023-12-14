@@ -276,53 +276,6 @@ const updateOrden = async (req, res) => {
   }
 };
 
-// const updateOrden = async (req, res) => {
-//   const { _id, estado_servicio, hora_servicio, profesional_id } = req.body;
-
-//   try {
-//     const buscarorden = await Orden.findById(_id)
-//       .populate({
-//         path: "cliente_id",
-//         select: "_id nombre apellido email cedula telefono direccionDefault",
-//         populate: {
-//           path: "direccionDefault",
-//           select: "-createdAt -updateAt -cliente",
-//         },
-//       })
-//       .populate({ path: "factura", select: "-__v -orden -servicios" })
-//       .populate({
-//         path: "profesional_id",
-//         select:
-//           "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt",
-//       })
-//       .populate({ path: "servicios", select: "_id nombre precio link" });
-
-//     if (!buscarorden) {
-//       return res.status(404).json({ message: "Orden not found" });
-//     }
-
-//     if (profesional_id) {
-//       buscarorden.profesional_id = profesional_id;
-//     }
-
-//     buscarorden.estado_servicio = estado_servicio;
-
-//     if (hora_servicio) {
-//       buscarorden.hora_servicio = hora_servicio;
-//     }
-
-//     const ordenActualizada = await buscarorden.save();
-//     console.log(ordenActualizada.profesional_id, profesional_id, "Actualizada");
-//     res.json({
-//       msg: "Orden actualizada correctamente",
-//       ordenActualizada,
-//     });
-//   } catch (error) {
-//     console.error("Error al actualizar la orden:", error);
-//     return res.status(500).json({ msg: "Error al actualizar la orden" });
-//   }
-// };
-
 const deleteOrden = async (req, res, next) => {
   try {
     const orden = await Orden.findByIdAndDelete(req.params._id);
@@ -335,6 +288,60 @@ const deleteOrden = async (req, res, next) => {
   }
 };
 
+const updateOrdenByProfesional = async (req, res) => {
+  console.log("body update", req.body)
+  const { id, estado, registroFirmaCliente } = req.body;
+
+  try {
+    // Validar que se proporcionen tanto el ID como el estado
+    if (!id || !estado) {
+      return res.status(400).json({ message: "Se requiere un ID y un estado en la solicitud" });
+    }
+
+    // Validar que el estado sea "Pendiente" o "Completado"
+    if (estado !== "Pendiente" && estado !== "Completado") {
+      return res.status(400).json({ message: "El estado debe ser 'Pendiente' o 'Completada'" });
+    }
+
+    const options = { new: true };
+    const update = {
+      estado_servicio: estado,
+      registroFirmaCliente,
+    };
+
+    const ordenActualizada = await Orden.findByIdAndUpdate(id, update, options)
+      .populate({
+        path: "cliente_id",
+        select: "_id nombre apellido email cedula telefono direccionDefault",
+        populate: {
+          path: "direccionDefault",
+          select: "-createdAt -updateAt -cliente",
+        },
+      })
+      .populate({ path: "factura", select: "-__v -orden -servicios" })
+      .populate({
+        path: "profesional_id",
+        select:
+          "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt",
+      })
+      .populate({ path: "servicios", select: "_id nombre precio link" });
+
+    if (!ordenActualizada) {
+      return res.status(404).json({ message: "Orden no encontrada" });
+    }
+
+    res.json({
+      msg: "Orden actualizada correctamente",
+      ordenActualizada,
+    });
+  } catch (error) {
+    console.error("Error al actualizar la orden:", error);
+    return res.status(500).json({ msg: "Error al actualizar la orden" });
+  }
+};
+
+
+
 export {
   getAllOrden,
   createOrden,
@@ -343,6 +350,7 @@ export {
   deleteOrden,
   getOrdenesByUserId,
   getOrdenesByStatus,
+  updateOrdenByProfesional,
 };
 
 export default saveOrder;
