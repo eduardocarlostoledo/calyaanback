@@ -821,7 +821,8 @@ const registrarUsuarioReserva = async (req, res) => {
 
     const usuarioData = {
       ...req.body,
-      password: cedula // Establece la cédula como contraseña por defecto
+      password: cedula, // Establece la cédula como contraseña por defecto
+      confirmado: true, // establece user confirmado desde su creacion
     };
 
     const usuario = new Usuario(usuarioData);
