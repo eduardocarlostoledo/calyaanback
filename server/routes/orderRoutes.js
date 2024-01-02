@@ -2,7 +2,7 @@ import express from "express";
 import isAdminRole from "../middlewares/isAdminRole.js";
 import checkAuth from "../middlewares/checkAuth.js";
 
-import { createOrden, updateOrden, getAllOrden, getOrdenById, deleteOrden, getOrdenesByUserId, updateOrdenByProfesional } from "../controllers/orderController.js";
+import { createOrden, updateOrden, getAllOrden, getOrdenById, deleteOrden, getOrdenesByUserId, updateOrdenByProfesional, editarOrdenCompletaDashboard } from "../controllers/orderController.js";
 
 const orderRouter = express.Router();
 
@@ -14,5 +14,6 @@ orderRouter.get("/orden", checkAuth, isAdminRole, getAllOrden);
 orderRouter.get("/getordenbyid/:id", checkAuth, getOrdenById);
 orderRouter.get("/ordenbyuserid/:id", checkAuth, getOrdenesByUserId); 
 orderRouter.post("/updateorderbyprofesional/", checkAuth, updateOrdenByProfesional);
+orderRouter.put("/updateordendashboard/:id", checkAuth, editarOrdenCompletaDashboard); //se esta trabajando para editar las ordenes
 
 export default orderRouter;

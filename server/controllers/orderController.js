@@ -276,6 +276,47 @@ const updateOrden = async (req, res) => {
   }
 };
 
+////se esta trabajando para editar las ordenes
+
+const editarOrdenCompletaDashboard = async (req, res) => {
+  const { _id } = req.params; // Obtener el ID de la orden de los parámetros de la URL
+  const update = req.body; // Tomar todos los campos del cuerpo de la solicitud
+    
+    try {
+      const options = { new: true };
+  
+    // Actualizar todos los campos de la orden
+    const ordenActualizada = await Orden.findByIdAndUpdate(_id, update, options)
+    .populate({
+      path: "cliente_id",
+      select: "_id nombre apellido email cedula telefono direccionDefault",
+      populate: {
+        path: "direccionDefault",
+        select: "-createdAt -updateAt -cliente",
+      },
+    })
+    .populate({ path: "factura", select: "-__v -orden -servicios" })
+    .populate({
+      path: "profesional_id",
+      select:
+        "-referidos -reservas -preferencias -codigorefereido -createdAt -updateAt",
+    })
+    .populate({ path: "servicios", select: "_id nombre precio link" });
+
+    if (!ordenActualizada) {
+      return res.status(404).json({ message: "Orden not found" });
+    }
+
+    res.json({
+      msg: "Orden actualizada correctamente",
+      ordenActualizada,
+    });
+  } catch (error) {
+    console.error("Error al actualizar la orden:", error);
+    return res.status(500).json({ msg: "Error al actualizar la orden" });
+  }
+};
+
 const deleteOrden = async (req, res, next) => {
   try {
     const orden = await Orden.findByIdAndDelete(req.params._id);
@@ -351,6 +392,7 @@ export {
   getOrdenesByUserId,
   getOrdenesByStatus,
   updateOrdenByProfesional,
+  editarOrdenCompletaDashboard
 };
 
 export default saveOrder;

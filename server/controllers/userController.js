@@ -8,6 +8,7 @@ import Disponibilidad from "../models/AvailableModel.js";
 import Reserva from "../models/BookingModel.js";
 import generarIdReferido from "../helpers/generarIdReferido.js";
 import Orden from "../models/OrderModel.js";
+import bcryptjs from 'bcryptjs';
 
 // REGISTRAR A LOS USUARIOS
 const registrar = async (req, res) => {
@@ -808,26 +809,28 @@ const obtenerUsuarioEmail = async (req, res) => {
 
 const registrarUsuarioReserva = async (req, res) => {
   try {
-
-
     const { email, cedula } = req.body;
 
+    // Verificar si el usuario ya está registrado
     const existeUsuario = await Usuario.findOne({ email });
 
     if (existeUsuario) {
-      const error = new Error("Usuario ya registrado");
-      return res.status(400).json({ msg: error.message });
+      return res.status(400).json({ msg: "Usuario ya registrado" });
     }
 
+    // Hashear la contraseña por defecto (cedula)
+    const sal = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(cedula, sal);
+
+    // Crear el objeto de datos del usuario
     const usuarioData = {
       ...req.body,
-      password: cedula, // Establece la cédula como contraseña por defecto
-      confirmado: true, // establece user confirmado desde su creacion
+      password: hashedPassword, // Utilizar la contraseña hasheada
+      confirmado: true,
     };
 
+    // Crear y guardar el usuario
     const usuario = new Usuario(usuarioData);
-
-
     await usuario.save();
 
     // Crear la nueva dirección para el usuario
@@ -836,20 +839,70 @@ const registrarUsuarioReserva = async (req, res) => {
       ...req.body,
     });
 
+    // Establecer la dirección por defecto si no tiene ninguna
     if (usuario.direcciones.length === 0) {
       usuario.direccionDefault = nuevaDireccion._id;
     }
 
+    // Agregar la nueva dirección al usuario
     usuario.direcciones.push(nuevaDireccion._id);
 
+    // Guardar la nueva dirección y actualizar el usuario
     await nuevaDireccion.save();
     await usuario.save();
 
     res.json(usuario);
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).json({ msg: "Error interno del servidor" });
   }
 };
+
+
+// const registrarUsuarioReserva = async (req, res) => {
+//   try {
+
+
+//     const { email, cedula } = req.body;
+
+//     const existeUsuario = await Usuario.findOne({ email });
+
+//     if (existeUsuario) {
+//       const error = new Error("Usuario ya registrado");
+//       return res.status(400).json({ msg: error.message });
+//     }
+
+//     const usuarioData = {
+//       ...req.body,
+//       password: cedula, // Establece la cédula como contraseña por defecto
+//       confirmado: true, // establece user confirmado desde su creacion
+//     };
+
+//     const usuario = new Usuario(usuarioData);
+
+
+//     await usuario.save();
+
+//     // Crear la nueva dirección para el usuario
+//     const nuevaDireccion = new Direccion({
+//       cliente: usuario._id,
+//       ...req.body,
+//     });
+
+//     if (usuario.direcciones.length === 0) {
+//       usuario.direccionDefault = nuevaDireccion._id;
+//     }
+
+//     usuario.direcciones.push(nuevaDireccion._id);
+
+//     await nuevaDireccion.save();
+//     await usuario.save();
+
+//     res.json(usuario);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 const getUser = async (req, res) => {
   try {
@@ -864,6 +917,68 @@ const getUser = async (req, res) => {
     console.log(error);
   }
 };
+
+// const reiniciarCuentayPassword = async (req, res) => {
+//   try {
+//     console.log("RESET", req.body)
+//     const { emailReset } = req.body;
+
+//     // Verificar si el usuario ya está registrado
+//     const existeUsuario = await Usuario.findOne({ emailReset });
+//     if (existeUsuario) {
+//       // Crear y guardar el usuario con la contraseña por defecto
+      
+//       existeUsuario.password= "calyaan",
+//       existeUsuario.confirmado= true,
+      
+//       await existeUsuario.save();
+
+//       return res.status(200).json({ msg: "Usuario reseteado", existeUsuario });
+//     } else {
+//       // Si el usuario no está registrado, devolver un mensaje de error
+//       return res.status(404).json({ msg: "Usuario no encontrado" });
+//     }
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ msg: "Error interno del servidor" });
+//   }
+// };
+
+
+
+const reiniciarCuentayPassword = async (req, res) => {
+  try {
+    console.log("RESET", req.body)
+    const { emailReset } = req.body;
+
+    // Verificar si el usuario ya está registrado
+    const existeUsuario = await Usuario.findOne({ emailReset });
+    if (existeUsuario) {
+      // Hashear la nueva contraseña "calyaan" antes de guardarla
+      // const sal = await bcryptjs.genSalt(10);
+      // const hashedPassword = await bcryptjs.hash("calyaan", sal);
+
+      // Asignar la contraseña hasheada al usuario
+      existeUsuario.password = "calyaan";
+      existeUsuario.confirmado = true;
+      existeUsuario.token = "";
+
+      // Guardar el usuario
+      await existeUsuario.save();
+
+      return res.status(200).json({ msg: "Usuario reseteado", existeUsuario });
+    } else {
+      // Si el usuario no está registrado, devolver un mensaje de error
+      return res.status(404).json({ msg: "Usuario no encontrado" });
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error interno del servidor" });
+  }
+};
+
 
 
 export {
@@ -893,5 +1008,6 @@ export {
   registrarUsuarioReserva,
   getUser,
   confirmarEmail,
-  actualizarUsuarioAdmin
+  actualizarUsuarioAdmin,
+  reiniciarCuentayPassword
 };

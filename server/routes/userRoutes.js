@@ -32,7 +32,8 @@ import {
   registrarUsuarioReserva,
   getUser,
   confirmarEmail,
-  actualizarUsuarioAdmin
+  actualizarUsuarioAdmin,
+  reiniciarCuentayPassword
 } from "../controllers/userController.js";
 
 // Instanciando el router de express
@@ -150,6 +151,8 @@ usuarioRoutes.get("/historial/:id", checkAuth, obtenerHistorial);
 
 // Obtener usuario por email
 usuarioRoutes.post("/email",   checkAuth, isAdminRole, obtenerUsuarioEmail);
+
+usuarioRoutes.post("/reset-user",   checkAuth, isAdminRole, reiniciarCuentayPassword);
 
 // Crear usuario en reserva 
 usuarioRoutes.post("/reserva-usuario",   checkAuth, isAdminRole, registrarUsuarioReserva);
