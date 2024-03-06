@@ -1,5 +1,6 @@
 import Orden from "../models/OrderModel.js";
 import PerfilProfesional from "../models/ProfessionalModel.js";
+import { emailRecompra } from "../helpers/emails.js";
 
 const getAllOrden = async (req, res, next) => {
   try {
@@ -331,7 +332,7 @@ const deleteOrden = async (req, res, next) => {
 
 const updateOrdenByProfesional = async (req, res) => {
   console.log("body update", req.body)
-  const { id, estado, registroFirmaCliente } = req.body;
+  const { id, estado, registroFirmaCliente, fechaRealizacion, horaRealizacion } = req.body;
 
   try {
     // Validar que se proporcionen tanto el ID como el estado
@@ -348,6 +349,8 @@ const updateOrdenByProfesional = async (req, res) => {
     const update = {
       estado_servicio: estado,
       registroFirmaCliente,
+      cita_servicio: fechaRealizacion,
+      hora_servicio: horaRealizacion,
     };
 
     const ordenActualizada = await Orden.findByIdAndUpdate(id, update, options)
@@ -381,7 +384,98 @@ const updateOrdenByProfesional = async (req, res) => {
   }
 };
 
+//este endpoint recupera los clientes cuyos servicios han finalizado y no tienen servicios en curso
+const campañaRecompra = async (req, res) => {
+  try {
+    const ordenes = await Orden.find()
+      .populate({
+        path: 'cliente_id'
+      });
 
+    const clientesUnicos = new Set();
+
+    const clientesCompletados = ordenes
+  .filter(orden => orden.estado_servicio === 'Completado')
+  .reduce((clientes, orden) => {
+    const clienteId = orden.cliente_id?._id?.toString();
+    const telefono = orden.cliente_id?.telefono;
+    const email = orden.cliente_id?.email;
+    if (clienteId && telefono && email && !clientesUnicos.has(clienteId)) {
+      clientesUnicos.add(clienteId);
+      return [...clientes, { telefono: orden.cliente_id.telefono, email: orden.cliente_id.email }];
+    }
+    return clientes;
+  }, []);
+
+
+// // Agregar demora de 2 segundos entre cada envío
+// for (const cliente of clientesCompletados) {
+//   await new Promise(resolve => setTimeout(() => {
+//     console.log("ENVIADO A:", cliente.email)
+//     emailRecompra(cliente.email);
+//     resolve();
+//   }, 2000)); // 2000 milisegundos = 2 segundos
+// }
+// console.log("SE HAN ENVIADO A", clientesCompletados.length, "CLIENTES DE MANERA EXITOSA");
+
+console.log("CAMPAÑA RECOMPRA", clientesCompletados, "FIN CLIENTES");
+res.json({
+  msg: "Orden actualizada correctamente",
+  clientesCompletados,
+});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+
+const calcularVentasPorMes = (ordenes) => {
+  // Inicializar un objeto para almacenar las ventas por mes
+  const ventasPorMes = {};
+
+  // Recorrer cada orden
+  ordenes.forEach((orden) => {
+    // Obtener el mes y año de la fecha de venta
+    const fechaVenta = new Date(orden.createdAt);
+    const mes = fechaVenta.getMonth() + 1; // Sumar 1 porque los meses son indexados desde 0
+    const año = fechaVenta.getFullYear();
+
+    // Crear una clave única para el mes y año
+    const claveMes = `${año}-${mes}`;
+
+    // Verificar si la clave ya existe en el objeto
+    if (ventasPorMes[claveMes]) {
+      // Sumar el precioTotal de la orden al total del mes existente
+      ventasPorMes[claveMes] += orden.factura.precioTotal;
+    } else {
+      // Crear una nueva entrada en el objeto para el mes
+      ventasPorMes[claveMes] = orden.factura.precioTotal;
+    }
+  });
+
+  return ventasPorMes;
+};
+
+const ventasPorMesController = async (req, res) => {
+  try {
+    // Obtener todas las órdenes
+    const ordenes = await Orden.find()
+    .populate({ path: "factura", select: "-__v -orden -servicios", populate: {path:"coupon",select:"-reclamados -vencimiento -eliminado"} });
+
+    // Calcular las ventas por mes
+    const ventasPorMes = calcularVentasPorMes(ordenes);
+
+    // Imprimir el total de ventas por mes en la consola
+    console.log("Ventas por Mes:", ventasPorMes);
+
+    // Retornar el resultado como respuesta JSON
+    res.json({ ventasPorMes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
 
 export {
   getAllOrden,
@@ -392,7 +486,9 @@ export {
   getOrdenesByUserId,
   getOrdenesByStatus,
   updateOrdenByProfesional,
-  editarOrdenCompletaDashboard
+  editarOrdenCompletaDashboard,
+  campañaRecompra,
+  ventasPorMesController
 };
 
 export default saveOrder;

@@ -1259,4 +1259,62 @@ if (profesional_telefono) await sendWhatsappfn(args);
 }
 };
 
-export { emailRegistro, emailOlvidePassword, emailCompra, emailProfesional, emailCancelacionProfesional, emailNotificacionCliente, emailNotificacionProfesional };
+
+const emailRecompra = async (email) => {
+
+  try {     
+
+
+  const transport = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const emailHTML = `<!DOCTYPE html>
+  <html lang="es">
+  
+  <head>
+      <meta charset="UTF-8">
+      <title>¡Te Extrañamos en Calyaan!</title>
+  </head>
+  
+  <body style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333333; background-color: #f5f5f5; text-align: center;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <div style="text-align: center;">
+              <img src="https://calyaan.b-cdn.net/wp-content/uploads/2022/01/Logo-Calyaan2.png" alt="Logo de la empresa" style="max-width: 150px;">
+          </div>
+          <div style="margin-bottom: 20px; text-align: center;">
+              <p>¡Te extrañamos en Calyaan!</p>
+              <p>Tenemos una propuesta especial para hacerte. No querrás perderte nuestras ofertas exclusivas.</p>
+              <p>Visita nuestro sitio web o contáctanos para obtener más detalles.</p>
+          </div>
+          <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px; text-align: center;">
+          <a href="https://calyyaan.funnelish.com/masajes-reductores" style="display: inline-block; padding: 10px 20px; margin: 2px auto; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; text-decoration: none;">Explorar Ofertas</a>
+          <a href="http://wa.me/573242118509" style="display: inline-block; padding: 10px 20px; margin: 2px auto; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; text-decoration: none;">Chatea con Nosotros</a>
+      </div>
+      
+      </div>
+  </body>
+  
+  </html>
+  `;
+
+  const info = await transport.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "En Calyaan te extrañamos! Tenemos un propuesta especial para ti!",
+    text: "calyaan",    
+    html: emailHTML,
+  });
+
+} catch (error) {
+  console.log(error);
+}
+};
+
+
+export { emailRegistro, emailOlvidePassword, emailCompra, emailProfesional, emailCancelacionProfesional, emailNotificacionCliente, emailNotificacionProfesional, emailRecompra };

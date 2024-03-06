@@ -57,7 +57,7 @@ const FacturaSchema = new mongoose.Schema({
     default: "NoFacturado",
   },
   fecha_venta: {
-    type: String,
+    type: Date,
     default: new Date()
   },
   metodo_pago:{

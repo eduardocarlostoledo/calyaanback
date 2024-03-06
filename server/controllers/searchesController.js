@@ -136,7 +136,10 @@ const obtenerOrdenes = async (req, res) => {
             path: "creador",
             select: "_id nombre img apellido telefono img",
           },
-        })
+        }
+        )
+        .populate({ path: "factura", select: "-__v -orden -servicios", populate: {path:"coupon",select:"-reclamados -vencimiento -eliminado"} })
+
         
           
     ]);
@@ -257,6 +260,7 @@ const obtenerOrdenesBusquedaReservas = async (req, res) => {
         },
       })
       .populate({ path: "servicios", select: "nombre" })     
+      .populate({ path: "factura", select: "-__v -orden -servicios", populate: {path:"coupon",select:"-reclamados -vencimiento -eliminado"} })
       .lean();
 
       let resultadoFiltrado = orden;

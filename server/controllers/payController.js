@@ -362,6 +362,7 @@ const feedbackFailure = async (req, res) => {
 };
 
 const payPreferenceManual = async (req, res) => {
+  console.log("entro a preference manual")
   try {
     const {
       cliente_id,
@@ -372,21 +373,22 @@ const payPreferenceManual = async (req, res) => {
       servicios,
       coupon,
       metodo_pago,
-      link_pago
+      link_pago,
+      fecha_venta,
     } = req.body;
-
-
+    
+    
     let usuario = await Usuario.findOne({ _id: cliente_id });
 
     if (!usuario) {
       const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
-console.log("SERVICIOS",servicios)
+//console.log("SERVICIOS",servicios)
     const serviciosSearch = await Producto.find({ idWP: { $in: servicios } });
-console.log("servicios search",serviciosSearch)
+//console.log("servicios search",serviciosSearch)
     const serviciosGuardar = serviciosSearch.map((product) => product._id)
-console.log("servicios guardar",serviciosGuardar)
+//console.log("servicios guardar",serviciosGuardar)
 
     const arrayPreference = {
       cliente_id: usuario._id,
@@ -399,6 +401,10 @@ console.log("servicios guardar",serviciosGuardar)
       telefono_servicio,
       estado_servicio: "Agendar",
       coupon: coupon ? coupon : undefined,
+      fecha_venta: fecha_venta && fecha_venta.trim() ? new Date(new Date(fecha_venta).getTime() + 12 * 60 * 60 * 1000) : new Date(),
+
+      //fecha_venta: fecha_venta && fecha_venta.trim() ? new Date(fecha_venta) : new Date(), //agrego 12 horas por que el front me toma dia anterior
+
     };
 
     let precioNeto = serviciosSearch.reduce((accum, product) => accum + product.precio, 0);
@@ -440,13 +446,15 @@ console.log("servicios guardar",serviciosGuardar)
       precioSubTotal,
       precioTotal,
       coupon: coupon ? coupon : undefined,
-      fechaVenta: new Date(),
+      fecha_venta: fecha_venta && fecha_venta.trim() ? new Date(new Date(fecha_venta).getTime() + 12 * 60 * 60 * 1000) : new Date(),
+
+      //      fecha_venta: fecha_venta && fecha_venta.trim() ? new Date(fecha_venta) : new Date(),//agrego 12 horas por que el front me toma dia anterior
       origen: "",
       servicios: serviciosGuardar,
       link_pago,
       metodo_pago
     })
-
+console.log(FacturaOrden.fecha_venta, "fecha_venta")
     const factura = await FacturaOrden.save()
 
     const newOrder = await new Orden({ ...arrayPreference, factura: factura._id });
