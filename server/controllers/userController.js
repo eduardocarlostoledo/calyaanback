@@ -769,6 +769,10 @@ const obtenerHistorial = async (req, res) => {
   const { id } = req.params;
   try {
     const ordenes = await Orden.find({ cliente_id: id })
+    .populate({
+      path: "factura",
+    //  match: { estado_pago: "approved" },
+    })
       .populate({
         path: "servicios",
         select: "idWP nombre"
@@ -781,7 +785,7 @@ const obtenerHistorial = async (req, res) => {
         },
         select: "creador"
       })
-      .select("profesional_id cita_servicio hora_servicio servicios estado_servicio").sort({ createdAt: -1 });
+      .select("profesional_id cita_servicio hora_servicio servicios estado_servicio factura nroSesion").sort({ createdAt: -1 });
 
     res.json(ordenes);
   } catch (error) {
@@ -947,17 +951,50 @@ const getUser = async (req, res) => {
 
 
 
+// const reiniciarCuentayPassword = async (req, res) => {
+//   try {
+//     console.log("RESET", req.body)
+//     const { emailReset } = req.body;
+
+//     // Verificar si el usuario ya está registrado
+//     const existeUsuario = await Usuario.findOne({ emailReset });
+//     if (existeUsuario) {
+//       // Hashear la nueva contraseña "calyaan" antes de guardarla
+//       // const sal = await bcryptjs.genSalt(10);
+//       // const hashedPassword = await bcryptjs.hash("calyaan", sal);
+
+//       // Asignar la contraseña hasheada al usuario
+//       existeUsuario.password = "$2a$10$phA5YrBNAHWB4bBqrR42Debu97jfGo.YStEnx4NNbd7WugIC6F6Uq";
+//       //puse calyaan: $2a$10$NWs6nzcay8NyoHF/vjQhketZH071ouxutSsB/XhG2/UI5T1Qt.tty
+//       //puse calyaan: $2a$10$.MUoIEpeKnHJ7b2MQsGJnO6UyCQrGbNXNrfu//eIxv/07hSoGy8Cm
+//       existeUsuario.confirmado = true;
+//       existeUsuario.token = "";
+
+//       // Guardar el usuario
+//       console.log("se ha reseteado el usuario con la clave calyaan", existeUsuario.password)
+//       await existeUsuario.save();
+
+//       return res.status(200).json({ msg: "Usuario reseteado", existeUsuario });
+//     } else {
+//       // Si el usuario no está registrado, devolver un mensaje de error
+//       return res.status(404).json({ msg: "Usuario no encontrado" });
+//     }
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ msg: "Error interno del servidor" });
+//   }
+// };
+
 const reiniciarCuentayPassword = async (req, res) => {
   try {
-    console.log("RESET", req.body)
+    console.log("RESET", req.body);
     const { emailReset } = req.body;
 
     // Verificar si el usuario ya está registrado
     const existeUsuario = await Usuario.findOne({ emailReset });
     if (existeUsuario) {
-      // Hashear la nueva contraseña "calyaan" antes de guardarla
-      // const sal = await bcryptjs.genSalt(10);
-      // const hashedPassword = await bcryptjs.hash("calyaan", sal);
+      
 
       // Asignar la contraseña hasheada al usuario
       existeUsuario.password = "calyaan";
@@ -978,8 +1015,6 @@ const reiniciarCuentayPassword = async (req, res) => {
     res.status(500).json({ msg: "Error interno del servidor" });
   }
 };
-
-
 
 export {
   registrar,

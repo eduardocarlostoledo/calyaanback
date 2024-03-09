@@ -59,7 +59,7 @@ const crearNuevoProducto = async (req, res) => {
   try {
     //console.log(req.body);
     // Extrae los datos del cuerpo de la solicitud
-    const { nombre, idWP, img, descripcion, precio, precio_regular, link } = req.body;
+    const { nombre, idWP, img, descripcion, precio, precio_regular, link, porcetajeCalyaan, porcetajeProfesional } = req.body;
 
     // Crea una nueva instancia de Producto con los datos proporcionados
     const producto = new Producto({
@@ -69,7 +69,9 @@ const crearNuevoProducto = async (req, res) => {
       descripcion,
       precio,
       precio_regular,
-      link
+      link,
+      porcetajeCalyaan, 
+      porcetajeProfesional,
     });
 
     // Guarda el nuevo producto en la base de datos

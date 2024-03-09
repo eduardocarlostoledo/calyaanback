@@ -701,7 +701,7 @@ const obtenerHistorial = async (req, res) => {
     const ordenes = await Orden.find({ profesional_id: id })
       .populate({
         path: "factura",
-        match: { estado_pago: "approved" },
+      //  match: { estado_pago: "approved" },
       })
       .populate({
         path: "servicios",

@@ -116,7 +116,7 @@ checkAuth, isAdminRole, async (req, res, next) => {
   try {
     console.log("ENTRO A INVOICE ROUOTES", req.body);
 
-    if (estado_facturacion!=="Facturado" || !nro_factura) return res.status(400).json({ message: "Para cambiar el estado de facturacion se necesita una factura de siigo }" });
+    if (estado_facturacion==="Facturado" && !nro_factura) return res.status(400).json({ message: "Para cambiar el estado de facturacion se necesita una factura de siigo }" });
 
     const facturas = await Factura.findById(_id);
 
