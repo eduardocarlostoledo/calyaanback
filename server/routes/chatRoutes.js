@@ -6,7 +6,9 @@ import {  getChatMessages, saveChatMessage, enviarNotificacion } from "../contro
 
 const chatRoutes = express.Router();
 
-chatRoutes.get("/getchat/:id", checkAuth, getChatMessages);
+chatRoutes.get("/getchat/:id", 
+//checkAuth, 
+getChatMessages);
 chatRoutes.post("/savechat", checkAuth, saveChatMessage);
 chatRoutes.post("/notificacion", checkAuth, enviarNotificacion);
 

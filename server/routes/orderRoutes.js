@@ -11,7 +11,9 @@ orderRouter.delete("/orden/:id", deleteOrden);
 
 orderRouter.put("/updateorden", checkAuth, updateOrden);
 orderRouter.get("/orden", checkAuth, isAdminRole, getAllOrden);
-orderRouter.get("/getordenbyid/:id", checkAuth, getOrdenById);
+orderRouter.get("/getordenbyid/:id", 
+//checkAuth, 
+getOrdenById);
 orderRouter.get("/ordenbyuserid/:id", checkAuth, getOrdenesByUserId); 
 orderRouter.post("/updateorderbyprofesional/", checkAuth, updateOrdenByProfesional);
 orderRouter.put("/updateordendashboard/:id", checkAuth, editarOrdenCompletaDashboard); //se esta trabajando para editar las ordenes
