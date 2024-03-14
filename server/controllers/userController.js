@@ -835,6 +835,8 @@ const registrarUsuarioReserva = async (req, res) => {
 
     // Crear y guardar el usuario
     const usuario = new Usuario(usuarioData);
+    usuario.confirmado = true;
+    usuario.token = "";
     await usuario.save();
 
     // Crear la nueva dirección para el usuario
