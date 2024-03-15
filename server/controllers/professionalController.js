@@ -3,6 +3,7 @@ import PerfilProfesional from "../models/ProfessionalModel.js";
 import Disponibilidad from "../models/AvailableModel.js";
 import Reserva from "../models/BookingModel.js";
 import Orden from "../models/OrderModel.js";
+import Direccion from "../models/AddressModel.js";
 import { ObjectId } from 'mongodb';
 
 
@@ -319,8 +320,8 @@ const obtenerDisponibilidadTotalporId = async (req, res) => {
 };
 
 
-
 const actualizarProfesionalAdmin = async (req, res) => {
+  console.log(req.body);
   const {
     _id,
     nombre,
@@ -329,8 +330,10 @@ const actualizarProfesionalAdmin = async (req, res) => {
     telefono,
     cedula,
     sexo,
-    // direccionDefault,
+    localidad,
+    direccion,
   } = req.body;
+  
   try {
     // Comprobar si el usuario existe
     const profesional = await Usuario.findOne({
@@ -338,7 +341,7 @@ const actualizarProfesionalAdmin = async (req, res) => {
     });
 
     if (!profesional) {
-      const error = new Error("El usuario no esta registrado");
+      const error = new Error("El usuario no está registrado");
       return res.status(404).json({ msg: error.message });
     }
 
@@ -347,20 +350,108 @@ const actualizarProfesionalAdmin = async (req, res) => {
     profesional.email = email || profesional.email;
     profesional.telefono = telefono || profesional.telefono;
     profesional.cedula = cedula || profesional.cedula;
-    profesional.sexo = sexo || profesional.sexo;
-    // if (direccionDefault.nombre) {
-    //   profesional.direccionDefault = direccionDefault;
-    // }
+    profesional.sexo = sexo || profesional.sexo;    
+    profesional.direccion = direccion || profesional.direccion;
+    profesional.localidad = localidad || profesional.localidad;
+
+    // Establecer la dirección por defecto si no tiene ninguna
+    if ((profesional.direccionDefault === null) && (profesional.direcciones.length === 0)) {
+
+      const nuevaDireccion = new Direccion({
+        cliente: profesional._id,
+        nombre: "Principal",
+        direccion,
+        localidad,
+      });
+
+      profesional.direccionDefault = nuevaDireccion._id;
+      profesional.direcciones.push(nuevaDireccion._id);
+      await nuevaDireccion.save();
+    } else {
+     
+      profesional.direcciones[0].direccion = direccion
+      profesional.direcciones[0].localidad = localidad      
+
+    }
+
+
     await profesional.save();
 
+    console.log(profesional);
     res.json({
       msg: "Perfil actualizado correctamente",
       profesional,
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ msg: "Error interno del servidor" });
   }
 };
+
+
+// const actualizarProfesionalAdmin = async (req, res) => {
+//   console.log(req.body);
+//   const {
+//     _id,
+//     nombre,
+//     apellido,
+//     email,
+//     telefono,
+//     cedula,
+//     sexo,
+//     localidad,
+//     direccion,
+//   } = req.body;
+//   let nuevaDireccion = {};
+//   try {
+//     // Comprobar si el usuario existe
+//     const profesional = await Usuario.findOne({
+//       _id: _id,
+//     });
+
+//     if (!profesional) {
+//       const error = new Error("El usuario no esta registrado");
+//       return res.status(404).json({ msg: error.message });
+//     }
+
+//     profesional.nombre = nombre || profesional.nombre;
+//     profesional.apellido = apellido || profesional.apellido;
+//     profesional.email = email || profesional.email;
+//     profesional.telefono = telefono || profesional.telefono;
+//     profesional.cedula = cedula || profesional.cedula;
+//     profesional.sexo = sexo || profesional.sexo;    
+//     profesional.direccion = direccion,
+//     profesional.localidad = localidad,
+ 
+//     // // Crear la nueva dirección para el usuario
+//     // nuevaDireccion = new Direccion({
+//     //   cliente: profesional._id,
+//     //   direccion,
+//     //   localidad, 
+//     // });
+
+//     // Establecer la dirección por defecto si no tiene ninguna
+//     if (profesional.direcciones.length === 0) {
+//       profesional.direccionDefault = new Direccion({
+//         cliente: profesional._id,
+//         direccion,
+//         localidad, 
+//       });
+//     }
+   
+//     profesional.direcciones.push(nuevaDireccion._id);    
+//     await nuevaDireccion.save();
+
+//     await profesional.save();
+// console.log(profesional)
+//     res.json({
+//       msg: "Perfil actualizado correctamente",
+//       profesional,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 // const actualizarProfesionalAdmin = async (req, res) => {
 //   try {

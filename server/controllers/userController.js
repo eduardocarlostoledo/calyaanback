@@ -798,14 +798,16 @@ const obtenerUsuarioEmail = async (req, res) => {
 
   try {
 
-    const usuario = await Usuario.findOne({ email: email }).select("_id email nombre apellido cedula telefono direccionDefault").populate("direccionDefault")
+    const usuario = await Usuario.findOne({ email: email }).select("_id email nombre apellido cedula telefono direcciones direccionDefault").populate("direccionDefault").populate("direcciones")
 
     if (!usuario) {
       const error = new Error("El usuario no esta registrado");
       return res.status(404).json({ msg: error.message });
     }
-
+    //console.log(usuario)
     res.json(usuario);
+
+    
   } catch (error) {
     console.log(error);
   }
@@ -813,48 +815,41 @@ const obtenerUsuarioEmail = async (req, res) => {
 
 const registrarUsuarioReserva = async (req, res) => {
   try {
-    const { email, cedula } = req.body;
-
+    const { nombre, email, cedula, direccion, localidad, info, } = req.body;
+        
     // Verificar si el usuario ya está registrado
-    const existeUsuario = await Usuario.findOne({ email });
+    const existeUsuario = await Usuario.findOne({ email: email });
 
     if (existeUsuario) {
       return res.status(400).json({ msg: "Usuario ya registrado" });
     }
-
-    // Hashear la contraseña por defecto (cedula)
-    const sal = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(cedula, sal);
-
-    // Crear el objeto de datos del usuario
+    
     const usuarioData = {
       ...req.body,
-      password: hashedPassword, // Utilizar la contraseña hasheada
-      confirmado: true,
+      password: cedula,      
     };
-
-    // Crear y guardar el usuario
+   
     const usuario = new Usuario(usuarioData);
-    usuario.confirmado = true;
-    usuario.token = "";
-    await usuario.save();
 
-    // Crear la nueva dirección para el usuario
-    const nuevaDireccion = new Direccion({
-      cliente: usuario._id,
-      ...req.body,
-    });
+    // Crear la nueva dirección para el usuario si se proporciona una nueva dirección en el cuerpo de la solicitud
+    if (direccion && localidad) {
+      const nuevaDireccion = new Direccion({
+        cliente: usuario._id,
+        nombre: "Principal",
+        direccion,
+        localidad, 
+      });
 
-    // Establecer la dirección por defecto si no tiene ninguna
-    if (usuario.direcciones.length === 0) {
-      usuario.direccionDefault = nuevaDireccion._id;
+      if ((usuario.direccionDefault === null) && (usuario.direcciones.length === 0)) {
+        usuario.direccionDefault = nuevaDireccion._id;
+      }
+      usuario.direcciones.push(nuevaDireccion._id);
+      await nuevaDireccion.save();
     }
 
-    // Agregar la nueva dirección al usuario
-    usuario.direcciones.push(nuevaDireccion._id);
-
-    // Guardar la nueva dirección y actualizar el usuario
-    await nuevaDireccion.save();
+    usuario.token = generarIdToken();  
+    emailRegistro({email, nombre, token: usuario.token,});
+    usuario.confirmado = true;    
     await usuario.save();
 
     res.json(usuario);
@@ -924,89 +919,29 @@ const getUser = async (req, res) => {
   }
 };
 
-// const reiniciarCuentayPassword = async (req, res) => {
-//   try {
-//     console.log("RESET", req.body)
-//     const { emailReset } = req.body;
-
-//     // Verificar si el usuario ya está registrado
-//     const existeUsuario = await Usuario.findOne({ emailReset });
-//     if (existeUsuario) {
-//       // Crear y guardar el usuario con la contraseña por defecto
-      
-//       existeUsuario.password= "calyaan",
-//       existeUsuario.confirmado= true,
-      
-//       await existeUsuario.save();
-
-//       return res.status(200).json({ msg: "Usuario reseteado", existeUsuario });
-//     } else {
-//       // Si el usuario no está registrado, devolver un mensaje de error
-//       return res.status(404).json({ msg: "Usuario no encontrado" });
-//     }
-
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ msg: "Error interno del servidor" });
-//   }
-// };
-
-
-
-// const reiniciarCuentayPassword = async (req, res) => {
-//   try {
-//     console.log("RESET", req.body)
-//     const { emailReset } = req.body;
-
-//     // Verificar si el usuario ya está registrado
-//     const existeUsuario = await Usuario.findOne({ emailReset });
-//     if (existeUsuario) {
-//       // Hashear la nueva contraseña "calyaan" antes de guardarla
-//       // const sal = await bcryptjs.genSalt(10);
-//       // const hashedPassword = await bcryptjs.hash("calyaan", sal);
-
-//       // Asignar la contraseña hasheada al usuario
-//       existeUsuario.password = "$2a$10$phA5YrBNAHWB4bBqrR42Debu97jfGo.YStEnx4NNbd7WugIC6F6Uq";
-//       //puse calyaan: $2a$10$NWs6nzcay8NyoHF/vjQhketZH071ouxutSsB/XhG2/UI5T1Qt.tty
-//       //puse calyaan: $2a$10$.MUoIEpeKnHJ7b2MQsGJnO6UyCQrGbNXNrfu//eIxv/07hSoGy8Cm
-//       existeUsuario.confirmado = true;
-//       existeUsuario.token = "";
-
-//       // Guardar el usuario
-//       console.log("se ha reseteado el usuario con la clave calyaan", existeUsuario.password)
-//       await existeUsuario.save();
-
-//       return res.status(200).json({ msg: "Usuario reseteado", existeUsuario });
-//     } else {
-//       // Si el usuario no está registrado, devolver un mensaje de error
-//       return res.status(404).json({ msg: "Usuario no encontrado" });
-//     }
-
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ msg: "Error interno del servidor" });
-//   }
-// };
-
 const reiniciarCuentayPassword = async (req, res) => {
   try {
     console.log("RESET", req.body);
-    const { emailReset } = req.body;
+    const { emailReset, passwordReset } = req.body;
 
     // Verificar si el usuario ya está registrado
-    const existeUsuario = await Usuario.findOne({ emailReset });
-    if (existeUsuario) {
+
+    const usuarioReset = await Usuario.findOne({ email: emailReset }).select("_id email");
+    
+    console.log("asd", usuarioReset, "asd")
+    if (usuarioReset) {
       
 
       // Asignar la contraseña hasheada al usuario
-      existeUsuario.password = "calyaan";
-      existeUsuario.confirmado = true;
-      existeUsuario.token = "";
+      usuarioReset.password = passwordReset;
+      usuarioReset.confirmado = true;
+      usuarioReset.token = "";      
 
       // Guardar el usuario
-      await existeUsuario.save();
+      await usuarioReset.save();
+      console.log(usuarioReset)
 
-      return res.status(200).json({ msg: "Usuario reseteado", existeUsuario });
+      return res.status(200).json({ msg: "Usuario reseteado", usuarioReset });
     } else {
       // Si el usuario no está registrado, devolver un mensaje de error
       return res.status(404).json({ msg: "Usuario no encontrado" });
