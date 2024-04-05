@@ -797,7 +797,7 @@ const emailCompra = async (data) => {
   <p>Nos complace informarle que su solicitud de servicio ha sido procesada con éxito. Usted ha contratado nuestro servicio de ${servicio} para su hogar en la dirección: ${direccion_Servicio}, cuyos datos adicionales: ${adicional_direccion_Servicio}, ubicada en la localidad de ${localidad_Servicio}, ciudad de ${ciudad_Servicio}.</p>
   <p>Su solicitud ha sido asignada a nuestr@ profesional: ${profesional_nombre}, quien estará disponible para brindarle el servicio el día: ${dia_servicio} a las: ${hora_servicio}.</p>
   <p>Le recordamos que el costo del servicio es de $${precio} y que el estado de su pago es: ${pagoServicio} </p>
-  <p>Puede coordinar los detalles de su reserva en el siguiente Chat: https://calyaan.netlify.app/resumen/${order_id}</p>
+  <p>Puede coordinar los detalles de su reserva en el siguiente Chat: https://calyaan.com.co/resumen/${order_id}</p>
   <p>Si tiene alguna pregunta o inquietud, no dude en ponerse en contacto con nuestro equipo de soporte al cliente, siempre estamos dispuestos a ayudarle.</p>
   <p>Le agradecemos por confiar en nosotros y esperamos poder brindarle un excelente servicio.</p>
   <div class="signature">
@@ -925,7 +925,7 @@ const emailProfesional = async (data) => {
         <p>Estimado/a ${profesional_nombre}: </p>
         <p>Le informamos que hemos procesado una solicitud de servicio de <strong> ${servicio} </strong> para el cliente: ${cliente_nombre} ${cliente_apellido}, cédula: ${cliente_cedula}. La prestación se llevará a cabo el día: ${dia_servicio} a las: ${hora_servicio}, ubicado en: ${direccion_Servicio}, datos adicionales: ${adicional_direccion_Servicio}, en la localidad de ${localidad_Servicio}, ciudad de ${ciudad_Servicio}.</p>
         <p>Le recordamos que el estado del pago del servicio es: ${pagoServicio}.</p>
-        <p>Puede coordinar los detalles de su reserva en el siguiente Chat: https://calyaan.netlify.app/resumen-profesional/${order_id}</p>
+        <p>Puede coordinar los detalles de su reserva en el siguiente Chat: https://calyaan.com.co/resumen-profesional/${order_id}</p>
         <p>Si tiene alguna pregunta o inquietud, no dude en ponerse en contacto con el equipo de soporte. </p>
         
       </div>
@@ -1153,13 +1153,13 @@ const info = await transport.sendMail({
   html: emailHTML,
 });
 
-const args = {
-  number: cliente_telefono,
-  message: `Tu esteticista desea comunicarse contigo. Inicia sesión en la plataforma https://calyaan.netlify.app y coordina los detalles de tu reservación en el chat https://calyaan.netlify.app/resumen/${id}`
-};
-if (cliente_telefono) await sendWhatsappfn(args);  
+// const args = {
+//   number: cliente_telefono,
+//   message: `Tu esteticista desea comunicarse contigo. Inicia sesión en la plataforma https://calyaan.com.co y coordina los detalles de tu reservación en el chat https://calyaan.com.co/resumen/${id}`
+// };
+// if (cliente_telefono) await sendWhatsappfn(args);  
 
-
+console.log("EMAIL ENVIADO CLIENTE")
 } catch (error) {
   console.log(error);
 }
@@ -1248,12 +1248,12 @@ const info = await transport.sendMail({
   html: emailHTML,
 });
 
-const args = {
-  number: profesional_telefono,
-  message: `Tu cliente desea comunicarse contigo. Inicia sesión en la plataforma https://calyaan.netlify.app y coordina los detalles de tu reservación en el chat https://calyaan.netlify.app/resumen-profesional/${id}`
-};
-if (profesional_telefono) await sendWhatsappfn(args);  
-
+// const args = {
+//   number: profesional_telefono,
+//   message: `Tu cliente desea comunicarse contigo. Inicia sesión en la plataforma https://calyaan.com.co y coordina los detalles de tu reservación en el chat https://calyaan.com.co/resumen-profesional/${id}`
+// };
+// if (profesional_telefono) await sendWhatsappfn(args);  
+console.log("EMAIL ENVIADO PROFESIONAL")
 } catch (error) {
   console.log(error);
 }

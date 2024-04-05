@@ -919,39 +919,75 @@ const getUser = async (req, res) => {
   }
 };
 
+// const reiniciarCuentayPassword = async (req, res) => {
+//   try {
+//     console.log("RESET", req.body);
+//     const { emailReset, passwordReset } = req.body;
+
+//     // Verificar si el usuario ya está registrado
+
+//     const usuarioReset = await Usuario.findOne({ email: emailReset }).select("_id email");
+    
+//     console.log("asd", usuarioReset, "asd")
+//     if (usuarioReset) {
+      
+
+//       // Asignar la contraseña hasheada al usuario
+//       usuarioReset.password = passwordReset;
+//       usuarioReset.confirmado = true;
+//       usuarioReset.token = "";      
+
+//       // Guardar el usuario
+//       await usuarioReset.save();
+//       console.log(usuarioReset)
+
+//       return res.status(200).json({ msg: "Usuario reseteado", usuarioReset });
+//     } else {
+//       // Si el usuario no está registrado, devolver un mensaje de error
+//       return res.status(404).json({ msg: "Usuario no encontrado" });
+//     }
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ msg: "Error interno del servidor" });
+//   }
+// };
+
 const reiniciarCuentayPassword = async (req, res) => {
   try {
     console.log("RESET", req.body);
-    const { emailReset, passwordReset } = req.body;
+    const { email, password } = req.body;
 
     // Verificar si el usuario ya está registrado
-
-    const usuarioReset = await Usuario.findOne({ email: emailReset }).select("_id email");
+    const usuarioReset = await Usuario.findOne({ email: email }).select("_id email token");
     
-    console.log("asd", usuarioReset, "asd")
+    //console.log("asd", usuarioReset, "asd")
     if (usuarioReset) {
+      // Blanquear el token del usuario
+      usuarioReset.token = "";
       
-
-      // Asignar la contraseña hasheada al usuario
-      usuarioReset.password = passwordReset;
+      // Asignar la nueva contraseña hasheada al usuario
+      usuarioReset.password = password;
+      
+      // Marcar la cuenta como confirmada (si es necesario)
       usuarioReset.confirmado = true;
-      usuarioReset.token = "";      
 
-      // Guardar el usuario
+      // Guardar el usuario actualizado
+
       await usuarioReset.save();
-      console.log(usuarioReset)
+      console.log("DATOS USAURIO", usuarioReset.email, usuarioReset.password)
 
-      return res.status(200).json({ msg: "Usuario reseteado", usuarioReset });
+      return res.status(200).json({ msg: "Contraseña restablecida con éxito" });
     } else {
       // Si el usuario no está registrado, devolver un mensaje de error
       return res.status(404).json({ msg: "Usuario no encontrado" });
     }
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Error interno del servidor" });
   }
 };
+
 
 export {
   registrar,
